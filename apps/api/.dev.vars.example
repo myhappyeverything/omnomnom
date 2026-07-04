@@ -1,8 +1,19 @@
-# Copy to .dev.vars for local `wrangler dev`. Never commit the real file.
-# Full documentation of every variable arrives in Stage 6 (Cloudflare setup).
+# Copy to .dev.vars for local `wrangler dev`. Never commit the real file —
+# .dev.vars only affects local dev and overrides wrangler.toml's [vars] and
+# secrets; it's never read when deployed. Full variable reference:
+# docs/cloudflare-setup.md.
+ENVIRONMENT=development
+ALLOWED_ORIGIN=http://localhost:5173
+
+# Generate with: openssl rand -base64 48
 JWT_SECRET=change-me-to-a-long-random-string
+
+# platform.openai.com/api-keys — used for meal photo recognition (Stage 14)
 OPENAI_API_KEY=sk-...
+
+# onesignal.com app settings — used for push reminders (Stage 18)
 ONESIGNAL_APP_ID=...
 ONESIGNAL_REST_API_KEY=...
+
+# fdc.nal.usda.gov/api-key-signup.html — fallback food database (Stage 13)
 USDA_FDC_API_KEY=...
-ALLOWED_ORIGIN=http://localhost:5173

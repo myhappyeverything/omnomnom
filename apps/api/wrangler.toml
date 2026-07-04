@@ -1,21 +1,39 @@
-# KV / R2 / Cron bindings are added in Stage 6. The D1 binding below points at
-# packages/db for schema/migrations; database_id is a placeholder until Stage 6
-# runs `wrangler d1 create purple-db` and swaps in the real id.
+# Deployed (production) configuration. Local development overrides live in
+# .dev.vars (gitignored, never deployed) — see .dev.vars.example and
+# docs/cloudflare-setup.md for the full provisioning runbook.
+#
+# Three placeholders below (database_id, KV id, ALLOWED_ORIGIN) can't be
+# known until you've run the setup commands against your own Cloudflare
+# account, since this app is provisioned per-account, not shared.
 name = "purple-api"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-ENVIRONMENT = "development"
+ENVIRONMENT = "production"
+# Swap for the real Pages URL once `wrangler pages project create` gives you one
+# (e.g. https://purple.pages.dev, or your custom domain).
+ALLOWED_ORIGIN = "REPLACE_WITH_PAGES_URL"
+# Not secret — OneSignal app IDs are meant to be public (the Web SDK ships it
+# client-side too). The REST API key used to *send* notifications is a secret;
+# see docs/cloudflare-setup.md.
+ONESIGNAL_APP_ID = "REPLACE_WITH_ONESIGNAL_APP_ID"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "purple-db"
-database_id = "REPLACE_ME_IN_STAGE_6"
+database_id = "REPLACE_WITH_D1_DATABASE_ID" # from `wrangler d1 create purple-db`
 migrations_dir = "../../packages/db/migrations"
 
-# Used for rate limiting now; caching (food search, sessions) added in Stage 6.
 [[kv_namespaces]]
 binding = "CACHE"
-id = "REPLACE_ME_IN_STAGE_6"
+id = "REPLACE_WITH_KV_NAMESPACE_ID" # from `wrangler kv namespace create CACHE`
+
+[[r2_buckets]]
+binding = "MEAL_IMAGES"
+bucket_name = "purple-meal-images" # from `wrangler r2 bucket create purple-meal-images`
+
+# The reminder-scheduling cron (Stage 18) will add a [triggers] block here
+# once the scheduled() handler exists — an empty trigger with no handler
+# would just be dead configuration.

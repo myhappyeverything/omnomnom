@@ -27,7 +27,9 @@ npm run dev:api   # Worker on http://localhost:8787
 npm run dev:web   # Vite dev server on http://localhost:5173
 ```
 
-Copy `apps/api/.dev.vars.example` → `apps/api/.dev.vars` and `apps/web/.env.example` → `apps/web/.env.local`, filling in real values as they're needed (documented fully in Stage 6).
+Copy `apps/api/.dev.vars.example` → `apps/api/.dev.vars` and `apps/web/.env.example` → `apps/web/.env.local`. Local dev works with placeholder secrets for everything except features that call a real third party (OpenAI, OneSignal, USDA).
+
+To deploy your own instance to Cloudflare, follow [docs/cloudflare-setup.md](./docs/cloudflare-setup.md) — it provisions D1/KV/R2/Pages under your own account (this can't be done on your behalf; it needs your Cloudflare login).
 
 ## Common scripts
 
