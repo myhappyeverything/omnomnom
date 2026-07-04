@@ -12,5 +12,5 @@ export default defineConfig({
     padding: 0.3,
     resizeOptions: { background: '#FFF3E7' },
   }),
-  images: ['pwa-assets/source.svg'],
+  images: ['pwa-assets/source.png'],
 })

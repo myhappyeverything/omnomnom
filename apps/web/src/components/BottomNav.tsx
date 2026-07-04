@@ -23,7 +23,7 @@ export function BottomNav({ items }: BottomNavProps) {
           <li key={to} className="flex-1">
             <NavLink
               to={to}
-              end={to === '/'}
+              end
               className={({ isActive }) =>
                 cn(
                   'flex flex-col items-center gap-1 py-2.5 text-xs transition-colors',

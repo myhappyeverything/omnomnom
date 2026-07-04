@@ -53,7 +53,7 @@ export function OnboardingPage() {
         waterTargetMl: values.waterTargetMl,
         waterTargetOverridden: overridden.waterTargetMl ?? false,
       })
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Something went wrong'
       toast.error(message)

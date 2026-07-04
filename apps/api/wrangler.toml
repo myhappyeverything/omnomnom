@@ -2,8 +2,6 @@
 # .dev.vars (gitignored, never deployed) — see .dev.vars.example and
 # docs/cloudflare-setup.md for the full provisioning runbook.
 #
-# ONESIGNAL_APP_ID below is still a placeholder until you set up your own
-# OneSignal app — see docs/cloudflare-setup.md.
 name = "omnomnom-api"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
@@ -16,7 +14,7 @@ ALLOWED_ORIGIN = "https://omnomnom.pages.dev"
 # Not secret — OneSignal app IDs are meant to be public (the Web SDK ships it
 # client-side too). The REST API key used to *send* notifications is a secret;
 # see docs/cloudflare-setup.md.
-ONESIGNAL_APP_ID = "REPLACE_WITH_ONESIGNAL_APP_ID"
+ONESIGNAL_APP_ID = "d4d60ccf-4353-4bf6-8d30-15d386ab43d0"
 
 [[d1_databases]]
 binding = "DB"

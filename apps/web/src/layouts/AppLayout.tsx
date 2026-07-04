@@ -5,7 +5,7 @@ import { PageTransition } from '@/components/PageTransition'
 import { useOutboxSync } from '@/hooks/useOutbox'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Home', icon: Home },
+  { to: '/dashboard', label: 'Home', icon: Home },
   { to: '/foods', label: 'Foods', icon: Utensils },
   { to: '/analytics', label: 'Analytics', icon: LineChart },
   { to: '/settings', label: 'Settings', icon: Settings },

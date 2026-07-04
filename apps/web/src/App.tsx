@@ -6,10 +6,14 @@ import { UpdatePrompt } from './components/UpdatePrompt'
 import { Toaster } from './components/ui/sonner'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AppLayout } from './layouts/AppLayout'
+import { useAuth } from './context/AuthContext'
 
 // Route-level code splitting: each page ships as its own chunk, fetched on
 // first navigation rather than bloating the initial bundle every stage adds
 // another full page to.
+const LandingPage = lazy(() =>
+  import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })),
+)
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })))
 const OnboardingPage = lazy(() =>
   import('./pages/onboarding/OnboardingPage').then((m) => ({ default: m.OnboardingPage })),
@@ -52,14 +56,25 @@ function RouteFallback() {
   )
 }
 
+/** "/" is public marketing for a logged-out visitor, but bounces straight to the app once signed in. */
+function RootRoute() {
+  const { user, isLoading } = useAuth()
+  if (isLoading) return <RouteFallback />
+  if (user) return <Navigate to="/dashboard" replace />
+  return <LandingPage />
+}
+
 export function App() {
   return (
     <>
       <OfflineBanner />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
+          <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<OnboardingPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
 
           <Route
             element={
@@ -68,7 +83,7 @@ export function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/foods" element={<FoodsPage />} />
             <Route path="/log/photo" element={<PhotoLogPage />} />
             <Route path="/water" element={<WaterPage />} />
@@ -76,8 +91,6 @@ export function App() {
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
           </Route>
 
           <Route path="/404" element={<NotFoundPage />} />
