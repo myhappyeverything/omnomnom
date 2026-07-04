@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { OfflineBanner } from './components/OfflineBanner'
 import { InstallPrompt } from './components/InstallPrompt'
@@ -5,38 +6,70 @@ import { UpdatePrompt } from './components/UpdatePrompt'
 import { Toaster } from './components/ui/sonner'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AppLayout } from './layouts/AppLayout'
-import { LoginPage } from './pages/LoginPage'
-import { OnboardingPage } from './pages/onboarding/OnboardingPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { FoodsPage } from './pages/FoodsPage'
-import { AnalyticsPage } from './pages/AnalyticsPage'
-import { SettingsPage } from './pages/SettingsPage'
-import { NotFoundPage } from './pages/NotFoundPage'
+
+// Route-level code splitting: each page ships as its own chunk, fetched on
+// first navigation rather than bloating the initial bundle every stage adds
+// another full page to.
+const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })))
+const OnboardingPage = lazy(() =>
+  import('./pages/onboarding/OnboardingPage').then((m) => ({ default: m.OnboardingPage })),
+)
+const DashboardPage = lazy(() =>
+  import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+)
+const FoodsPage = lazy(() => import('./pages/FoodsPage').then((m) => ({ default: m.FoodsPage })))
+const PhotoLogPage = lazy(() =>
+  import('./pages/PhotoLogPage').then((m) => ({ default: m.PhotoLogPage })),
+)
+const AnalyticsPage = lazy(() =>
+  import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
+)
+const SettingsPage = lazy(() =>
+  import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+)
+const NotFoundPage = lazy(() =>
+  import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
+)
+
+function RouteFallback() {
+  return (
+    <div className="bg-background flex min-h-screen items-center justify-center">
+      <div
+        className="border-border border-t-primary size-8 animate-spin rounded-full border-2"
+        role="status"
+        aria-label="Loading"
+      />
+    </div>
+  )
+}
 
 export function App() {
   return (
     <>
       <OfflineBanner />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<OnboardingPage />} />
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<OnboardingPage />} />
 
-        <Route
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/foods" element={<FoodsPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Route>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/foods" element={<FoodsPage />} />
+            <Route path="/log/photo" element={<PhotoLogPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
 
-        <Route path="/404" element={<NotFoundPage />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
-      </Routes>
+          <Route path="/404" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Routes>
+      </Suspense>
       <InstallPrompt />
       <UpdatePrompt />
       <Toaster position="top-center" />
