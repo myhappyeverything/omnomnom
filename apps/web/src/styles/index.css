@@ -1,7 +1,128 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/inter/wght.css';
+
+/* Enables `dark:` utility variants; most theming below happens automatically
+   via the semantic tokens flipping under .dark, without needing dark: everywhere. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantic tokens (light). Palette scales are declared inside @theme below;
+ * these plain custom properties exist *outside* @theme so `.dark` can
+ * override them via ordinary CSS cascade/inheritance — components that use
+ * `bg-background`, `text-foreground`, etc. adapt to dark mode with no
+ * `dark:` prefix required.
+ */
+:root {
+  --background: #ffffff;
+  --foreground: var(--color-neutral-900);
+  --surface: #ffffff;
+  --surface-muted: var(--color-neutral-50);
+  --border: var(--color-neutral-200);
+  --muted-foreground: var(--color-neutral-500);
+
+  --primary: var(--color-primary-900);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-secondary-100);
+  --secondary-foreground: var(--color-primary-900);
+  --accent: var(--color-accent-600);
+  --accent-foreground: #ffffff;
+  --ring: var(--color-primary-700);
+}
+
+.dark {
+  --background: var(--color-neutral-950);
+  --foreground: var(--color-neutral-50);
+  --surface: var(--color-neutral-900);
+  --surface-muted: var(--color-neutral-800);
+  --border: var(--color-neutral-800);
+  --muted-foreground: var(--color-neutral-400);
+
+  /* Deep Purple (900) has almost no contrast against a near-black background,
+     so dark mode reaches for a lighter step of the same scale instead. */
+  --primary: var(--color-primary-400);
+  --primary-foreground: var(--color-neutral-950);
+  --secondary: var(--color-neutral-800);
+  --secondary-foreground: var(--color-neutral-50);
+  --accent: var(--color-accent-400);
+  --accent-foreground: var(--color-neutral-950);
+  --ring: var(--color-primary-400);
+}
 
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Primary — Deep Purple */
+  --color-primary-50: #f5f3ff;
+  --color-primary-100: #ede9fe;
+  --color-primary-200: #ddd6fe;
+  --color-primary-300: #c4b5fd;
+  --color-primary-400: #a78bfa;
+  --color-primary-500: #8b5cf6;
+  --color-primary-600: #7c3aed;
+  --color-primary-700: #6d28d9;
+  --color-primary-800: #5b21b6;
+  --color-primary-900: #4c1d95;
+  --color-primary-950: #2e1065;
+
+  /* Secondary — Soft Lavender: a gentler, greyer tint than Primary, not just Primary-but-lighter */
+  --color-secondary-50: #fbfaff;
+  --color-secondary-100: #f4f1fb;
+  --color-secondary-200: #e9e4f5;
+  --color-secondary-300: #d9d0ea;
+  --color-secondary-400: #bfb0d8;
+  --color-secondary-500: #a08cc2;
+  --color-secondary-600: #8268a8;
+  --color-secondary-700: #674f88;
+  --color-secondary-800: #4c3a66;
+  --color-secondary-900: #362a49;
+
+  /* Accent — Muted Indigo: cooler and deliberately desaturated, for tertiary emphasis */
+  --color-accent-400: #8a8fc4;
+  --color-accent-500: #6c71a8;
+  --color-accent-600: #5b5f8d;
+  --color-accent-700: #484c72;
+  --color-accent-800: #383b59;
+
+  /* Neutral — grey with a faint violet undertone rather than a flat, unconsidered grey.
+     Doubles as "Charcoal" (950/900) for dark mode. */
+  --color-neutral-50: #fafafc;
+  --color-neutral-100: #f4f3f7;
+  --color-neutral-200: #e7e5ed;
+  --color-neutral-300: #d3d0dc;
+  --color-neutral-400: #a6a2b5;
+  --color-neutral-500: #7a7690;
+  --color-neutral-600: #5d5a70;
+  --color-neutral-700: #454356;
+  --color-neutral-800: #2e2d3a;
+  --color-neutral-900: #1c1b24;
+  --color-neutral-950: #121118;
+
+  /* Semantic mappings — these generate bg-background, text-foreground, bg-primary, etc.
+     and stay in sync with .dark automatically because they point at the plain vars above. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+
+  /* Rounder than Tailwind's own `rounded-xl` — the app's signature card shape. */
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+
+  /* A soft, diffuse, purple-tinted shadow rather than a flat black one. */
+  --shadow-card:
+    0 1px 2px color-mix(in srgb, var(--color-neutral-900) 4%, transparent),
+    0 8px 24px color-mix(in srgb, var(--color-neutral-900) 6%, transparent);
+
+  --ease-out-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html,
@@ -11,6 +132,32 @@ body,
 }
 
 body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.2s var(--ease-out-smooth),
+    color 0.2s var(--ease-out-smooth);
+}
+
+::selection {
+  background-color: var(--color-primary-200);
+  color: var(--color-primary-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
