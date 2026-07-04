@@ -12,6 +12,7 @@ import { weightRoute } from './routes/weight.js'
 import { settingsRoute } from './routes/settings.js'
 import { notificationsRoute } from './routes/notifications.js'
 import { aiRoute } from './routes/ai.js'
+import { exportRoute } from './routes/export.js'
 import { AppError } from './lib/errors.js'
 import { OpenAiError } from './lib/openai.js'
 import { runReminderCheck } from './services/reminderScheduler.js'
@@ -50,6 +51,7 @@ app.route('/api/weight', weightRoute)
 app.route('/api/settings', settingsRoute)
 app.route('/api/notifications', notificationsRoute)
 app.route('/api/ai', aiRoute)
+app.route('/api/export', exportRoute)
 
 export default {
   fetch: app.fetch,

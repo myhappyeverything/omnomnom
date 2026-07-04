@@ -26,6 +26,11 @@ export async function findUserById(env: Env, id: string): Promise<UserRow | null
   return env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first<UserRow>()
 }
 
+/** Every other table's user_id/created_by_user_id column is ON DELETE CASCADE — one delete clears everything. */
+export async function deleteUser(env: Env, id: string): Promise<void> {
+  await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run()
+}
+
 export async function createUser(env: Env, input: NewUserInput): Promise<UserRow> {
   const id = newId()
   const timestamp = nowIso()

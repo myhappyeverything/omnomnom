@@ -4,7 +4,7 @@ import type { UserRow } from '../types/models.js'
 import { hashPassword, verifyPassword, generateOpaqueToken, sha256Hex } from '../lib/crypto.js'
 import { createAccessToken, REFRESH_TOKEN_TTL_SECONDS } from '../lib/tokens.js'
 import { ConflictError, ForbiddenError, UnauthorizedError } from '../lib/errors.js'
-import { countUsers, createUser, findUserByEmail } from '../repositories/users.js'
+import { countUsers, createUser, deleteUser, findUserByEmail } from '../repositories/users.js'
 import {
   createRefreshToken,
   findActiveRefreshTokenByHash,
@@ -112,4 +112,9 @@ export async function logoutSession(env: Env, rawRefreshToken: string): Promise<
   if (existing) {
     await revokeRefreshToken(env, existing.id)
   }
+}
+
+/** Deletes the user row; every other table cascades on user_id/created_by_user_id. */
+export async function deleteAccount(env: Env, userId: string): Promise<void> {
+  await deleteUser(env, userId)
 }

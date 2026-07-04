@@ -5,6 +5,7 @@ import { registerSchema, loginSchema } from '@purple/shared'
 import type { AppEnv } from '../types/hono.js'
 import type { AuthTokens } from '../services/auth.js'
 import {
+  deleteAccount,
   loginUser,
   logoutSession,
   refreshSession,
@@ -83,4 +84,10 @@ authRoute.get('/me', requireAuth, async (c) => {
     return c.json({ error: 'User not found' }, 404)
   }
   return c.json({ user: toPublicUser(user) })
+})
+
+authRoute.delete('/me', requireAuth, async (c) => {
+  await deleteAccount(c.env, c.get('userId'))
+  deleteCookie(c, REFRESH_COOKIE_NAME, { path: REFRESH_COOKIE_PATH })
+  return c.json({ success: true })
 })

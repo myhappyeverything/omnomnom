@@ -26,6 +26,11 @@ export async function logout(): Promise<void> {
   setAccessToken(null)
 }
 
+export async function deleteAccount(): Promise<void> {
+  await apiRequest('/api/auth/me', { method: 'DELETE' })
+  setAccessToken(null)
+}
+
 export async function fetchCurrentUser(): Promise<PublicUser> {
   const data = await apiRequest<{ user: PublicUser }>('/api/auth/me')
   return data.user

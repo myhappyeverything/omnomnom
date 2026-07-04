@@ -55,6 +55,15 @@ export async function createCustomFood(
   return food
 }
 
+export async function listCustomFoodsByUser(env: Env, userId: string): Promise<FoodRow[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM foods WHERE created_by_user_id = ? AND source = 'custom' ORDER BY created_at ASC`,
+  )
+    .bind(userId)
+    .all<FoodRow>()
+  return results
+}
+
 export async function upsertFood(
   env: Env,
   food: Omit<FoodRow, 'id' | 'created_by_user_id' | 'created_at' | 'updated_at'>,

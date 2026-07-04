@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { UnitSystem } from '@purple/shared'
 import {
   Dialog,
   DialogContent,
@@ -14,14 +15,26 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createWeightLog, type OfflineWeightLogRecord } from '@/api/weight'
 import { ApiError } from '@/api/client'
+import { displayWeight, toStoredKg, weightUnitLabel } from '@/utils/units'
 
-export function LogWeightDialog({ suggestedWeightKg }: { suggestedWeightKg: number | null }) {
+export function LogWeightDialog({
+  suggestedWeightKg,
+  unitSystem,
+}: {
+  suggestedWeightKg: number | null
+  unitSystem: UnitSystem
+}) {
   const [open, setOpen] = useState(false)
-  const [weightKg, setWeightKg] = useState(suggestedWeightKg ?? 70)
+  const suggestedDisplayValue =
+    suggestedWeightKg !== null
+      ? Math.round(displayWeight(suggestedWeightKg, unitSystem) * 10) / 10
+      : 70
+  const [displayValue, setDisplayValue] = useState(suggestedDisplayValue)
+  const unitLabel = weightUnitLabel(unitSystem)
   const queryClient = useQueryClient()
 
   const logMutation = useMutation({
-    mutationFn: () => createWeightLog({ weightKg }),
+    mutationFn: () => createWeightLog({ weightKg: toStoredKg(displayValue, unitSystem) }),
     onSuccess: (log) => {
       if (log.pending) {
         queryClient.setQueriesData<OfflineWeightLogRecord[]>(
@@ -44,7 +57,7 @@ export function LogWeightDialog({ suggestedWeightKg }: { suggestedWeightKg: numb
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (next) setWeightKg(suggestedWeightKg ?? weightKg)
+        if (next) setDisplayValue(suggestedDisplayValue)
         setOpen(next)
       }}
     >
@@ -56,19 +69,19 @@ export function LogWeightDialog({ suggestedWeightKg }: { suggestedWeightKg: numb
           <DialogTitle>Log your weight</DialogTitle>
         </DialogHeader>
         <div className="grid gap-2">
-          <Label htmlFor="weightKg">Weight (kg)</Label>
+          <Label htmlFor="weightValue">Weight ({unitLabel})</Label>
           <Input
-            id="weightKg"
+            id="weightValue"
             type="number"
             step="0.1"
-            value={weightKg}
-            onChange={(e) => setWeightKg(Number(e.target.value))}
+            value={displayValue}
+            onChange={(e) => setDisplayValue(Number(e.target.value))}
           />
         </div>
         <DialogFooter>
           <Button
             className="w-full"
-            disabled={weightKg <= 0 || logMutation.isPending}
+            disabled={displayValue <= 0 || logMutation.isPending}
             onClick={() => logMutation.mutate()}
           >
             {logMutation.isPending ? 'Saving…' : 'Save'}

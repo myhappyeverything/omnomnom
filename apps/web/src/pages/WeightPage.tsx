@@ -8,9 +8,11 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WeightChart } from '@/components/weight/WeightChart'
 import { LogWeightDialog } from '@/components/weight/LogWeightDialog'
 import { useWeightHistory } from '@/hooks/useWeightHistory'
+import { useSettings } from '@/hooks/useSettings'
 import { calculateWeightTrend, estimateGoalDate } from '@/utils/weightTrend'
 import { deleteWeightLog } from '@/api/weight'
 import { ApiError } from '@/api/client'
+import { displayWeight, weightUnitLabel } from '@/utils/units'
 
 const RANGE_OPTIONS = [
   { value: '7', label: '7D', days: 7 },
@@ -21,6 +23,9 @@ const RANGE_OPTIONS = [
 
 export function WeightPage() {
   const { isLoading, goal, logs } = useWeightHistory()
+  const settingsQuery = useSettings()
+  const unitSystem = settingsQuery.data?.unitSystem ?? 'metric'
+  const unitLabel = weightUnitLabel(unitSystem)
   const [range, setRange] = useState<(typeof RANGE_OPTIONS)[number]['value']>('30')
   const queryClient = useQueryClient()
 
@@ -62,7 +67,9 @@ export function WeightPage() {
             <div>
               <p className="text-muted-foreground text-sm">Current weight</p>
               <p className="text-foreground text-2xl font-semibold">
-                {currentWeightKg !== null ? `${currentWeightKg.toFixed(1)} kg` : '—'}
+                {currentWeightKg !== null
+                  ? `${displayWeight(currentWeightKg, unitSystem).toFixed(1)} ${unitLabel}`
+                  : '—'}
               </p>
             </div>
             <Tabs value={range} onValueChange={(v) => setRange(v as typeof range)}>
@@ -95,7 +102,7 @@ export function WeightPage() {
                   ) : (
                     <Minus size={18} />
                   )}
-                  {Math.abs(trendKgPerWeek).toFixed(2)} kg
+                  {Math.abs(displayWeight(trendKgPerWeek, unitSystem)).toFixed(2)} {unitLabel}
                 </>
               )}
             </div>
@@ -119,7 +126,7 @@ export function WeightPage() {
         </Card>
       </div>
 
-      <LogWeightDialog suggestedWeightKg={currentWeightKg} />
+      <LogWeightDialog suggestedWeightKg={currentWeightKg} unitSystem={unitSystem} />
 
       {filteredLogs.length > 0 && (
         <Card>
@@ -142,7 +149,9 @@ export function WeightPage() {
                         })}
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="text-foreground">{log.weightKg.toFixed(1)} kg</span>
+                    <span className="text-foreground">
+                      {displayWeight(log.weightKg, unitSystem).toFixed(1)} {unitLabel}
+                    </span>
                     <button
                       type="button"
                       aria-label="Delete entry"

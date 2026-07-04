@@ -101,6 +101,11 @@ export async function listFavouriteFoods(env: Env, userId: string): Promise<Food
   return rows.map((row) => toFoodRecord(row, true))
 }
 
+export async function listCustomFoods(env: Env, userId: string): Promise<FoodRecord[]> {
+  const rows = await foodsRepo.listCustomFoodsByUser(env, userId)
+  return toFoodRecordsWithFavourites(env, userId, rows)
+}
+
 export async function addFavourite(env: Env, userId: string, foodId: string): Promise<void> {
   const food = await foodsRepo.findFoodById(env, foodId)
   if (!food) throw new NotFoundError('Food not found')

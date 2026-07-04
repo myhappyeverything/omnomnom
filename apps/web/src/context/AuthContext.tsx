@@ -10,6 +10,7 @@ interface AuthContextValue {
   login: (input: LoginInput) => Promise<void>
   register: (input: RegisterInput) => Promise<void>
   logout: () => Promise<void>
+  deleteAccount: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -57,6 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   })
 
+  const deleteAccountMutation = useMutation({
+    mutationFn: authApi.deleteAccount,
+    onSuccess: () => {
+      setHasSession(false)
+      queryClient.clear()
+    },
+  })
+
   const value: AuthContextValue = {
     user: meQuery.data ?? null,
     isLoading: hasSession === null || (hasSession && meQuery.isLoading),
@@ -68,6 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     logout: async () => {
       await logoutMutation.mutateAsync()
+    },
+    deleteAccount: async () => {
+      await deleteAccountMutation.mutateAsync()
     },
   }
 
