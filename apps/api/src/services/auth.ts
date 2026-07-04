@@ -3,16 +3,13 @@ import type { Env } from '../types/env.js'
 import type { UserRow } from '../types/models.js'
 import { hashPassword, verifyPassword, generateOpaqueToken, sha256Hex } from '../lib/crypto.js'
 import { createAccessToken, REFRESH_TOKEN_TTL_SECONDS } from '../lib/tokens.js'
-import { ConflictError, ForbiddenError, UnauthorizedError } from '../lib/errors.js'
-import { countUsers, createUser, deleteUser, findUserByEmail } from '../repositories/users.js'
+import { ConflictError, UnauthorizedError } from '../lib/errors.js'
+import { createUser, deleteUser, findUserByEmail } from '../repositories/users.js'
 import {
   createRefreshToken,
   findActiveRefreshTokenByHash,
   revokeRefreshToken,
 } from '../repositories/refreshTokens.js'
-
-/** This app is built for exactly two people; registration closes once both accounts exist. */
-export const MAX_REGISTERED_USERS = 2
 
 export interface AuthTokens {
   accessToken: string
@@ -45,11 +42,6 @@ export async function registerUser(
   env: Env,
   input: RegisterInput,
 ): Promise<{ user: UserRow; tokens: AuthTokens }> {
-  const existingCount = await countUsers(env)
-  if (existingCount >= MAX_REGISTERED_USERS) {
-    throw new ForbiddenError('Registration is closed')
-  }
-
   const existing = await findUserByEmail(env, input.email)
   if (existing) {
     throw new ConflictError('An account with this email already exists')

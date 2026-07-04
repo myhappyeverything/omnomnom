@@ -2,10 +2,10 @@ import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Env } from '../types/env.js'
 import type { RegisterInput } from '@purple/shared'
-import { ConflictError, ForbiddenError, UnauthorizedError } from '../lib/errors.js'
+import { ConflictError, UnauthorizedError } from '../lib/errors.js'
 import { findUserById } from '../repositories/users.js'
 import { createWaterLog } from './water.js'
-import { MAX_REGISTERED_USERS, deleteAccount, loginUser, registerUser } from './auth.js'
+import { deleteAccount, loginUser, registerUser } from './auth.js'
 
 const testEnv = env as unknown as Env
 
@@ -58,12 +58,10 @@ describe('registerUser / loginUser round trip', () => {
     await expect(registerUser(testEnv, input)).rejects.toThrow(ConflictError)
   })
 
-  it('closes registration once MAX_REGISTERED_USERS accounts exist', async () => {
-    // Fill up to the cap using fresh emails, then confirm the next one is refused.
-    for (let i = 0; i < MAX_REGISTERED_USERS; i++) {
+  it('does not cap the number of registered accounts', async () => {
+    for (let i = 0; i < 5; i++) {
       await registerUser(testEnv, makeRegisterInput())
     }
-    await expect(registerUser(testEnv, makeRegisterInput())).rejects.toThrow(ForbiddenError)
   })
 })
 

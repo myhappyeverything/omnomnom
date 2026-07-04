@@ -7,9 +7,8 @@ export function PrivacyPolicyPage() {
       <Card>
         <CardContent className="text-muted-foreground space-y-4 text-sm leading-relaxed">
           <p>
-            Purple is a private nutrition and health tracker built for a small, fixed set of people
-            who know each other — not a public product. This page explains what data it keeps and
-            why.
+            Purple is a personal nutrition and health tracker. This page explains what data it keeps
+            and why.
           </p>
 
           <section className="space-y-1">
@@ -62,8 +61,8 @@ export function PrivacyPolicyPage() {
           <section className="space-y-1">
             <h2 className="text-foreground font-medium">Who can see it</h2>
             <p>
-              Registration is limited to two accounts. Each account can only ever see its own data —
-              there is no sharing, following, or admin visibility into another account's logs.
+              Each account can only ever see its own data — there is no sharing, following, or admin
+              visibility into another account's logs.
             </p>
           </section>
         </CardContent>

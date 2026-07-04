@@ -1,6 +1,8 @@
 # Purple
 
-Personal nutrition & health tracker — PWA frontend on Cloudflare Pages, API on Cloudflare Workers, D1/KV/R2 for storage. Built for exactly two people; registration closes once both accounts exist. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the system design and cost model.
+Personal nutrition & health tracker — PWA frontend on Cloudflare Pages, API on Cloudflare Workers, D1/KV/R2 for storage. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the system design and cost model.
+
+> **Note:** registration is currently open to anyone with the URL — there's no invite code, CAPTCHA, or email verification. Each new account can trigger real OpenAI Vision costs (meal photo recognition), so if you're deploying this publicly, keep an eye on usage or set a spending cap on your OpenAI account.
 
 ## Features
 

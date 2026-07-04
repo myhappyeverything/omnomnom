@@ -13,11 +13,6 @@ export interface NewUserInput {
   heightCm: number
 }
 
-export async function countUsers(env: Env): Promise<number> {
-  const row = await env.DB.prepare('SELECT COUNT(*) as count FROM users').first<{ count: number }>()
-  return row?.count ?? 0
-}
-
 export async function findUserByEmail(env: Env, email: string): Promise<UserRow | null> {
   return env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(email).first<UserRow>()
 }

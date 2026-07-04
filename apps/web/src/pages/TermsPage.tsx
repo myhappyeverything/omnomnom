@@ -13,10 +13,7 @@ export function TermsPage() {
 
           <section className="space-y-1">
             <h2 className="text-foreground font-medium">Who this is for</h2>
-            <p>
-              Access is limited to two accounts, created by invitation. There is no public sign-up,
-              and registration closes automatically once both accounts exist.
-            </p>
+            <p>Anyone can create an account. Each account only ever sees its own data.</p>
           </section>
 
           <section className="space-y-1">
