@@ -3,6 +3,13 @@ import { cors } from 'hono/cors'
 import type { AppEnv } from './types/hono.js'
 import { healthRoute } from './routes/health.js'
 import { authRoute } from './routes/auth.js'
+import { goalsRoute } from './routes/goals.js'
+import { foodsRoute } from './routes/foods.js'
+import { mealsRoute } from './routes/meals.js'
+import { waterRoute } from './routes/water.js'
+import { weightRoute } from './routes/weight.js'
+import { settingsRoute } from './routes/settings.js'
+import { notificationsRoute } from './routes/notifications.js'
 import { AppError } from './lib/errors.js'
 
 const app = new Hono<AppEnv>()
@@ -25,5 +32,12 @@ app.onError((err, c) => {
 
 app.route('/api/health', healthRoute)
 app.route('/api/auth', authRoute)
+app.route('/api/goals', goalsRoute)
+app.route('/api/foods', foodsRoute)
+app.route('/api/meals', mealsRoute)
+app.route('/api/water', waterRoute)
+app.route('/api/weight', weightRoute)
+app.route('/api/settings', settingsRoute)
+app.route('/api/notifications', notificationsRoute)
 
 export default app
