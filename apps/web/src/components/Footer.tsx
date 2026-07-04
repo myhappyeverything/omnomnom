@@ -6,19 +6,18 @@ export function Footer() {
   return (
     <footer className="text-muted-foreground border-border border-t px-6 py-8 text-center text-sm">
       <p>Made with love for Sanaa</p>
-      <p className="mt-1 flex items-center justify-center gap-1.5">
-        <span>
-          &copy; {year}{' '}
-          <a
-            href="https://introvertsmakestuff.com/"
-            target="_blank"
-            rel="noreferrer"
-            className="text-primary hover:underline"
-          >
-            Introverts Make Stuff
-          </a>
-        </span>
-        <span aria-hidden="true">&middot;</span>
+      <p className="mt-1">
+        &copy; {year}{' '}
+        <a
+          href="https://introvertsmakestuff.com/"
+          target="_blank"
+          rel="noreferrer"
+          className="text-primary hover:underline whitespace-nowrap"
+        >
+          Introverts Make Stuff
+        </a>
+      </p>
+      <p className="mt-1">
         <a href="mailto:hello@introvertsmakestuff.com" className="hover:text-foreground">
           hello@introvertsmakestuff.com
         </a>

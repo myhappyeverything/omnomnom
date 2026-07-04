@@ -19,7 +19,7 @@ export function InstallPrompt() {
   return (
     <div
       className={cn(
-        'fixed inset-x-4 bottom-4 z-40 flex items-center justify-between gap-3 rounded-2xl',
+        'fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between gap-3 rounded-2xl',
         'bg-primary text-primary-foreground px-4 py-3 shadow-lg sm:inset-x-auto sm:right-4 sm:w-96',
       )}
     >

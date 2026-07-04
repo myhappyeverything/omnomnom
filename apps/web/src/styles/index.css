@@ -219,6 +219,10 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* Installed standalone (viewport-fit=cover in index.html) draws content
+     under the status bar/notch/camera cutout unless something claims that
+     space — this is 0 in a regular browser tab, so it's a no-op there. */
+  padding-top: env(safe-area-inset-top);
   transition:
     background-color 0.2s var(--ease-out-smooth),
     color 0.2s var(--ease-out-smooth);
