@@ -9,12 +9,20 @@ import { NavigationRoute, registerRoute } from 'workbox-routing'
 declare const self: ServiceWorkerGlobalScope
 
 // Merges OneSignal's push/notificationclick handling into this same worker
-// instead of registering a second, separate OneSignalSDKWorker.js — this is
+// instead of registering a second, separate service worker — this is
 // OneSignal's documented integration path for apps that already ship a
-// custom service worker. Safe to load unconditionally: with no app configured
-// client-side (see lib/oneSignal.ts), no push subscription is ever created,
-// so this file just sits idle.
-importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDKWorker.js')
+// custom service worker. With no app configured client-side (see
+// lib/oneSignal.ts), no push subscription is ever created, so this normally
+// just sits idle. Wrapped in try/catch because importScripts is a hard,
+// synchronous dependency for the whole service worker's evaluation — if
+// OneSignal's CDN is ever unreachable or renames this file again, push
+// notifications failing is fine, but that must never take down offline
+// precaching and PWA updates (everything below this line) along with it.
+try {
+  importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js')
+} catch (error) {
+  console.error('OneSignal service worker script failed to load', error)
+}
 
 // Precache the app shell (JS/CSS/fonts/icons + index.html) at install time.
 // __WB_MANIFEST is injected by vite-plugin-pwa's injectManifest build step.
@@ -32,5 +40,16 @@ registerRoute(
   }),
 )
 
-self.skipWaiting()
+// A new service worker installs and then sits in the `waiting` state until
+// something tells it to take over — that's what lets UpdatePrompt.tsx show
+// "a new version is ready" and only activate it once the user clicks
+// Reload. Calling skipWaiting() unconditionally here (as this used to) would
+// skip that wait and activate immediately on install, silently taking over
+// the current tab's network requests underneath a still-running old page —
+// exactly the update-notification flow this file is paired with is meant to
+// prevent. vite-plugin-pwa's client (useRegisterSW, via updateServiceWorker)
+// sends this exact message when the user confirms.
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting()
+})
 self.addEventListener('activate', () => self.clients.claim())

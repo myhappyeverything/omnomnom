@@ -12,8 +12,12 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.ts',
-      injectRegister: 'auto',
-      registerType: 'autoUpdate',
+      // Registration is handled entirely by the useRegisterSW hook in
+      // UpdatePrompt.tsx (which also polls for updates on an interval), so
+      // the plugin doesn't need to inject its own registration script too —
+      // having both was a redundant double-registration.
+      injectRegister: false,
+      registerType: 'prompt',
       // Service worker registration is disabled in `vite dev` — module-worker
       // support for a dev-transformed SW graph is inconsistent across
       // browsers. Test PWA/offline/install behavior against a real build:

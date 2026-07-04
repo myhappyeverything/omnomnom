@@ -1,10 +1,21 @@
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
+// How often an already-open tab checks for a new deployed version. The
+// service worker only otherwise checks on registration (page load), so
+// without this, someone who keeps the app open for days would never see an
+// update prompt until they happened to fully reload.
+const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000
+
 export function UpdatePrompt() {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
-  } = useRegisterSW()
+  } = useRegisterSW({
+    onRegisteredSW(_swUrl, registration) {
+      if (!registration) return
+      setInterval(() => void registration.update(), UPDATE_CHECK_INTERVAL_MS)
+    },
+  })
 
   if (!needRefresh) return null
 
@@ -12,7 +23,7 @@ export function UpdatePrompt() {
 
   return (
     <div className="fixed inset-x-4 top-4 z-50 flex items-center justify-between gap-3 rounded-2xl bg-violet-900 px-4 py-3 text-sm text-white shadow-lg sm:inset-x-auto sm:left-4 sm:w-96">
-      <p>A new version of Purple is ready.</p>
+      <p>A new version is ready.</p>
       <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
