@@ -1,6 +1,18 @@
 # Purple
 
-Personal nutrition & health tracker — PWA frontend on Cloudflare Pages, API on Cloudflare Workers, D1/KV/R2 for storage. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the system design and cost model.
+Personal nutrition & health tracker — PWA frontend on Cloudflare Pages, API on Cloudflare Workers, D1/KV/R2 for storage. Built for exactly two people; registration closes once both accounts exist. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the system design and cost model.
+
+## Features
+
+- Calorie/protein/carb/fat/fibre/water/weight tracking, with a weighted daily Nutrition Score
+- AI meal photo recognition (OpenAI Vision) — identification only; nutrition values always come from OpenFoodFacts/USDA, never invented
+- Food search across a local cache, OpenFoodFacts, and USDA, plus custom foods and recipes
+- Water and weight trackers with history, streaks, and trend/goal-date projection
+- Daily/weekly/monthly analytics
+- Push reminders (breakfast/lunch/dinner/water/weigh-in/custom) via OneSignal, scheduled server-side per user timezone and quiet hours
+- Offline logging for water and weight: mutations queue in IndexedDB when the network is unreachable, sync automatically on reconnect, and a still-unsynced entry can be deleted with no network call at all
+- Settings: metric/imperial and light/dark/system preferences, full data export as JSON, restoring water/weight logs from an export, and account deletion
+- Installable, offline-capable PWA (Workbox-based service worker, app-shell precaching)
 
 ## Repository layout
 
@@ -17,7 +29,7 @@ packages/
 
 - Node.js 20+
 - npm 10+
-- A Cloudflare account (free tier) with Wrangler authenticated (`npx wrangler login`) — needed from Stage 6 onward
+- A Cloudflare account (free tier) with Wrangler authenticated (`npx wrangler login`) — needed to deploy your own instance (see below); local dev works without it
 
 ## Getting started
 
@@ -29,7 +41,14 @@ npm run dev:web   # Vite dev server on http://localhost:5173
 
 Copy `apps/api/.dev.vars.example` → `apps/api/.dev.vars` and `apps/web/.env.example` → `apps/web/.env.local`. Local dev works with placeholder secrets for everything except features that call a real third party (OpenAI, OneSignal, USDA).
 
-To deploy your own instance to Cloudflare, follow [docs/cloudflare-setup.md](./docs/cloudflare-setup.md) — it provisions D1/KV/R2/Pages under your own account (this can't be done on your behalf; it needs your Cloudflare login).
+## Deployment
+
+One-time manual provisioning (D1/KV/R2/Pages/secrets, all under your own Cloudflare account — this can't be done on your behalf) is in [docs/cloudflare-setup.md](./docs/cloudflare-setup.md). Once that's done:
+
+- **CI** ([.github/workflows/ci.yml](./.github/workflows/ci.yml)) runs lint, format check, typecheck, build, and tests on every PR and push to `main`.
+- **Deploy** ([.github/workflows/deploy.yml](./.github/workflows/deploy.yml)) runs the same checks, then applies any pending D1 migrations and deploys the Worker and Pages, on every push to `main`. It needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets described in [docs/cloudflare-setup.md](./docs/cloudflare-setup.md#9-github-actions-deploy-access-for-stage-22).
+
+There's a single production environment — no staging cluster, matching a two-user personal app. Manual deploys work the same way from a local machine: `npm run deploy -w @purple/api` for the Worker, `npm run build:web && npx wrangler pages deploy apps/web/dist --project-name purple` for the frontend.
 
 ## Common scripts
 
@@ -41,6 +60,6 @@ To deploy your own instance to Cloudflare, follow [docs/cloudflare-setup.md](./d
 | `npm run format`    | Format with Prettier                 |
 | `npm test`          | Run unit tests across workspaces     |
 
-## Status
+## Testing
 
-This project is being built in stages (see `ARCHITECTURE.md` §"Development approach" in the original spec). Current progress is tracked in-session; the deployment guide and full environment variable reference land in the final stages.
+`apps/api` tests run against a real, ephemeral D1 database emulated by Miniflare (`@cloudflare/vitest-pool-workers`) — not mocks. `apps/web` tests use Vitest + `@testing-library/react` + `jsdom`, with `fake-indexeddb` for the offline outbox. `packages/shared` covers the pure nutrition/scoring math. Run everything with `npm test` from the root, or `npm test -w @purple/api` / `-w @purple/web` / `-w @purple/shared` individually.
