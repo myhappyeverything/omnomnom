@@ -26,6 +26,9 @@ const WeightPage = lazy(() => import('./pages/WeightPage').then((m) => ({ defaul
 const AnalyticsPage = lazy(() =>
   import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 )
+const NotificationsPage = lazy(() =>
+  import('./pages/NotificationsPage').then((m) => ({ default: m.NotificationsPage })),
+)
 const SettingsPage = lazy(() =>
   import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 )
@@ -67,6 +70,7 @@ export function App() {
             <Route path="/water" element={<WaterPage />} />
             <Route path="/weight" element={<WeightPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
 

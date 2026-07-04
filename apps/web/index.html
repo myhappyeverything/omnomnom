@@ -183,6 +183,8 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Loaded unconditionally; lib/oneSignal.ts no-ops if VITE_ONESIGNAL_APP_ID isn't configured. -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

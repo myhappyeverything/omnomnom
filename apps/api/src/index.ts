@@ -14,6 +14,8 @@ import { notificationsRoute } from './routes/notifications.js'
 import { aiRoute } from './routes/ai.js'
 import { AppError } from './lib/errors.js'
 import { OpenAiError } from './lib/openai.js'
+import { runReminderCheck } from './services/reminderScheduler.js'
+import type { Env } from './types/env.js'
 
 const app = new Hono<AppEnv>()
 
@@ -49,4 +51,9 @@ app.route('/api/settings', settingsRoute)
 app.route('/api/notifications', notificationsRoute)
 app.route('/api/ai', aiRoute)
 
-export default app
+export default {
+  fetch: app.fetch,
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(runReminderCheck(env))
+  },
+}

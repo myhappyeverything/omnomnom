@@ -34,6 +34,7 @@ id = "REPLACE_WITH_KV_NAMESPACE_ID" # from `wrangler kv namespace create CACHE`
 binding = "MEAL_IMAGES"
 bucket_name = "purple-meal-images" # from `wrangler r2 bucket create purple-meal-images`
 
-# The reminder-scheduling cron (Stage 18) will add a [triggers] block here
-# once the scheduled() handler exists — an empty trigger with no handler
-# would just be dead configuration.
+[triggers]
+# Every 5 minutes — matches TOLERANCE_MINUTES in reminderScheduler.ts, so a
+# reminder's configured time always falls inside exactly one tick's window.
+crons = ["*/5 * * * *"]
