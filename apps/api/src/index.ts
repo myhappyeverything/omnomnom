@@ -11,7 +11,9 @@ import { waterRoute } from './routes/water.js'
 import { weightRoute } from './routes/weight.js'
 import { settingsRoute } from './routes/settings.js'
 import { notificationsRoute } from './routes/notifications.js'
+import { aiRoute } from './routes/ai.js'
 import { AppError } from './lib/errors.js'
+import { OpenAiError } from './lib/openai.js'
 
 const app = new Hono<AppEnv>()
 
@@ -27,6 +29,10 @@ app.onError((err, c) => {
   if (err instanceof AppError) {
     return c.json({ error: err.message }, err.statusCode as 400 | 401 | 403 | 404 | 409)
   }
+  if (err instanceof OpenAiError) {
+    console.error(err)
+    return c.json({ error: 'Photo analysis is temporarily unavailable. Please try again.' }, 502)
+  }
   console.error(err)
   return c.json({ error: 'Internal server error' }, 500)
 })
@@ -41,5 +47,6 @@ app.route('/api/water', waterRoute)
 app.route('/api/weight', weightRoute)
 app.route('/api/settings', settingsRoute)
 app.route('/api/notifications', notificationsRoute)
+app.route('/api/ai', aiRoute)
 
 export default app

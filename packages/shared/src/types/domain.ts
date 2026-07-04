@@ -44,6 +44,24 @@ export interface FoodRecord {
   isFavourite?: boolean
 }
 
+export interface RecognizedFoodItem {
+  name: string
+  estimatedQuantityGrams: number
+  /** 0-1 — the AI's own confidence in this identification, not a nutrition-data confidence. */
+  confidence: number
+  /** The best nutrition-database match for `name`, if any — AI never supplies nutrition values itself. */
+  matchedFood: FoodRecord | null
+}
+
+export interface PhotoAnalysisResult {
+  imageHash: string
+  /** Pass this straight through as the meal's `photoR2Key` when saving. */
+  r2Key: string
+  items: RecognizedFoodItem[]
+  /** True if this exact photo (by content hash) was already analyzed before — no new AI call was made. */
+  fromCache: boolean
+}
+
 export interface RecipeItemRecord {
   id: string
   foodId: string

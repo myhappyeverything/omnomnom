@@ -7,6 +7,8 @@ export const mealItemInputSchema = z
     recipeId: z.string().uuid().optional(),
     quantity: z.number().positive(),
     unit: z.string().min(1).max(20),
+    /** Set when this item came from AI photo recognition — the AI's own identification confidence (0-1). */
+    aiConfidence: z.number().min(0).max(1).optional(),
   })
   .refine((data) => Boolean(data.foodId) !== Boolean(data.recipeId), {
     message: 'Provide exactly one of foodId or recipeId',

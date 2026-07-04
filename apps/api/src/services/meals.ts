@@ -50,6 +50,7 @@ async function resolveItems(
         carbsG: round2(food.carbs_g * ratio),
         fatG: round2(food.fat_g * ratio),
         fibreG: round2(food.fibre_g * ratio),
+        aiConfidence: item.aiConfidence ?? null,
       })
     } else if (item.recipeId) {
       const recipe = await findRecipeForMealItem(env, userId, item.recipeId)
@@ -66,6 +67,7 @@ async function resolveItems(
         carbsG: round2(recipe.carbsGPerServing * item.quantity),
         fatG: round2(recipe.fatGPerServing * item.quantity),
         fibreG: round2(recipe.fibreGPerServing * item.quantity),
+        aiConfidence: item.aiConfidence ?? null,
       })
     }
   }

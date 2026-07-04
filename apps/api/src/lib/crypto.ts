@@ -78,6 +78,12 @@ export async function sha256Hex(value: string): Promise<string> {
   return toHex(digest)
 }
 
+/** SHA-256 hex digest of raw bytes — used to content-address uploaded meal photos. */
+export async function sha256HexFromBytes(bytes: ArrayBuffer): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', bytes)
+  return toHex(digest)
+}
+
 /** Cryptographically random, URL-safe opaque token (32 bytes of entropy). */
 export function generateOpaqueToken(): string {
   const bytes = new Uint8Array(32)

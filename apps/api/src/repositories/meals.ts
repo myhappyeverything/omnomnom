@@ -12,6 +12,7 @@ export interface ResolvedMealItem {
   carbsG: number
   fatG: number
   fibreG: number
+  aiConfidence: number | null
 }
 
 export interface MealTotals {
@@ -113,8 +114,8 @@ export async function createMealWithItems(
     ),
     ...items.map((item, index) =>
       env.DB.prepare(
-        `INSERT INTO meal_items (id, meal_id, food_id, recipe_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO meal_items (id, meal_id, food_id, recipe_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, ai_confidence, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
         newId(),
         id,
@@ -127,6 +128,7 @@ export async function createMealWithItems(
         item.carbsG,
         item.fatG,
         item.fibreG,
+        item.aiConfidence,
         index,
       ),
     ),
@@ -146,8 +148,8 @@ export async function replaceMealItemsAndTotals(
     env.DB.prepare('DELETE FROM meal_items WHERE meal_id = ?').bind(mealId),
     ...items.map((item, index) =>
       env.DB.prepare(
-        `INSERT INTO meal_items (id, meal_id, food_id, recipe_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO meal_items (id, meal_id, food_id, recipe_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, ai_confidence, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
         newId(),
         mealId,
@@ -160,6 +162,7 @@ export async function replaceMealItemsAndTotals(
         item.carbsG,
         item.fatG,
         item.fibreG,
+        item.aiConfidence,
         index,
       ),
     ),
