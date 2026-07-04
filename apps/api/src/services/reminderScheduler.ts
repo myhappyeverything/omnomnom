@@ -144,7 +144,7 @@ async function checkCustomReminders(
       dedupeKey,
       DAY_SECONDS,
       reminder.label,
-      'Reminder from Purple',
+      'Reminder from OmNomNom',
     )
   }
 }

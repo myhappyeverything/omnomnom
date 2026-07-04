@@ -1,4 +1,4 @@
-import type { CreateWeightLogInput, WeightLogRecord } from '@purple/shared'
+import type { CreateWeightLogInput, WeightLogRecord } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { WeightLogRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'

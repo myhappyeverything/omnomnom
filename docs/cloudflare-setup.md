@@ -28,7 +28,7 @@ This opens a browser to authorize Wrangler against your account.
 ## 2. Create the D1 database
 
 ```bash
-npx wrangler d1 create purple-db
+npx wrangler d1 create omnomnom-db
 ```
 
 Copy the `database_id` from the output into [`apps/api/wrangler.toml`](../apps/api/wrangler.toml),
@@ -37,8 +37,8 @@ replacing `REPLACE_WITH_D1_DATABASE_ID`.
 Apply the schema:
 
 ```bash
-npm run db:migrate:remote -w @purple/api   # applies packages/db/migrations to the real D1 instance
-npm run db:migrate:local -w @purple/api    # keep local dev in sync too
+npm run db:migrate:remote -w @omnomnom/api   # applies packages/db/migrations to the real D1 instance
+npm run db:migrate:local -w @omnomnom/api    # keep local dev in sync too
 ```
 
 ## 3. Create the KV namespace
@@ -52,10 +52,10 @@ Copy the `id` into `wrangler.toml`, replacing `REPLACE_WITH_KV_NAMESPACE_ID`.
 ## 4. Create the R2 bucket
 
 ```bash
-npx wrangler r2 bucket create purple-meal-images
+npx wrangler r2 bucket create omnomnom-meal-images
 ```
 
-The bucket name in `wrangler.toml` already matches (`purple-meal-images`) —
+The bucket name in `wrangler.toml` already matches (`omnomnom-meal-images`) —
 no further edit needed unless you chose a different name.
 
 ## 5. Set secrets
@@ -82,24 +82,24 @@ Edit `wrangler.toml` directly (these are safe to commit):
 ## 7. Deploy the Worker
 
 ```bash
-npm run deploy -w @purple/api
+npm run deploy -w @omnomnom/api
 ```
 
 ## 8. Create the Cloudflare Pages project (frontend)
 
-Run from the repo root, since the frontend build depends on `@purple/shared`:
+Run from the repo root, since the frontend build depends on `@omnomnom/shared`:
 
 ```bash
 npm run build:web
-npx wrangler pages project create purple --production-branch main
-npx wrangler pages deploy apps/web/dist --project-name purple
+npx wrangler pages project create omnomnom --production-branch main
+npx wrangler pages deploy apps/web/dist --project-name omnomnom
 ```
 
 Note the `*.pages.dev` URL Wrangler prints. Set the frontend's own env vars
 either in a `.env.production` file before building, or as Pages environment
 variables in the dashboard (Settings → Environment variables):
 
-- `VITE_API_BASE_URL` — your Worker's URL (`https://purple-api.<your-subdomain>.workers.dev`, or a custom domain)
+- `VITE_API_BASE_URL` — your Worker's URL (`https://omnomnom-api.<your-subdomain>.workers.dev`, or a custom domain)
 - `VITE_ONESIGNAL_APP_ID` — same OneSignal app ID as Step 6
 
 Then go back to Step 6 and set `ALLOWED_ORIGIN` in `apps/api/wrangler.toml` to

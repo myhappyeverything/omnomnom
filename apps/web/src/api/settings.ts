@@ -1,4 +1,4 @@
-import type { SettingsRecord, UpdateSettingsInput } from '@purple/shared'
+import type { SettingsRecord, UpdateSettingsInput } from '@omnomnom/shared'
 import { apiRequest } from './client'
 
 export async function getSettings(): Promise<SettingsRecord> {

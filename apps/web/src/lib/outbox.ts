@@ -6,7 +6,7 @@ import {
   type OutboxEntry,
 } from './outboxDb'
 
-const CHANGE_EVENT = 'purple:outbox-changed'
+const CHANGE_EVENT = 'omnomnom:outbox-changed'
 
 function notifyChange() {
   window.dispatchEvent(new CustomEvent(CHANGE_EVENT))

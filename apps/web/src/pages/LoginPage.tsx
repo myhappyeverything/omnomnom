@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { loginSchema, type LoginInput } from '@purple/shared'
+import { loginSchema, type LoginInput } from '@omnomnom/shared'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,7 +36,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <h1 className="text-foreground text-2xl font-semibold">Welcome back</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Sign in to Purple</p>
+          <p className="text-muted-foreground mt-1 text-sm">Sign in to OmNomNom</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

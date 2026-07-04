@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { UnitSystem } from '@purple/shared'
+import type { UnitSystem } from '@omnomnom/shared'
 import {
   Dialog,
   DialogContent,

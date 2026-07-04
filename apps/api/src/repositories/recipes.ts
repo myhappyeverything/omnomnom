@@ -1,4 +1,4 @@
-import type { RecipeItemInput } from '@purple/shared'
+import type { RecipeItemInput } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { RecipeItemRow, RecipeRow } from '../types/models.js'
 import { newId, nowIso } from '../lib/db.js'

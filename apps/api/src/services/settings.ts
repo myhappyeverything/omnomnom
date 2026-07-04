@@ -1,4 +1,4 @@
-import type { SettingsRecord, UpdateSettingsInput } from '@purple/shared'
+import type { SettingsRecord, UpdateSettingsInput } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { SettingsRow } from '../types/models.js'
 import * as settingsRepo from '../repositories/settings.js'

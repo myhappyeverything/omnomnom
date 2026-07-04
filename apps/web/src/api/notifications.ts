@@ -4,7 +4,7 @@ import type {
   NotificationSettingsRecord,
   UpdateCustomReminderInput,
   UpdateNotificationSettingsInput,
-} from '@purple/shared'
+} from '@omnomnom/shared'
 import { apiRequest } from './client'
 
 export async function getNotificationSettings(): Promise<NotificationSettingsRecord> {

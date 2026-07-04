@@ -10,7 +10,7 @@ export default defineConfig({
   },
   preset: combinePresetAndAppleSplashScreens(minimal2023Preset, {
     padding: 0.3,
-    resizeOptions: { background: '#4C1D95' },
+    resizeOptions: { background: '#FFF3E7' },
   }),
   images: ['pwa-assets/source.svg'],
 })

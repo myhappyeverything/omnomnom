@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { updateSettingsSchema } from '@purple/shared'
+import { updateSettingsSchema } from '@omnomnom/shared'
 import type { AppEnv } from '../types/hono.js'
 import { requireAuth } from '../middleware/auth.js'
 import * as settingsService from '../services/settings.js'

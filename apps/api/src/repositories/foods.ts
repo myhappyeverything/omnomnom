@@ -1,4 +1,4 @@
-import type { CreateCustomFoodInput } from '@purple/shared'
+import type { CreateCustomFoodInput } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { FavouriteFoodRow, FoodRow } from '../types/models.js'
 import { newId, nowIso } from '../lib/db.js'

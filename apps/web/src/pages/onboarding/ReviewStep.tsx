@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { calculateGoalPlan, type GoalPlan } from '@purple/shared'
+import { calculateGoalPlan, type GoalPlan } from '@omnomnom/shared'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

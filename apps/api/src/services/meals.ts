@@ -1,4 +1,4 @@
-import type { CreateMealInput, MealItemInput, MealRecord, UpdateMealInput } from '@purple/shared'
+import type { CreateMealInput, MealItemInput, MealRecord, UpdateMealInput } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { FoodRow, MealItemRow, MealRow } from '../types/models.js'
 import { NotFoundError, ValidationError } from '../lib/errors.js'

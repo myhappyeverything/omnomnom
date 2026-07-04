@@ -87,7 +87,7 @@ export function SettingsPage() {
         )
       }
     } catch {
-      toast.error('This file could not be read as a Purple export')
+      toast.error('This file could not be read as an OmNomNom export')
     } finally {
       setIsImporting(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -171,9 +171,9 @@ export function SettingsPage() {
         <CardContent className="space-y-3">
           <p className="text-foreground text-sm font-medium">Your data</p>
           <p className="text-muted-foreground text-xs">
-            Download everything Purple has stored for you as a single JSON file. Importing restores
-            water and weight entries from a Purple export — safe to re-run, existing entries
-            won&apos;t be duplicated.
+            Download everything OmNomNom has stored for you as a single JSON file. Importing
+            restores water and weight entries from an OmNomNom export — safe to re-run, existing
+            entries won&apos;t be duplicated.
           </p>
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" disabled={isExporting} onClick={handleExport}>

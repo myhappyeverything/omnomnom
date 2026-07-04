@@ -30,7 +30,7 @@ export async function searchOpenFoodFacts(
   url.searchParams.set('page_size', String(limit))
 
   const response = await fetch(url, {
-    headers: { 'User-Agent': 'Purple - Personal Nutrition Tracker - Version 1.0' },
+    headers: { 'User-Agent': 'OmNomNom - Personal Nutrition Tracker - Version 1.0' },
   })
   if (!response.ok) return []
 

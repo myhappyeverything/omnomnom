@@ -1,4 +1,4 @@
-import type { CreateCustomFoodInput, FoodRecord } from '@purple/shared'
+import type { CreateCustomFoodInput, FoodRecord } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { FoodRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'

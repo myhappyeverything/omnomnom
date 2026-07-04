@@ -27,18 +27,18 @@ describe('useTheme', () => {
   })
 
   it('reads a previously stored theme on mount', () => {
-    localStorage.setItem('purple:theme', 'dark')
+    localStorage.setItem('omnomnom:theme', 'dark')
     const { result } = renderHook(() => useTheme())
     expect(result.current.theme).toBe('dark')
   })
 
   it('falls back to "system" for an invalid stored value', () => {
-    localStorage.setItem('purple:theme', 'not-a-real-theme')
+    localStorage.setItem('omnomnom:theme', 'not-a-real-theme')
     const { result } = renderHook(() => useTheme())
     expect(result.current.theme).toBe('system')
   })
 
-  it('persists to localStorage under the purple:theme key and updates state', () => {
+  it('persists to localStorage under the omnomnom:theme key and updates state', () => {
     const { result } = renderHook(() => useTheme())
 
     act(() => {
@@ -46,7 +46,7 @@ describe('useTheme', () => {
     })
 
     expect(result.current.theme).toBe('dark')
-    expect(localStorage.getItem('purple:theme')).toBe('dark')
+    expect(localStorage.getItem('omnomnom:theme')).toBe('dark')
   })
 
   it('applies the dark class to the document element when set to dark', () => {

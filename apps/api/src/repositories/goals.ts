@@ -1,4 +1,4 @@
-import type { CreateGoalInput, UpdateGoalOverridesInput } from '@purple/shared'
+import type { CreateGoalInput, UpdateGoalOverridesInput } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { GoalRow } from '../types/models.js'
 import { newId, nowIso } from '../lib/db.js'

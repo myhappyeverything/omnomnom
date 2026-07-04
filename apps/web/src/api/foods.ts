@@ -1,4 +1,4 @@
-import type { CreateCustomFoodInput, FoodRecord } from '@purple/shared'
+import type { CreateCustomFoodInput, FoodRecord } from '@omnomnom/shared'
 import { apiRequest } from './client'
 
 export async function searchFoods(query: string, limit = 20): Promise<FoodRecord[]> {

@@ -1,6 +1,6 @@
 {
-  "name": "@purple/db",
+  "name": "@omnomnom/db",
   "version": "0.1.0",
   "private": true,
-  "description": "D1 schema, migrations, and seed data for Purple"
+  "description": "D1 schema, migrations, and seed data for OmNomNom"
 }

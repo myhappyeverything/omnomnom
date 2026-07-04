@@ -1,5 +1,5 @@
 import { Star } from 'lucide-react'
-import type { FoodRecord } from '@purple/shared'
+import type { FoodRecord } from '@omnomnom/shared'
 import { cn } from '@/utils/cn'
 
 export function FoodListItem({

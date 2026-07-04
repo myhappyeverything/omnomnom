@@ -1,4 +1,4 @@
-import type { ActivityLevel, Goal, MealType, Sex, TargetDuration } from '@purple/shared'
+import type { ActivityLevel, Goal, MealType, Sex, TargetDuration } from '@omnomnom/shared'
 
 /** Raw D1 `users` row shape (snake_case, matches the schema exactly). */
 export interface UserRow {

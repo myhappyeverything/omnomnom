@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#4C1D95" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121118" />
-    <title>Purple — Nutrition & Health Tracker</title>
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E07A4F" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#241B16" />
+    <title>OmNomNom — Nutrition & Health Tracker</title>
     <meta name="description" content="Track calories, macros, water, and weight — beautifully." />
 
     <script>
       // Applied before first paint to avoid a light-mode flash for users who
       // have chosen dark (or system-dark). Kept in sync at runtime by useTheme.
       ;(function () {
-        var stored = localStorage.getItem('purple:theme')
+        var stored = localStorage.getItem('omnomnom:theme')
         var isDark =
           stored === 'dark' ||
           (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -21,7 +21,7 @@
     </script>
 
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <link rel="icon" href="/purple-mark.svg" sizes="any" type="image/svg+xml" />
+    <link rel="icon" href="/omnomnom-mark.svg" sizes="any" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
 
     <!-- iOS splash screens (no native support for generating these from the manifest) -->
@@ -179,7 +179,7 @@
     <!-- iOS treats these as its own (non-standard) PWA install signals. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Purple" />
+    <meta name="apple-mobile-web-app-title" content="OmNomNom" />
   </head>
   <body>
     <div id="root"></div>

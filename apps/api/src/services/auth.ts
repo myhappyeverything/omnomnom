@@ -1,4 +1,4 @@
-import type { RegisterInput, LoginInput, PublicUser } from '@purple/shared'
+import type { RegisterInput, LoginInput, PublicUser } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { UserRow } from '../types/models.js'
 import { hashPassword, verifyPassword, generateOpaqueToken, sha256Hex } from '../lib/crypto.js'

@@ -1,4 +1,4 @@
-import type { ActivityLevel, Goal, RegisterInput, TargetDuration } from '@purple/shared'
+import type { ActivityLevel, Goal, RegisterInput, TargetDuration } from '@omnomnom/shared'
 
 export interface OnboardingAccountData extends RegisterInput {
   currentWeightKg: number

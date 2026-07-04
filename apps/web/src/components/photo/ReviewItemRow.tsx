@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import type { FoodRecord, RecognizedFoodItem } from '@purple/shared'
+import type { FoodRecord, RecognizedFoodItem } from '@omnomnom/shared'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

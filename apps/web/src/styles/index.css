@@ -13,20 +13,20 @@
  * `dark:` prefix required.
  */
 :root {
-  --background: #ffffff;
+  --background: #fff3e7;
   --foreground: var(--color-neutral-900);
   --surface: #ffffff;
   --surface-muted: var(--color-neutral-50);
   --border: var(--color-neutral-200);
   --muted-foreground: var(--color-neutral-500);
 
-  --primary: var(--color-primary-900);
+  --primary: var(--color-primary-500);
   --primary-foreground: #ffffff;
   --secondary: var(--color-secondary-100);
-  --secondary-foreground: var(--color-primary-900);
+  --secondary-foreground: var(--color-primary-700);
   --accent: var(--color-accent-600);
   --accent-foreground: #ffffff;
-  --ring: var(--color-primary-700);
+  --ring: var(--color-primary-600);
 
   /* shadcn/ui's expected vocabulary, mapped onto the tokens above so every
      generated primitive (Card, Popover, Select, Dialog...) themes correctly
@@ -49,15 +49,15 @@
   --border: var(--color-neutral-800);
   --muted-foreground: var(--color-neutral-400);
 
-  /* Deep Purple (900) has almost no contrast against a near-black background,
+  /* Burnt Orange (500) has almost no contrast against a near-black background,
      so dark mode reaches for a lighter step of the same scale instead. */
-  --primary: var(--color-primary-400);
+  --primary: var(--color-primary-300);
   --primary-foreground: var(--color-neutral-950);
   --secondary: var(--color-neutral-800);
   --secondary-foreground: var(--color-neutral-50);
   --accent: var(--color-accent-400);
   --accent-foreground: var(--color-neutral-950);
-  --ring: var(--color-primary-400);
+  --ring: var(--color-primary-300);
 
   --card: var(--surface);
   --card-foreground: var(--foreground);
@@ -72,51 +72,51 @@
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* Primary — Deep Purple */
-  --color-primary-50: #f5f3ff;
-  --color-primary-100: #ede9fe;
-  --color-primary-200: #ddd6fe;
-  --color-primary-300: #c4b5fd;
-  --color-primary-400: #a78bfa;
-  --color-primary-500: #8b5cf6;
-  --color-primary-600: #7c3aed;
-  --color-primary-700: #6d28d9;
-  --color-primary-800: #5b21b6;
-  --color-primary-900: #4c1d95;
-  --color-primary-950: #2e1065;
+  /* Primary — Burnt Orange */
+  --color-primary-50: #fdf2ec;
+  --color-primary-100: #fbe0d1;
+  --color-primary-200: #f6c2a7;
+  --color-primary-300: #f0a37c;
+  --color-primary-400: #e88d61;
+  --color-primary-500: #e07a4f;
+  --color-primary-600: #c2623a;
+  --color-primary-700: #9c4d2d;
+  --color-primary-800: #763a22;
+  --color-primary-900: #572b19;
+  --color-primary-950: #3a1c10;
 
-  /* Secondary — Soft Lavender: a gentler, greyer tint than Primary, not just Primary-but-lighter */
-  --color-secondary-50: #fbfaff;
-  --color-secondary-100: #f4f1fb;
-  --color-secondary-200: #e9e4f5;
-  --color-secondary-300: #d9d0ea;
-  --color-secondary-400: #bfb0d8;
-  --color-secondary-500: #a08cc2;
-  --color-secondary-600: #8268a8;
-  --color-secondary-700: #674f88;
-  --color-secondary-800: #4c3a66;
-  --color-secondary-900: #362a49;
+  /* Secondary — Dusty Peach: a gentler, pinker tint than Primary, not just Primary-but-lighter */
+  --color-secondary-50: #fdf6f4;
+  --color-secondary-100: #fbe9e4;
+  --color-secondary-200: #f6d1c6;
+  --color-secondary-300: #f6b6a6;
+  --color-secondary-400: #ec9483;
+  --color-secondary-500: #dd7560;
+  --color-secondary-600: #c05b49;
+  --color-secondary-700: #984738;
+  --color-secondary-800: #723528;
 
-  /* Accent — Muted Indigo: cooler and deliberately desaturated, for tertiary emphasis */
-  --color-accent-400: #8a8fc4;
-  --color-accent-500: #6c71a8;
-  --color-accent-600: #5b5f8d;
-  --color-accent-700: #484c72;
-  --color-accent-800: #383b59;
+  /* Accent — Sage/Olive Green: cooler and calmer against the warm primary/secondary, for tertiary emphasis */
+  --color-accent-300: #c2cdb6;
+  --color-accent-400: #a7b89a;
+  --color-accent-500: #93a67e;
+  --color-accent-600: #7d8b57;
+  --color-accent-700: #656f45;
+  --color-accent-800: #4f5636;
 
-  /* Neutral — grey with a faint violet undertone rather than a flat, unconsidered grey.
-     Doubles as "Charcoal" (950/900) for dark mode. */
-  --color-neutral-50: #fafafc;
-  --color-neutral-100: #f4f3f7;
-  --color-neutral-200: #e7e5ed;
-  --color-neutral-300: #d3d0dc;
-  --color-neutral-400: #a6a2b5;
-  --color-neutral-500: #7a7690;
-  --color-neutral-600: #5d5a70;
-  --color-neutral-700: #454356;
-  --color-neutral-800: #2e2d3a;
-  --color-neutral-900: #1c1b24;
-  --color-neutral-950: #121118;
+  /* Neutral — grey with a faint warm-brown undertone rather than a flat, unconsidered grey.
+     Doubles as the dark-mode background/surface scale (950/900). */
+  --color-neutral-50: #faf7f5;
+  --color-neutral-100: #f2eae3;
+  --color-neutral-200: #e3d3c6;
+  --color-neutral-300: #cbb3a0;
+  --color-neutral-400: #a68b76;
+  --color-neutral-500: #8a7060;
+  --color-neutral-600: #6d5749;
+  --color-neutral-700: #59473b;
+  --color-neutral-800: #4b3b30;
+  --color-neutral-900: #362a22;
+  --color-neutral-950: #241b16;
 
   /* Semantic mappings — these generate bg-background, text-foreground, bg-primary, etc.
      and stay in sync with .dark automatically because they point at the plain vars above. */
@@ -146,7 +146,7 @@
   --radius-control: 0.75rem;
   --radius-card: 1.25rem;
 
-  /* A soft, diffuse, purple-tinted shadow rather than a flat black one. */
+  /* A soft, diffuse, warm-tinted shadow rather than a flat black one. */
   --shadow-card:
     0 1px 2px color-mix(in srgb, var(--color-neutral-900) 4%, transparent),
     0 8px 24px color-mix(in srgb, var(--color-neutral-900) 6%, transparent);

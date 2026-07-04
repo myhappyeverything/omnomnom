@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ACTIVITY_LEVEL_VALUES, GOAL_VALUES, TARGET_DURATION_VALUES } from '@purple/shared'
+import { ACTIVITY_LEVEL_VALUES, GOAL_VALUES, TARGET_DURATION_VALUES } from '@omnomnom/shared'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

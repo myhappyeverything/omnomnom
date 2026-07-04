@@ -8,7 +8,7 @@ import type {
   SettingsRecord,
   WaterLogRecord,
   WeightLogRecord,
-} from '@purple/shared'
+} from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import * as goalsService from './goals.js'
 import * as waterService from './water.js'

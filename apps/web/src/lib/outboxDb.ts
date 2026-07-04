@@ -2,7 +2,7 @@
 // dependency-free (no `idb`) since the access pattern is a single small
 // object store with add/getAll/delete, not worth a new dependency for.
 
-const DB_NAME = 'purple-outbox'
+const DB_NAME = 'omnomnom-outbox'
 const DB_VERSION = 1
 const STORE_NAME = 'mutations'
 

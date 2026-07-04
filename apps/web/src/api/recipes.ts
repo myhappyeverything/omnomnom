@@ -1,4 +1,4 @@
-import type { CreateRecipeInput, RecipeRecord } from '@purple/shared'
+import type { CreateRecipeInput, RecipeRecord } from '@omnomnom/shared'
 import { apiRequest } from './client'
 
 export async function listRecipes(): Promise<RecipeRecord[]> {

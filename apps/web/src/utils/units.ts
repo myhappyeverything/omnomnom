@@ -1,4 +1,4 @@
-import type { UnitSystem } from '@purple/shared'
+import type { UnitSystem } from '@omnomnom/shared'
 
 const KG_PER_LB = 0.45359237
 

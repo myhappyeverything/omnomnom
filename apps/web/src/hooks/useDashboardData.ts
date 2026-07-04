@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { calculateNutritionScore, type NutritionScoreBreakdown } from '@purple/shared'
+import { calculateNutritionScore, type NutritionScoreBreakdown } from '@omnomnom/shared'
 import { fetchActiveGoal } from '@/api/goals'
 import { listMeals } from '@/api/meals'
 import { listWaterLogs } from '@/api/water'

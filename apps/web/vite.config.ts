@@ -21,7 +21,7 @@ export default defineConfig({
       // Service worker registration is disabled in `vite dev` — module-worker
       // support for a dev-transformed SW graph is inconsistent across
       // browsers. Test PWA/offline/install behavior against a real build:
-      // `npm run build:web && npm run preview -w @purple/web`.
+      // `npm run build:web && npm run preview -w @omnomnom/web`.
       devOptions: {
         enabled: false,
         type: 'module',
@@ -31,11 +31,11 @@ export default defineConfig({
       },
       manifest: {
         id: '/',
-        name: 'Purple — Nutrition & Health Tracker',
-        short_name: 'Purple',
+        name: 'OmNomNom — Nutrition & Health Tracker',
+        short_name: 'OmNomNom',
         description: 'Track calories, macros, water, and weight — beautifully.',
-        theme_color: '#4C1D95',
-        background_color: '#FFFFFF',
+        theme_color: '#E07A4F',
+        background_color: '#FFF3E7',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',

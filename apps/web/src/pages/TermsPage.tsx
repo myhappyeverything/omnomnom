@@ -7,8 +7,8 @@ export function TermsPage() {
       <Card>
         <CardContent className="text-muted-foreground space-y-4 text-sm leading-relaxed">
           <p>
-            Purple is a personal project, not a commercial product. These terms exist so it's clear
-            what you can expect from it.
+            OmNomNom is a personal project, not a commercial product. These terms exist so it's
+            clear what you can expect from it.
           </p>
 
           <section className="space-y-1">

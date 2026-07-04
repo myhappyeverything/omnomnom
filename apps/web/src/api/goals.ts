@@ -1,4 +1,4 @@
-import type { CreateGoalInput, GoalRecord } from '@purple/shared'
+import type { CreateGoalInput, GoalRecord } from '@omnomnom/shared'
 import { apiRequest } from './client'
 
 export async function createGoal(input: CreateGoalInput): Promise<GoalRecord> {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { NutritionScoreBreakdown } from '@purple/shared'
+import type { NutritionScoreBreakdown } from '@omnomnom/shared'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import {

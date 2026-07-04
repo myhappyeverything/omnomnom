@@ -1,5 +1,5 @@
 {
-  "name": "@purple/api",
+  "name": "@omnomnom/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,12 +9,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "deploy": "wrangler deploy",
     "test": "vitest run",
-    "db:migrate:local": "wrangler d1 migrations apply purple-db --local",
-    "db:migrate:remote": "wrangler d1 migrations apply purple-db --remote"
+    "db:migrate:local": "wrangler d1 migrations apply omnomnom-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply omnomnom-db --remote"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.2",
-    "@purple/shared": "*",
+    "@omnomnom/shared": "*",
     "hono": "^4.6.16",
     "zod": "^3.24.1"
   },

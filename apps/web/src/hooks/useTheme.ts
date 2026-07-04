@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 export type Theme = 'light' | 'dark' | 'system'
 
-const STORAGE_KEY = 'purple:theme'
+const STORAGE_KEY = 'omnomnom:theme'
 
 function resolveIsDark(theme: Theme): boolean {
   if (theme === 'system') return window.matchMedia('(prefers-color-scheme: dark)').matches

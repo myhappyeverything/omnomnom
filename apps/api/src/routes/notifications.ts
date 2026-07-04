@@ -4,7 +4,7 @@ import {
   createCustomReminderSchema,
   updateCustomReminderSchema,
   updateNotificationSettingsSchema,
-} from '@purple/shared'
+} from '@omnomnom/shared'
 import { z } from 'zod'
 import type { AppEnv } from '../types/hono.js'
 import { requireAuth } from '../middleware/auth.js'

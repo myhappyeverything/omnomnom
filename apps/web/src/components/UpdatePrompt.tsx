@@ -22,17 +22,21 @@ export function UpdatePrompt() {
   const dismiss = () => setNeedRefresh(false)
 
   return (
-    <div className="fixed inset-x-4 top-4 z-50 flex items-center justify-between gap-3 rounded-2xl bg-violet-900 px-4 py-3 text-sm text-white shadow-lg sm:inset-x-auto sm:left-4 sm:w-96">
+    <div className="bg-primary text-primary-foreground fixed inset-x-4 top-4 z-50 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm shadow-lg sm:inset-x-auto sm:left-4 sm:w-96">
       <p>A new version is ready.</p>
       <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={() => updateServiceWorker(true)}
-          className="rounded-full bg-white px-3 py-1.5 font-medium text-violet-900"
+          className="bg-primary-foreground text-primary rounded-full px-3 py-1.5 font-medium"
         >
           Reload
         </button>
-        <button type="button" onClick={dismiss} className="text-white/80 hover:text-white">
+        <button
+          type="button"
+          onClick={dismiss}
+          className="text-primary-foreground/80 hover:text-primary-foreground"
+        >
           Later
         </button>
       </div>

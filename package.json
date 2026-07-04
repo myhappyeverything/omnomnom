@@ -1,26 +1,26 @@
 {
-  "name": "purple",
+  "name": "omnomnom",
   "private": true,
   "version": "0.1.0",
-  "description": "Purple — personal nutrition & health tracker",
+  "description": "OmNomNom — personal nutrition & health tracker",
   "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "npm run dev -w @purple/web",
-    "dev:api": "npm run dev -w @purple/api",
-    "build": "npm run build -w @purple/shared && npm run build -w @purple/web && npm run build -w @purple/api",
-    "build:web": "npm run build -w @purple/shared && npm run build -w @purple/web",
-    "build:api": "npm run build -w @purple/shared && npm run build -w @purple/api",
+    "dev:web": "npm run dev -w @omnomnom/web",
+    "dev:api": "npm run dev -w @omnomnom/api",
+    "build": "npm run build -w @omnomnom/shared && npm run build -w @omnomnom/web && npm run build -w @omnomnom/api",
+    "build:web": "npm run build -w @omnomnom/shared && npm run build -w @omnomnom/web",
+    "build:api": "npm run build -w @omnomnom/shared && npm run build -w @omnomnom/api",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm run test --workspaces --if-present",
-    "db:migrate:local": "npm run db:migrate:local -w @purple/api",
-    "db:migrate:remote": "npm run db:migrate:remote -w @purple/api"
+    "db:migrate:local": "npm run db:migrate:local -w @omnomnom/api",
+    "db:migrate:remote": "npm run db:migrate:remote -w @omnomnom/api"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",

@@ -34,7 +34,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/api
-          command: d1 migrations apply purple-db --remote
+          command: d1 migrations apply omnomnom-db --remote
 
       - name: Deploy API (Cloudflare Worker)
         uses: cloudflare/wrangler-action@v3
@@ -49,4 +49,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=purple
+          command: pages deploy apps/web/dist --project-name=omnomnom

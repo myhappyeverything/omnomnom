@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Camera, ImageUp } from 'lucide-react'
-import { MEAL_TYPE_VALUES, type MealType } from '@purple/shared'
+import { MEAL_TYPE_VALUES, type MealType } from '@omnomnom/shared'
 import { Button } from '@/components/ui/button'
 import {
   Select,

@@ -1,7 +1,7 @@
 import { Hono, type Context } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
-import { registerSchema, loginSchema } from '@purple/shared'
+import { registerSchema, loginSchema } from '@omnomnom/shared'
 import type { AppEnv } from '../types/hono.js'
 import type { AuthTokens } from '../services/auth.js'
 import {
@@ -18,7 +18,7 @@ import { rateLimit } from '../middleware/rateLimit.js'
 import { findUserById } from '../repositories/users.js'
 import { REFRESH_TOKEN_TTL_SECONDS } from '../lib/tokens.js'
 
-const REFRESH_COOKIE_NAME = 'purple_refresh_token'
+const REFRESH_COOKIE_NAME = 'omnomnom_refresh_token'
 const REFRESH_COOKIE_PATH = '/api/auth'
 
 export const authRoute = new Hono<AppEnv>()

@@ -1,4 +1,4 @@
-import type { RecipeRecord } from '@purple/shared'
+import type { RecipeRecord } from '@omnomnom/shared'
 
 export function RecipeListItem({
   recipe,

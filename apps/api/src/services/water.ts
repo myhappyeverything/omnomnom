@@ -1,4 +1,4 @@
-import type { CreateWaterLogInput, WaterLogRecord } from '@purple/shared'
+import type { CreateWaterLogInput, WaterLogRecord } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { WaterLogRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'

@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { createMealSchema, listMealsQuerySchema, updateMealSchema } from '@purple/shared'
+import { createMealSchema, listMealsQuerySchema, updateMealSchema } from '@omnomnom/shared'
 import { z } from 'zod'
 import type { AppEnv } from '../types/hono.js'
 import { requireAuth } from '../middleware/auth.js'

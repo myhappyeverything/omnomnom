@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { createGoalSchema, updateGoalOverridesSchema } from '@purple/shared'
+import { createGoalSchema, updateGoalOverridesSchema } from '@omnomnom/shared'
 import type { AppEnv } from '../types/hono.js'
 import { requireAuth } from '../middleware/auth.js'
 import * as goalsService from '../services/goals.js'

@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { Env } from '../types/env.js'
-import type { RegisterInput } from '@purple/shared'
+import type { RegisterInput } from '@omnomnom/shared'
 import { ConflictError, UnauthorizedError } from '../lib/errors.js'
 import { findUserById } from '../repositories/users.js'
 import { createWaterLog } from './water.js'

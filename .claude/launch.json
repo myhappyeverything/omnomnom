@@ -20,7 +20,7 @@
         "run",
         "preview",
         "-w",
-        "@purple/web",
+        "@omnomnom/web",
         "--",
         "--port",
         "4173",

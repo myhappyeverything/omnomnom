@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { analyzePhotoSchema } from '@purple/shared'
+import { analyzePhotoSchema } from '@omnomnom/shared'
 import { z } from 'zod'
 import type { AppEnv } from '../types/hono.js'
 import { requireAuth } from '../middleware/auth.js'

@@ -1,4 +1,4 @@
-import type { CreateWeightLogInput, WeightLogRecord } from '@purple/shared'
+import type { CreateWeightLogInput, WeightLogRecord } from '@omnomnom/shared'
 import { apiRequest } from './client'
 import { createWithOfflineFallback, deleteWithOfflineFallback } from '@/lib/outbox'
 

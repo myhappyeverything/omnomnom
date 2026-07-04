@@ -8,6 +8,6 @@ export interface Env {
   ONESIGNAL_REST_API_KEY: string
   USDA_FDC_API_KEY: string
   ENVIRONMENT: 'development' | 'production'
-  /** Exact origin the Pages frontend is served from, e.g. https://purple.pages.dev */
+  /** Exact origin the Pages frontend is served from, e.g. https://omnomnom.pages.dev */
   ALLOWED_ORIGIN: string
 }

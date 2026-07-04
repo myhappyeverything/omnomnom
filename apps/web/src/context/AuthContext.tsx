@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { LoginInput, PublicUser, RegisterInput } from '@purple/shared'
+import type { LoginInput, PublicUser, RegisterInput } from '@omnomnom/shared'
 import * as authApi from '@/api/auth'
 import { tryRestoreSession } from '@/api/client'
 

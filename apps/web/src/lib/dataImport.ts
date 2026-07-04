@@ -24,7 +24,7 @@ export async function importDataExport(fileText: string): Promise<ImportResult> 
   const parsed: unknown = JSON.parse(fileText)
   const result: ImportResult = { waterImported: 0, weightImported: 0, errors: [] }
   if (typeof parsed !== 'object' || parsed === null) {
-    result.errors.push('This file is not a valid Purple export.')
+    result.errors.push('This file is not a valid OmNomNom export.')
     return result
   }
   const data = parsed as Record<string, unknown>

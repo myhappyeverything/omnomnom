@@ -2,19 +2,17 @@
 # .dev.vars (gitignored, never deployed) — see .dev.vars.example and
 # docs/cloudflare-setup.md for the full provisioning runbook.
 #
-# Three placeholders below (database_id, KV id, ALLOWED_ORIGIN) can't be
-# known until you've run the setup commands against your own Cloudflare
-# account, since this app is provisioned per-account, not shared.
-name = "purple-api"
+# ONESIGNAL_APP_ID below is still a placeholder until you set up your own
+# OneSignal app — see docs/cloudflare-setup.md.
+name = "omnomnom-api"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
-# Swap for the real Pages URL once `wrangler pages project create` gives you one
-# (e.g. https://purple.pages.dev, or your custom domain).
-ALLOWED_ORIGIN = "REPLACE_WITH_PAGES_URL"
+# Update this if you later move to a custom domain instead of *.pages.dev.
+ALLOWED_ORIGIN = "https://omnomnom.pages.dev"
 # Not secret — OneSignal app IDs are meant to be public (the Web SDK ships it
 # client-side too). The REST API key used to *send* notifications is a secret;
 # see docs/cloudflare-setup.md.
@@ -22,17 +20,17 @@ ONESIGNAL_APP_ID = "REPLACE_WITH_ONESIGNAL_APP_ID"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "purple-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID" # from `wrangler d1 create purple-db`
+database_name = "omnomnom-db"
+database_id = "85f3ff5e-552a-4eec-800a-ab02221e7708"
 migrations_dir = "../../packages/db/migrations"
 
 [[kv_namespaces]]
 binding = "CACHE"
-id = "REPLACE_WITH_KV_NAMESPACE_ID" # from `wrangler kv namespace create CACHE`
+id = "e9086595a4144ba58b5588224bf1ed0f"
 
 [[r2_buckets]]
 binding = "MEAL_IMAGES"
-bucket_name = "purple-meal-images" # from `wrangler r2 bucket create purple-meal-images`
+bucket_name = "omnomnom-meal-images" # from `wrangler r2 bucket create omnomnom-meal-images`
 
 [triggers]
 # Every 5 minutes — matches TOLERANCE_MINUTES in reminderScheduler.ts, so a

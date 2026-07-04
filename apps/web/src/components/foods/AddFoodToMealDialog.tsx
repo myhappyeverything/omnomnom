@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { FoodRecord, MealType } from '@purple/shared'
+import type { FoodRecord, MealType } from '@omnomnom/shared'
 import {
   Dialog,
   DialogContent,

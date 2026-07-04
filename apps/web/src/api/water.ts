@@ -1,4 +1,4 @@
-import type { CreateWaterLogInput, WaterLogRecord } from '@purple/shared'
+import type { CreateWaterLogInput, WaterLogRecord } from '@omnomnom/shared'
 import { apiRequest } from './client'
 import { createWithOfflineFallback, deleteWithOfflineFallback } from '@/lib/outbox'
 

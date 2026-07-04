@@ -1,4 +1,4 @@
-import type { LoginInput, PublicUser, RegisterInput } from '@purple/shared'
+import type { LoginInput, PublicUser, RegisterInput } from '@omnomnom/shared'
 import { apiRequest, setAccessToken } from './client'
 
 interface AuthResponse {

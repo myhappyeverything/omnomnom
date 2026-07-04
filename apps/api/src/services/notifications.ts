@@ -4,7 +4,7 @@ import type {
   NotificationSettingsRecord,
   UpdateCustomReminderInput,
   UpdateNotificationSettingsInput,
-} from '@purple/shared'
+} from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { CustomReminderRow, NotificationSettingsRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'

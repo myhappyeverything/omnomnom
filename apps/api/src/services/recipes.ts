@@ -1,4 +1,4 @@
-import type { CreateRecipeInput, RecipeRecord } from '@purple/shared'
+import type { CreateRecipeInput, RecipeRecord } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { FoodRow, RecipeItemRow, RecipeRow } from '../types/models.js'
 import { NotFoundError, ValidationError } from '../lib/errors.js'

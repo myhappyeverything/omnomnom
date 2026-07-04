@@ -1,4 +1,4 @@
-# Purple — Architecture (Stage 1)
+# OmNomNom — Architecture (Stage 1)
 
 Personal nutrition tracker for two users. Every decision below is optimised for **$0–2/month operating cost**, low operational burden, and a clean path to the "Future Features" list without rewrites.
 
@@ -54,7 +54,7 @@ flowchart LR
 A single monorepo, npm workspaces:
 
 ```
-purple/
+omnomnom/
 ├── apps/
 │   ├── web/          React PWA (Vite)
 │   └── api/           Cloudflare Worker (Hono)
@@ -73,7 +73,7 @@ Sharing `packages/shared` between frontend and Worker means calorie math, the sc
 - **Vite + React + TypeScript**, SPA with React Router (no SSR needed — this is a private, authenticated app, so there's no SEO/first-paint case for server rendering).
 - **TanStack Query** owns all server state (meals, foods, weights, water, analytics). Mutations are optimistic: the UI updates immediately, reconciles on response, and rolls back on failure.
 - **React Hook Form + Zod** for every form (registration, food entry, custom recipes, settings). The same Zod schemas are imported from `packages/shared` and reused as the Worker's request validators — one schema, enforced on both ends.
-- **shadcn/ui + Tailwind** for components, themed via CSS variables for the purple/lavender/indigo palette and dark-mode charcoal.
+- **shadcn/ui + Tailwind** for components, themed via CSS variables for the burnt-orange/peach/sage palette and dark-mode warm-brown.
 - **State that isn't server state** (theme, unit preference, onboarding step) lives in small Zustand-free React context or `useReducer` — no Redux; there's not enough client-only state to justify it.
 - **PWA layer**: `vite-plugin-pwa` (Workbox under the hood) generates the manifest, service worker, and precache manifest as part of the Vite build — not hand-rolled.
 

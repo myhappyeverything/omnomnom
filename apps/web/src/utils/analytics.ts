@@ -1,5 +1,5 @@
-import type { GoalRecord, MealRecord, WaterLogRecord } from '@purple/shared'
-import { calculateNutritionScore } from '@purple/shared'
+import type { GoalRecord, MealRecord, WaterLogRecord } from '@omnomnom/shared'
+import { calculateNutritionScore } from '@omnomnom/shared'
 import { localDateKey } from './date'
 
 export interface DayAggregate {

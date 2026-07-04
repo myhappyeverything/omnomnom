@@ -1,4 +1,4 @@
-import type { CreateMealInput, MealRecord } from '@purple/shared'
+import type { CreateMealInput, MealRecord } from '@omnomnom/shared'
 import { apiRequest } from './client'
 
 export async function listMeals(range: { from?: string; to?: string } = {}): Promise<MealRecord[]> {

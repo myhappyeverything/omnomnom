@@ -1,4 +1,4 @@
-import type { AnalyzePhotoInput, PhotoAnalysisResult, RecognizedFoodItem } from '@purple/shared'
+import type { AnalyzePhotoInput, PhotoAnalysisResult, RecognizedFoodItem } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import { sha256HexFromBytes } from '../lib/crypto.js'
 import { base64ToArrayBuffer } from '../lib/encoding.js'

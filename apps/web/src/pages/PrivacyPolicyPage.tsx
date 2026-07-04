@@ -7,8 +7,8 @@ export function PrivacyPolicyPage() {
       <Card>
         <CardContent className="text-muted-foreground space-y-4 text-sm leading-relaxed">
           <p>
-            Purple is a personal nutrition and health tracker. This page explains what data it keeps
-            and why.
+            OmNomNom is a personal nutrition and health tracker. This page explains what data it
+            keeps and why.
           </p>
 
           <section className="space-y-1">

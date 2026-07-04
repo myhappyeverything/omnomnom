@@ -1,4 +1,4 @@
-import type { MealType } from '@purple/shared'
+import type { MealType } from '@omnomnom/shared'
 
 export function inferMealTypeFromTime(date: Date = new Date()): MealType {
   const hour = date.getHours()

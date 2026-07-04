@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
-import type { FoodRecord } from '@purple/shared'
+import type { FoodRecord } from '@omnomnom/shared'
 import {
   Dialog,
   DialogContent,

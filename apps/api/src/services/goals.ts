@@ -1,4 +1,4 @@
-import type { CreateGoalInput, GoalRecord, UpdateGoalOverridesInput } from '@purple/shared'
+import type { CreateGoalInput, GoalRecord, UpdateGoalOverridesInput } from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { GoalRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'
