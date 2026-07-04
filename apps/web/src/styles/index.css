@@ -26,6 +26,10 @@
   --secondary-foreground: var(--color-primary-700);
   --accent: var(--color-accent-600);
   --accent-foreground: #ffffff;
+  --info: var(--color-info-500);
+  --info-foreground: #ffffff;
+  --warning: var(--color-warning-500);
+  --warning-foreground: var(--color-warning-950);
   --ring: var(--color-primary-600);
 
   /* shadcn/ui's expected vocabulary, mapped onto the tokens above so every
@@ -42,21 +46,31 @@
 }
 
 .dark {
-  --background: var(--color-neutral-950);
-  --foreground: var(--color-neutral-50);
-  --surface: var(--color-neutral-900);
-  --surface-muted: var(--color-neutral-800);
-  --border: var(--color-neutral-800);
-  --muted-foreground: var(--color-neutral-400);
+  /* A dedicated, desaturated near-black scale rather than the warm "neutral"
+     scale above — reusing neutral (tuned for light-mode text/borders) as the
+     dark background made every surface read as the same muddy brown and
+     dulled the primary/accent colors sitting on top of it (analogous hues
+     have little contrast). A near-neutral backdrop is what actually makes
+     colors pop, per Material's dark theme guidance. */
+  --background: var(--color-dark-950);
+  --foreground: var(--color-dark-50);
+  --surface: var(--color-dark-900);
+  --surface-muted: var(--color-dark-800);
+  --border: var(--color-dark-700);
+  --muted-foreground: var(--color-dark-400);
 
   /* Burnt Orange (500) has almost no contrast against a near-black background,
      so dark mode reaches for a lighter step of the same scale instead. */
   --primary: var(--color-primary-300);
-  --primary-foreground: var(--color-neutral-950);
-  --secondary: var(--color-neutral-800);
-  --secondary-foreground: var(--color-neutral-50);
+  --primary-foreground: var(--color-dark-950);
+  --secondary: var(--color-secondary-800);
+  --secondary-foreground: var(--color-secondary-100);
   --accent: var(--color-accent-400);
-  --accent-foreground: var(--color-neutral-950);
+  --accent-foreground: var(--color-dark-950);
+  --info: var(--color-info-300);
+  --info-foreground: var(--color-dark-950);
+  --warning: var(--color-warning-300);
+  --warning-foreground: var(--color-dark-950);
   --ring: var(--color-primary-300);
 
   --card: var(--surface);
@@ -104,8 +118,33 @@
   --color-accent-700: #656f45;
   --color-accent-800: #4f5636;
 
-  /* Neutral — grey with a faint warm-brown undertone rather than a flat, unconsidered grey.
-     Doubles as the dark-mode background/surface scale (950/900). */
+  /* Info — Sky Blue: the palette's one cool, un-warm hue. Reserved for water
+     (the obvious convention) and anywhere else that needs to visually stand
+     apart from the orange/peach/sage trio instead of blending into it. */
+  --color-info-50: #eef7fb;
+  --color-info-100: #d7edf6;
+  --color-info-300: #8fcbe8;
+  --color-info-400: #5cb2db;
+  --color-info-500: #3a97c4;
+  --color-info-600: #2c7ba3;
+  --color-info-700: #235f7d;
+  --color-info-950: #142831;
+
+  /* Warning — Golden Amber: a warm but distinctly yellow hue, kept apart from
+     Primary/Secondary so "needs attention" states don't read as just another
+     shade of orange. */
+  --color-warning-50: #fdf8ec;
+  --color-warning-100: #faedc4;
+  --color-warning-300: #f2cc6b;
+  --color-warning-400: #e8b93f;
+  --color-warning-500: #d9a12a;
+  --color-warning-600: #b6841e;
+  --color-warning-700: #8f6717;
+  --color-warning-950: #2e2308;
+
+  /* Neutral — grey with a faint warm-brown undertone, used for light-mode
+     text/borders/surfaces. Dark mode uses the separate --color-dark-* scale
+     below rather than this one — see the .dark block for why. */
   --color-neutral-50: #faf7f5;
   --color-neutral-100: #f2eae3;
   --color-neutral-200: #e3d3c6;
@@ -117,6 +156,17 @@
   --color-neutral-800: #4b3b30;
   --color-neutral-900: #362a22;
   --color-neutral-950: #241b16;
+
+  /* Dark — desaturated, near-black scale for dark-mode backgrounds/surfaces
+     only. A whisper of warmth (not a full brown tint) keeps it feeling like
+     part of the same family without dulling the primary/accent/info/warning
+     colors that sit on top of it. */
+  --color-dark-50: #f6f3f0;
+  --color-dark-400: #9c9389;
+  --color-dark-700: #3a352f;
+  --color-dark-800: #26221e;
+  --color-dark-900: #1c1916;
+  --color-dark-950: #14120f;
 
   /* Semantic mappings — these generate bg-background, text-foreground, bg-primary, etc.
      and stay in sync with .dark automatically because they point at the plain vars above. */
@@ -132,6 +182,10 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-ring: var(--ring);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);

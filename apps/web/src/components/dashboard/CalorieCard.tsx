@@ -8,7 +8,12 @@ export function CalorieCard({ consumed, target }: { consumed: number; target: nu
   return (
     <Card>
       <CardContent className="flex items-center gap-6">
-        <ProgressRing value={percent} size={104} strokeWidth={10}>
+        <ProgressRing
+          value={percent}
+          size={104}
+          strokeWidth={10}
+          gradient={['var(--color-primary)', 'var(--color-secondary-500)']}
+        >
           <div className="text-center">
             <div className="text-foreground text-lg font-semibold">{Math.round(consumed)}</div>
             <div className="text-muted-foreground text-[10px]">of {Math.round(target)}</div>

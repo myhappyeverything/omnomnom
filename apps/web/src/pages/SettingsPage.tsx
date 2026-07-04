@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Footer } from '@/components/Footer'
+import { ProfileCard } from '@/components/settings/ProfileCard'
 import {
   Select,
   SelectContent,
@@ -120,6 +122,8 @@ export function SettingsPage() {
         </Card>
       )}
 
+      {user && <ProfileCard user={user} />}
+
       <Card>
         <CardContent className="space-y-4">
           <p className="text-foreground text-sm font-medium">Preferences</p>
@@ -202,20 +206,6 @@ export function SettingsPage() {
 
       <Card>
         <CardContent className="space-y-3">
-          <p className="text-foreground text-sm font-medium">Legal</p>
-          <div className="flex flex-col gap-2">
-            <Link to="/privacy" className="text-primary text-sm hover:underline">
-              Privacy policy
-            </Link>
-            <Link to="/terms" className="text-primary text-sm hover:underline">
-              Terms of use
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="space-y-3">
           <Button variant="outline" className="w-full" onClick={() => void logout()}>
             <LogOut size={16} /> Log out
           </Button>
@@ -249,6 +239,8 @@ export function SettingsPage() {
           </AlertDialog>
         </CardContent>
       </Card>
+
+      <Footer />
     </div>
   )
 }

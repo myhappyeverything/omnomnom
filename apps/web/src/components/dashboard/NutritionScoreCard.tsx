@@ -23,7 +23,7 @@ const COMPONENT_LABELS: Record<keyof NutritionScoreBreakdown['components'], stri
 const LABEL_STYLES: Record<string, string> = {
   Excellent: 'text-primary',
   Good: 'text-accent',
-  Fair: 'text-secondary-foreground',
+  Fair: 'text-warning',
   'Needs Improvement': 'text-destructive',
 }
 

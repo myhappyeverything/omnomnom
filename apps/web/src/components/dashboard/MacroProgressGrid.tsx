@@ -8,6 +8,10 @@ interface MacroItem {
   unit: string
 }
 
+// Each macro gets its own hue rather than four identical orange bars — makes
+// the grid scannable at a glance and gives the card some visual variety.
+const MACRO_COLORS = ['accent', 'warning', 'primary', 'info'] as const
+
 export function MacroProgressGrid({
   protein,
   carbs,
@@ -24,7 +28,7 @@ export function MacroProgressGrid({
   return (
     <Card>
       <CardContent className="grid grid-cols-2 gap-4">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <div key={item.label} className="space-y-1.5">
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-foreground font-medium">{item.label}</span>
@@ -33,7 +37,10 @@ export function MacroProgressGrid({
                 {item.unit}
               </span>
             </div>
-            <Progress value={item.target > 0 ? (item.consumed / item.target) * 100 : 0} />
+            <Progress
+              value={item.target > 0 ? (item.consumed / item.target) * 100 : 0}
+              color={MACRO_COLORS[index]}
+            />
           </div>
         ))}
       </CardContent>

@@ -22,6 +22,14 @@ export const registerSchema = z.object({
 })
 export type RegisterInput = z.infer<typeof registerSchema>
 
+export const updateProfileSchema = z
+  .object({
+    dateOfBirth: registerSchema.shape.dateOfBirth,
+    heightCm: registerSchema.shape.heightCm,
+  })
+  .partial()
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>
+
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Enter a valid email address'),
   password: z.string().min(1, 'Password is required'),

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
 export interface ProgressRingProps {
@@ -9,6 +9,8 @@ export interface ProgressRingProps {
   className?: string
   trackClassName?: string
   indicatorClassName?: string
+  /** [from, to] CSS colors for a gradient stroke — takes priority over indicatorClassName. */
+  gradient?: [string, string]
   children?: ReactNode
 }
 
@@ -19,8 +21,10 @@ export function ProgressRing({
   className,
   trackClassName,
   indicatorClassName,
+  gradient,
   children,
 }: ProgressRingProps) {
+  const gradientId = useId()
   const clamped = Math.min(100, Math.max(0, value))
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
@@ -36,6 +40,14 @@ export function ProgressRing({
       aria-valuemax={100}
     >
       <svg width={size} height={size} className="-rotate-90">
+        {gradient && (
+          <defs>
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{ stopColor: gradient[0] }} />
+              <stop offset="100%" style={{ stopColor: gradient[1] }} />
+            </linearGradient>
+          </defs>
+        )}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -53,9 +65,10 @@ export function ProgressRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
+          stroke={gradient ? `url(#${gradientId})` : undefined}
           className={cn(
-            'stroke-primary transition-[stroke-dashoffset] duration-500 ease-out',
-            indicatorClassName,
+            'transition-[stroke-dashoffset] duration-500 ease-out',
+            !gradient && (indicatorClassName ?? 'stroke-primary'),
           )}
         />
       </svg>

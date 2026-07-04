@@ -1,7 +1,7 @@
 import { Hono, type Context } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
-import { registerSchema, loginSchema } from '@omnomnom/shared'
+import { registerSchema, loginSchema, updateProfileSchema } from '@omnomnom/shared'
 import type { AppEnv } from '../types/hono.js'
 import type { AuthTokens } from '../services/auth.js'
 import {
@@ -15,7 +15,7 @@ import {
 import { UnauthorizedError } from '../lib/errors.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
-import { findUserById } from '../repositories/users.js'
+import { findUserById, updateUser } from '../repositories/users.js'
 import { REFRESH_TOKEN_TTL_SECONDS } from '../lib/tokens.js'
 
 const REFRESH_COOKIE_NAME = 'omnomnom_refresh_token'
@@ -83,6 +83,11 @@ authRoute.get('/me', requireAuth, async (c) => {
   if (!user) {
     return c.json({ error: 'User not found' }, 404)
   }
+  return c.json({ user: toPublicUser(user) })
+})
+
+authRoute.patch('/me', requireAuth, zValidator('json', updateProfileSchema), async (c) => {
+  const user = await updateUser(c.env, c.get('userId'), c.req.valid('json'))
   return c.json({ user: toPublicUser(user) })
 })
 

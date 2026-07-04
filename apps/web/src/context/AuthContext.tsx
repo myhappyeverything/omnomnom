@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { LoginInput, PublicUser, RegisterInput } from '@omnomnom/shared'
+import type { LoginInput, PublicUser, RegisterInput, UpdateProfileInput } from '@omnomnom/shared'
 import * as authApi from '@/api/auth'
 import { tryRestoreSession } from '@/api/client'
 
@@ -11,6 +11,7 @@ interface AuthContextValue {
   register: (input: RegisterInput) => Promise<void>
   logout: () => Promise<void>
   deleteAccount: () => Promise<void>
+  updateProfile: (input: UpdateProfileInput) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -66,6 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   })
 
+  const updateProfileMutation = useMutation({
+    mutationFn: authApi.updateProfile,
+    onSuccess: (user) => {
+      queryClient.setQueryData(ME_QUERY_KEY, user)
+    },
+  })
+
   const value: AuthContextValue = {
     user: meQuery.data ?? null,
     isLoading: hasSession === null || (hasSession && meQuery.isLoading),
@@ -80,6 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     deleteAccount: async () => {
       await deleteAccountMutation.mutateAsync()
+    },
+    updateProfile: async (input) => {
+      await updateProfileMutation.mutateAsync(input)
     },
   }
 

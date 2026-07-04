@@ -1,4 +1,4 @@
-import type { LoginInput, PublicUser, RegisterInput } from '@omnomnom/shared'
+import type { LoginInput, PublicUser, RegisterInput, UpdateProfileInput } from '@omnomnom/shared'
 import { apiRequest, setAccessToken } from './client'
 
 interface AuthResponse {
@@ -33,5 +33,13 @@ export async function deleteAccount(): Promise<void> {
 
 export async function fetchCurrentUser(): Promise<PublicUser> {
   const data = await apiRequest<{ user: PublicUser }>('/api/auth/me')
+  return data.user
+}
+
+export async function updateProfile(input: UpdateProfileInput): Promise<PublicUser> {
+  const data = await apiRequest<{ user: PublicUser }>('/api/auth/me', {
+    method: 'PATCH',
+    body: input,
+  })
   return data.user
 }

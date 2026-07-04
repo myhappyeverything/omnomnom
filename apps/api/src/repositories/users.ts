@@ -26,6 +26,34 @@ export async function deleteUser(env: Env, id: string): Promise<void> {
   await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run()
 }
 
+export interface UpdateUserInput {
+  dateOfBirth?: string
+  heightCm?: number
+}
+
+export async function updateUser(env: Env, id: string, input: UpdateUserInput): Promise<UserRow> {
+  const fields: string[] = []
+  const values: unknown[] = []
+  if (input.dateOfBirth !== undefined) {
+    fields.push('date_of_birth = ?')
+    values.push(input.dateOfBirth)
+  }
+  if (input.heightCm !== undefined) {
+    fields.push('height_cm = ?')
+    values.push(input.heightCm)
+  }
+  if (fields.length > 0) {
+    fields.push('updated_at = ?')
+    values.push(nowIso())
+    await env.DB.prepare(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`)
+      .bind(...values, id)
+      .run()
+  }
+  const user = await findUserById(env, id)
+  if (!user) throw new Error('User not found after update')
+  return user
+}
+
 export async function createUser(env: Env, input: NewUserInput): Promise<UserRow> {
   const id = newId()
   const timestamp = nowIso()

@@ -41,3 +41,14 @@ export function lastNDayKeys(days: number, date: Date = new Date()): string[] {
     return localDateKey(d)
   })
 }
+
+/** Whole years elapsed since a `YYYY-MM-DD` date of birth, as of today. */
+export function calculateAge(dateOfBirth: string, today: Date = new Date()): number {
+  const dob = new Date(dateOfBirth)
+  let age = today.getFullYear() - dob.getFullYear()
+  const hasHadBirthdayThisYear =
+    today.getMonth() > dob.getMonth() ||
+    (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate())
+  if (!hasHadBirthdayThisYear) age -= 1
+  return age
+}
