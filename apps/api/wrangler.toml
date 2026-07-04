@@ -1,4 +1,6 @@
-# Full bindings (D1 / KV / R2 / Cron) are configured in Stage 6.
+# KV / R2 / Cron bindings are added in Stage 6. The D1 binding below points at
+# packages/db for schema/migrations; database_id is a placeholder until Stage 6
+# runs `wrangler d1 create purple-db` and swaps in the real id.
 name = "purple-api"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
@@ -6,3 +8,9 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "development"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "purple-db"
+database_id = "REPLACE_ME_IN_STAGE_6"
+migrations_dir = "../../packages/db/migrations"
