@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createWeightLog } from '@/api/weight'
+import { createWeightLog, type OfflineWeightLogRecord } from '@/api/weight'
 import { ApiError } from '@/api/client'
 
 export function LogWeightDialog({ suggestedWeightKg }: { suggestedWeightKg: number | null }) {
@@ -22,9 +22,17 @@ export function LogWeightDialog({ suggestedWeightKg }: { suggestedWeightKg: numb
 
   const logMutation = useMutation({
     mutationFn: () => createWeightLog({ weightKg }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['weight'] })
-      toast.success('Weight logged')
+    onSuccess: (log) => {
+      if (log.pending) {
+        queryClient.setQueriesData<OfflineWeightLogRecord[]>(
+          { queryKey: ['weight', 'history'] },
+          (old) => (old ? [...old, log] : [log]),
+        )
+        toast.info("Weight queued — will sync once you're back online")
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['weight'] })
+        toast.success('Weight logged')
+      }
       setOpen(false)
     },
     onError: (error) => {

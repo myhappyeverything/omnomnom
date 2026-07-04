@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { ProgressRing } from '@/components/ProgressRing'
 import { Skeleton } from '@/components/ui/skeleton'
-import { createWaterLog, deleteWaterLog } from '@/api/water'
+import { createWaterLog, deleteWaterLog, type OfflineWaterLogRecord } from '@/api/water'
 import { ApiError } from '@/api/client'
 import { useWaterHistory } from '@/hooks/useWaterHistory'
 
@@ -28,9 +28,17 @@ export function WaterPage() {
 
   const addMutation = useMutation({
     mutationFn: (amountMl: number) => createWaterLog({ amountMl }),
-    onSuccess: (_data, amountMl) => {
-      queryClient.invalidateQueries({ queryKey: ['water'] })
-      toast.success(`${amountMl}ml logged`)
+    onSuccess: (log, amountMl) => {
+      if (log.pending) {
+        queryClient.setQueriesData<OfflineWaterLogRecord[]>(
+          { queryKey: ['water', 'history'] },
+          (old) => (old ? [...old, log] : [log]),
+        )
+        toast.info(`${amountMl}ml queued — will sync once you're back online`)
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['water'] })
+        toast.success(`${amountMl}ml logged`)
+      }
       setCustomOpen(false)
     },
     onError: (error) => {
@@ -144,19 +152,24 @@ export function WaterPage() {
           <CardContent className="space-y-2">
             <p className="text-foreground text-sm font-medium">Today&apos;s entries</p>
             {todayLogs.map((log) => (
-              <div key={log.id} className="flex items-center justify-between text-sm">
+              <div
+                key={log.id}
+                className={`flex items-center justify-between text-sm ${log.pending ? 'opacity-60' : ''}`}
+              >
                 <span className="text-muted-foreground">
-                  {new Date(log.loggedAt).toLocaleTimeString([], {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
+                  {log.pending
+                    ? 'Pending sync'
+                    : new Date(log.loggedAt).toLocaleTimeString([], {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-foreground">{log.amountMl}ml</span>
                   <button
                     type="button"
                     aria-label="Delete entry"
-                    onClick={() => deleteMutation.mutate(log.id)}
+                    onClick={() => deleteMutation.mutate(log)}
                     className="text-muted-foreground hover:text-destructive p-1"
                   >
                     <Trash2 size={14} />

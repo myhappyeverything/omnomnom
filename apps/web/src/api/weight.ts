@@ -1,5 +1,8 @@
 import type { CreateWeightLogInput, WeightLogRecord } from '@purple/shared'
 import { apiRequest } from './client'
+import { createWithOfflineFallback, deleteWithOfflineFallback } from '@/lib/outbox'
+
+export type OfflineWeightLogRecord = WeightLogRecord & { pending?: boolean }
 
 export async function listWeightLogs(
   range: { from?: string; to?: string } = {},
@@ -12,14 +15,39 @@ export async function listWeightLogs(
   return data.logs
 }
 
-export async function createWeightLog(input: CreateWeightLogInput): Promise<WeightLogRecord> {
-  const data = await apiRequest<{ log: WeightLogRecord }>('/api/weight', {
-    method: 'POST',
+export async function createWeightLog(
+  input: CreateWeightLogInput,
+): Promise<OfflineWeightLogRecord> {
+  return createWithOfflineFallback({
+    resource: 'weight',
+    path: '/api/weight',
     body: input,
+    description: `${input.weightKg}kg weigh-in`,
+    onlineCall: async () => {
+      const data = await apiRequest<{ log: WeightLogRecord }>('/api/weight', {
+        method: 'POST',
+        body: input,
+      })
+      return data.log
+    },
+    buildOptimisticRecord: (clientId) => ({
+      id: clientId,
+      weightKg: input.weightKg,
+      loggedAt: input.loggedAt ?? new Date().toISOString(),
+      notes: input.notes ?? null,
+      createdAt: new Date().toISOString(),
+      pending: true,
+    }),
   })
-  return data.log
 }
 
-export async function deleteWeightLog(id: string): Promise<void> {
-  await apiRequest(`/api/weight/${id}`, { method: 'DELETE' })
+export async function deleteWeightLog(log: Pick<OfflineWeightLogRecord, 'id' | 'pending'>) {
+  await deleteWithOfflineFallback({
+    resource: 'weight',
+    id: log.id,
+    pending: Boolean(log.pending),
+    onlineCall: async () => {
+      await apiRequest(`/api/weight/${log.id}`, { method: 'DELETE' })
+    },
+  })
 }

@@ -1,5 +1,8 @@
 import type { CreateWaterLogInput, WaterLogRecord } from '@purple/shared'
 import { apiRequest } from './client'
+import { createWithOfflineFallback, deleteWithOfflineFallback } from '@/lib/outbox'
+
+export type OfflineWaterLogRecord = WaterLogRecord & { pending?: boolean }
 
 export async function listWaterLogs(
   range: { from?: string; to?: string } = {},
@@ -12,14 +15,36 @@ export async function listWaterLogs(
   return data.logs
 }
 
-export async function createWaterLog(input: CreateWaterLogInput): Promise<WaterLogRecord> {
-  const data = await apiRequest<{ log: WaterLogRecord }>('/api/water', {
-    method: 'POST',
+export async function createWaterLog(input: CreateWaterLogInput): Promise<OfflineWaterLogRecord> {
+  return createWithOfflineFallback({
+    resource: 'water',
+    path: '/api/water',
     body: input,
+    description: `${input.amountMl}ml water`,
+    onlineCall: async () => {
+      const data = await apiRequest<{ log: WaterLogRecord }>('/api/water', {
+        method: 'POST',
+        body: input,
+      })
+      return data.log
+    },
+    buildOptimisticRecord: (clientId) => ({
+      id: clientId,
+      amountMl: input.amountMl,
+      loggedAt: input.loggedAt ?? new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      pending: true,
+    }),
   })
-  return data.log
 }
 
-export async function deleteWaterLog(id: string): Promise<void> {
-  await apiRequest(`/api/water/${id}`, { method: 'DELETE' })
+export async function deleteWaterLog(log: Pick<OfflineWaterLogRecord, 'id' | 'pending'>) {
+  await deleteWithOfflineFallback({
+    resource: 'water',
+    id: log.id,
+    pending: Boolean(log.pending),
+    onlineCall: async () => {
+      await apiRequest(`/api/water/${log.id}`, { method: 'DELETE' })
+    },
+  })
 }

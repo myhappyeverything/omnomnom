@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Home, Utensils, LineChart, Settings } from 'lucide-react'
 import { BottomNav } from '@/components/BottomNav'
 import { PageTransition } from '@/components/PageTransition'
+import { useOutboxSync } from '@/hooks/useOutbox'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home', icon: Home },
@@ -11,6 +12,11 @@ const NAV_ITEMS = [
 ]
 
 export function AppLayout() {
+  // Draining the outbox needs an authenticated session, so it's driven from
+  // here rather than at the App root (which also renders the logged-out
+  // login/register routes).
+  useOutboxSync()
+
   return (
     <div className="bg-background min-h-screen">
       <main className="pb-20">

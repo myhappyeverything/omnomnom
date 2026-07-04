@@ -129,19 +129,24 @@ export function WeightPage() {
               .reverse()
               .slice(0, 20)
               .map((log) => (
-                <div key={log.id} className="flex items-center justify-between text-sm">
+                <div
+                  key={log.id}
+                  className={`flex items-center justify-between text-sm ${log.pending ? 'opacity-60' : ''}`}
+                >
                   <span className="text-muted-foreground">
-                    {new Date(log.loggedAt).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+                    {log.pending
+                      ? 'Pending sync'
+                      : new Date(log.loggedAt).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-foreground">{log.weightKg.toFixed(1)} kg</span>
                     <button
                       type="button"
                       aria-label="Delete entry"
-                      onClick={() => deleteMutation.mutate(log.id)}
+                      onClick={() => deleteMutation.mutate(log)}
                       className="text-muted-foreground hover:text-destructive p-1"
                     >
                       <Trash2 size={14} />

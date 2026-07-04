@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchActiveGoal } from '@/api/goals'
-import { listWaterLogs } from '@/api/water'
+import { listWaterLogs, type OfflineWaterLogRecord } from '@/api/water'
 import { getLastNDaysRange, lastNDayKeys, localDateKey } from '@/utils/date'
 import { computeWaterStreak, type DailyTotal } from '@/utils/streak'
 
@@ -10,7 +10,10 @@ export function useWaterHistory() {
   const range = getLastNDaysRange(HISTORY_DAYS)
 
   const goalQuery = useQuery({ queryKey: ['goals', 'active'], queryFn: fetchActiveGoal })
-  const logsQuery = useQuery({
+  // Typed as the wider offline-aware record: createWaterLog can inject an
+  // optimistic `pending` entry straight into this query's cache before the
+  // server has ever seen it (see WaterPage's addMutation.onSuccess).
+  const logsQuery = useQuery<OfflineWaterLogRecord[]>({
     queryKey: ['water', 'history', range.from],
     queryFn: () => listWaterLogs(range),
   })
