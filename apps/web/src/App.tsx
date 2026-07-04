@@ -21,6 +21,7 @@ const FoodsPage = lazy(() => import('./pages/FoodsPage').then((m) => ({ default:
 const PhotoLogPage = lazy(() =>
   import('./pages/PhotoLogPage').then((m) => ({ default: m.PhotoLogPage })),
 )
+const WaterPage = lazy(() => import('./pages/WaterPage').then((m) => ({ default: m.WaterPage })))
 const AnalyticsPage = lazy(() =>
   import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 )
@@ -62,6 +63,7 @@ export function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/foods" element={<FoodsPage />} />
             <Route path="/log/photo" element={<PhotoLogPage />} />
+            <Route path="/water" element={<WaterPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>

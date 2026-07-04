@@ -24,3 +24,20 @@ export function isSameLocalDay(a: Date, b: Date): boolean {
     a.getDate() === b.getDate()
   )
 }
+
+/** Stable per-local-day grouping key, e.g. "2026-07-04" in the viewer's own timezone. */
+export function localDateKey(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/** The last `days` local-day keys, most recent (today) first. */
+export function lastNDayKeys(days: number, date: Date = new Date()): string[] {
+  return Array.from({ length: days }, (_, i) => {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    d.setDate(d.getDate() - i)
+    return localDateKey(d)
+  })
+}
