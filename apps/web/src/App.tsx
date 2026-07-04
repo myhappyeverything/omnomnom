@@ -6,7 +6,7 @@ import { Toaster } from './components/ui/sonner'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AppLayout } from './layouts/AppLayout'
 import { LoginPage } from './pages/LoginPage'
-import { RegisterPage } from './pages/RegisterPage'
+import { OnboardingPage } from './pages/onboarding/OnboardingPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { FoodsPage } from './pages/FoodsPage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
@@ -19,7 +19,7 @@ export function App() {
       <OfflineBanner />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register" element={<OnboardingPage />} />
 
         <Route
           element={
