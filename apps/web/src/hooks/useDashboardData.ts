@@ -5,6 +5,7 @@ import { listMeals } from '@/api/meals'
 import { listWaterLogs } from '@/api/water'
 import { listWeightLogs } from '@/api/weight'
 import { getDayRange, getLastNDaysRange } from '@/utils/date'
+import { calculateWeightTrend } from '@/utils/weightTrend'
 
 export interface DailyTotals {
   calories: number
@@ -70,17 +71,7 @@ export function useDashboardData() {
     (a, b) => new Date(a.loggedAt).getTime() - new Date(b.loggedAt).getTime(),
   )
   const currentWeightKg = sortedWeights.at(-1)?.weightKg ?? null
-
-  let weightTrendKgPerWeek: number | null = null
-  if (sortedWeights.length >= 2) {
-    const first = sortedWeights[0]!
-    const last = sortedWeights.at(-1)!
-    const daysSpan =
-      (new Date(last.loggedAt).getTime() - new Date(first.loggedAt).getTime()) / 86_400_000
-    if (daysSpan > 0) {
-      weightTrendKgPerWeek = ((last.weightKg - first.weightKg) / daysSpan) * 7
-    }
-  }
+  const weightTrendKgPerWeek = calculateWeightTrend(weightLogs)
 
   let score: NutritionScoreBreakdown | null = null
   if (goal) {

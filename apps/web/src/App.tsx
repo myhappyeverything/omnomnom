@@ -22,6 +22,7 @@ const PhotoLogPage = lazy(() =>
   import('./pages/PhotoLogPage').then((m) => ({ default: m.PhotoLogPage })),
 )
 const WaterPage = lazy(() => import('./pages/WaterPage').then((m) => ({ default: m.WaterPage })))
+const WeightPage = lazy(() => import('./pages/WeightPage').then((m) => ({ default: m.WeightPage })))
 const AnalyticsPage = lazy(() =>
   import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 )
@@ -64,6 +65,7 @@ export function App() {
             <Route path="/foods" element={<FoodsPage />} />
             <Route path="/log/photo" element={<PhotoLogPage />} />
             <Route path="/water" element={<WaterPage />} />
+            <Route path="/weight" element={<WeightPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
