@@ -32,6 +32,11 @@ const FIELDS: FieldConfig[] = [
   { key: 'waterTargetMl', label: 'Water', unit: 'ml', step: '50' },
 ]
 
+type ReviewAccountData = Pick<
+  OnboardingAccountData,
+  'sex' | 'dateOfBirth' | 'heightCm' | 'currentWeightKg'
+>
+
 export function ReviewStep({
   accountData,
   goalData,
@@ -39,7 +44,7 @@ export function ReviewStep({
   onFinish,
   isSubmitting,
 }: {
-  accountData: OnboardingAccountData
+  accountData: ReviewAccountData
   goalData: OnboardingGoalData
   onBack: () => void
   onFinish: (values: ReviewValues, overridden: Record<string, boolean>) => void

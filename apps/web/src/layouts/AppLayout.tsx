@@ -19,7 +19,7 @@ export function AppLayout() {
 
   return (
     <div className="bg-background min-h-screen">
-      <main className="pb-20">
+      <main className="pb-[calc(5rem+env(safe-area-inset-bottom))]">
         <PageTransition>
           <Outlet />
         </PageTransition>

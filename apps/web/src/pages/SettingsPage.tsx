@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Footer } from '@/components/Footer'
 import { ProfileCard } from '@/components/settings/ProfileCard'
+import { GoalCard } from '@/components/settings/GoalCard'
 import {
   Select,
   SelectContent,
@@ -123,6 +124,8 @@ export function SettingsPage() {
       )}
 
       {user && <ProfileCard user={user} />}
+
+      {user && <GoalCard user={user} />}
 
       <Card>
         <CardContent className="space-y-4">
