@@ -1,9 +1,11 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import type { Env } from './types/env.js'
+import type { AppEnv } from './types/hono.js'
 import { healthRoute } from './routes/health.js'
+import { authRoute } from './routes/auth.js'
+import { AppError } from './lib/errors.js'
 
-const app = new Hono<{ Bindings: Env }>()
+const app = new Hono<AppEnv>()
 
 app.use(
   '*',
@@ -13,6 +15,15 @@ app.use(
   }),
 )
 
+app.onError((err, c) => {
+  if (err instanceof AppError) {
+    return c.json({ error: err.message }, err.statusCode as 400 | 401 | 403 | 404 | 409)
+  }
+  console.error(err)
+  return c.json({ error: 'Internal server error' }, 500)
+})
+
 app.route('/api/health', healthRoute)
+app.route('/api/auth', authRoute)
 
 export default app

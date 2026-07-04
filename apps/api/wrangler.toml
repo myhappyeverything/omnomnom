@@ -14,3 +14,8 @@ binding = "DB"
 database_name = "purple-db"
 database_id = "REPLACE_ME_IN_STAGE_6"
 migrations_dir = "../../packages/db/migrations"
+
+# Used for rate limiting now; caching (food search, sessions) added in Stage 6.
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_ME_IN_STAGE_6"
