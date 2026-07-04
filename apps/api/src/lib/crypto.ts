@@ -1,9 +1,15 @@
 import { timingSafeEqual } from 'node:crypto'
 
 // bcrypt/argon2 aren't available in the Workers runtime; PBKDF2-HMAC-SHA256 via
-// Web Crypto is the standard substitute. 600,000 iterations follows the 2023
-// OWASP Password Storage Cheat Sheet recommendation for this algorithm.
-export const DEFAULT_PBKDF2_ITERATIONS = 600_000
+// Web Crypto is the standard substitute. The 2023 OWASP Password Storage
+// Cheat Sheet recommends 600,000 iterations for this algorithm, but the real
+// (non-Miniflare) Workers runtime hard-caps crypto.subtle's PBKDF2 at 100,000
+// — anything higher throws `NotSupportedError` at request time. This only
+// surfaces in production; Miniflare's local/test emulation doesn't enforce
+// the limit, so 600,000 passed every local and CI test run before failing
+// against the real deployed Worker. 100,000 is the highest value the
+// platform allows.
+export const DEFAULT_PBKDF2_ITERATIONS = 100_000
 const DERIVED_KEY_LENGTH_BITS = 256
 
 function toHex(buffer: ArrayBuffer): string {
