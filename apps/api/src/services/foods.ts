@@ -3,6 +3,11 @@ import type { Env } from '../types/env.js'
 import type { FoodRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'
 import * as foodsRepo from '../repositories/foods.js'
+import { searchExternalProviders } from '../lib/foodProviders/index.js'
+
+// Only bother calling external providers when the local cache (everything
+// ever searched or logged before) doesn't already have enough to show.
+const MIN_LOCAL_RESULTS_BEFORE_EXTERNAL_SEARCH = 5
 
 export function toFoodRecord(row: FoodRow, isFavourite?: boolean): FoodRecord {
   return {
@@ -42,7 +47,33 @@ export async function searchFoods(
   query: string,
   limit: number,
 ): Promise<FoodRecord[]> {
-  const rows = await foodsRepo.searchFoodsLocal(env, query, limit)
+  const localRows = await foodsRepo.searchFoodsLocal(env, query, limit)
+  let rows = localRows
+
+  if (localRows.length < MIN_LOCAL_RESULTS_BEFORE_EXTERNAL_SEARCH) {
+    const externalResults = await searchExternalProviders(env, query, limit)
+    const upserted = await Promise.all(
+      externalResults.map((result) =>
+        foodsRepo.upsertFood(env, {
+          source: result.source,
+          source_id: result.sourceId,
+          barcode: result.barcode,
+          name: result.name,
+          brand: result.brand,
+          serving_size: result.servingSize,
+          serving_unit: result.servingUnit,
+          calories: result.calories,
+          protein_g: result.proteinG,
+          carbs_g: result.carbsG,
+          fat_g: result.fatG,
+          fibre_g: result.fibreG,
+        }),
+      ),
+    )
+    const existingIds = new Set(localRows.map((row) => row.id))
+    rows = [...localRows, ...upserted.filter((food) => !existingIds.has(food.id))].slice(0, limit)
+  }
+
   return toFoodRecordsWithFavourites(env, userId, rows)
 }
 

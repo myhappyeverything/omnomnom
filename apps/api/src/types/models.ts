@@ -71,6 +71,25 @@ export interface FoodRow {
   updated_at: string
 }
 
+export interface RecipeRow {
+  id: string
+  user_id: string
+  name: string
+  servings: number
+  instructions: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface RecipeItemRow {
+  id: string
+  recipe_id: string
+  food_id: string
+  quantity: number
+  unit: string
+  sort_order: number
+}
+
 export interface MealRow {
   id: string
   user_id: string

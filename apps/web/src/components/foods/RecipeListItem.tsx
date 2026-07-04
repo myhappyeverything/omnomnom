@@ -1,0 +1,27 @@
+import type { RecipeRecord } from '@purple/shared'
+
+export function RecipeListItem({
+  recipe,
+  onSelect,
+}: {
+  recipe: RecipeRecord
+  onSelect: (recipe: RecipeRecord) => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(recipe)}
+      className="rounded-control border-border bg-surface w-full border p-3 text-left"
+    >
+      <p className="text-foreground text-sm font-medium">{recipe.name}</p>
+      <p className="text-muted-foreground text-xs">
+        {recipe.servings} serving{recipe.servings === 1 ? '' : 's'} ·{' '}
+        {Math.round(recipe.caloriesPerServing)} kcal/serving
+      </p>
+      <p className="text-muted-foreground mt-0.5 text-xs">
+        P {Math.round(recipe.proteinGPerServing)}g · C {Math.round(recipe.carbsGPerServing)}g · F{' '}
+        {Math.round(recipe.fatGPerServing)}g
+      </p>
+    </button>
+  )
+}

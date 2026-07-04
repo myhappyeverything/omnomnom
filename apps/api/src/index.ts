@@ -6,6 +6,7 @@ import { authRoute } from './routes/auth.js'
 import { goalsRoute } from './routes/goals.js'
 import { foodsRoute } from './routes/foods.js'
 import { mealsRoute } from './routes/meals.js'
+import { recipesRoute } from './routes/recipes.js'
 import { waterRoute } from './routes/water.js'
 import { weightRoute } from './routes/weight.js'
 import { settingsRoute } from './routes/settings.js'
@@ -35,6 +36,7 @@ app.route('/api/auth', authRoute)
 app.route('/api/goals', goalsRoute)
 app.route('/api/foods', foodsRoute)
 app.route('/api/meals', mealsRoute)
+app.route('/api/recipes', recipesRoute)
 app.route('/api/water', waterRoute)
 app.route('/api/weight', weightRoute)
 app.route('/api/settings', settingsRoute)

@@ -2,56 +2,75 @@ import type { CreateMealInput, MealItemInput, MealRecord, UpdateMealInput } from
 import type { Env } from '../types/env.js'
 import type { FoodRow, MealItemRow, MealRow } from '../types/models.js'
 import { NotFoundError, ValidationError } from '../lib/errors.js'
+import { round2 } from '../lib/numbers.js'
 import * as mealsRepo from '../repositories/meals.js'
 import * as foodsRepo from '../repositories/foods.js'
 import { toFoodRecord } from './foods.js'
+import { findRecipeForMealItem } from './recipes.js'
 import type { MealTotals, ResolvedMealItem } from '../repositories/meals.js'
 
-function round2(value: number): number {
-  return Math.round(value * 100) / 100
-}
-
 /**
- * Nutrition values are always derived server-side from the food's per-serving
- * values scaled by quantity — the client can request a food+quantity, but
- * never dictate the resulting calories/macros directly.
+ * Nutrition values are always derived server-side — from a food's per-serving
+ * values scaled by quantity, or a recipe's per-serving totals scaled by
+ * servings consumed — the client can request an item + quantity, but never
+ * dictate the resulting calories/macros directly.
  */
 async function resolveItems(
   env: Env,
+  userId: string,
   items: MealItemInput[],
-): Promise<{ resolved: ResolvedMealItem[]; foodsById: Map<string, FoodRow> }> {
+): Promise<{ resolved: ResolvedMealItem[] }> {
   const foodsById = new Map<string, FoodRow>()
   const resolved: ResolvedMealItem[] = []
 
   for (const item of items) {
-    let food = foodsById.get(item.foodId)
-    if (!food) {
-      const found = await foodsRepo.findFoodById(env, item.foodId)
-      if (!found) throw new NotFoundError(`Food ${item.foodId} not found`)
-      food = found
-      foodsById.set(item.foodId, food)
-    }
+    if (item.foodId) {
+      let food = foodsById.get(item.foodId)
+      if (!food) {
+        const found = await foodsRepo.findFoodById(env, item.foodId)
+        if (!found) throw new NotFoundError(`Food ${item.foodId} not found`)
+        food = found
+        foodsById.set(item.foodId, food)
+      }
 
-    if (item.unit !== food.serving_unit) {
-      throw new ValidationError(
-        `Unit "${item.unit}" doesn't match "${food.name}"'s serving unit "${food.serving_unit}"`,
-      )
-    }
+      if (item.unit !== food.serving_unit) {
+        throw new ValidationError(
+          `Unit "${item.unit}" doesn't match "${food.name}"'s serving unit "${food.serving_unit}"`,
+        )
+      }
 
-    const ratio = item.quantity / food.serving_size
-    resolved.push({
-      foodId: item.foodId,
-      quantity: item.quantity,
-      unit: item.unit,
-      calories: round2(food.calories * ratio),
-      proteinG: round2(food.protein_g * ratio),
-      carbsG: round2(food.carbs_g * ratio),
-      fatG: round2(food.fat_g * ratio),
-      fibreG: round2(food.fibre_g * ratio),
-    })
+      const ratio = item.quantity / food.serving_size
+      resolved.push({
+        foodId: item.foodId,
+        recipeId: null,
+        quantity: item.quantity,
+        unit: item.unit,
+        calories: round2(food.calories * ratio),
+        proteinG: round2(food.protein_g * ratio),
+        carbsG: round2(food.carbs_g * ratio),
+        fatG: round2(food.fat_g * ratio),
+        fibreG: round2(food.fibre_g * ratio),
+      })
+    } else if (item.recipeId) {
+      const recipe = await findRecipeForMealItem(env, userId, item.recipeId)
+      if (!recipe) throw new NotFoundError(`Recipe ${item.recipeId} not found`)
+
+      // quantity is "servings of this recipe", e.g. 1.5 servings.
+      resolved.push({
+        foodId: null,
+        recipeId: item.recipeId,
+        quantity: item.quantity,
+        unit: item.unit,
+        calories: round2(recipe.caloriesPerServing * item.quantity),
+        proteinG: round2(recipe.proteinGPerServing * item.quantity),
+        carbsG: round2(recipe.carbsGPerServing * item.quantity),
+        fatG: round2(recipe.fatGPerServing * item.quantity),
+        fibreG: round2(recipe.fibreGPerServing * item.quantity),
+      })
+    }
   }
 
-  return { resolved, foodsById }
+  return { resolved }
 }
 
 function sumTotals(items: ResolvedMealItem[]): MealTotals {
@@ -106,8 +125,12 @@ async function toMealRecord(env: Env, row: MealRow): Promise<MealRecord> {
   }
 }
 
-async function recordUsage(env: Env, userId: string, foodIds: string[]): Promise<void> {
-  await Promise.all(foodIds.map((foodId) => foodsRepo.recordFoodUsage(env, userId, foodId)))
+async function recordUsage(env: Env, userId: string, foodIds: (string | null)[]): Promise<void> {
+  await Promise.all(
+    foodIds
+      .filter((id): id is string => !!id)
+      .map((foodId) => foodsRepo.recordFoodUsage(env, userId, foodId)),
+  )
 }
 
 export async function createMeal(
@@ -122,7 +145,7 @@ export async function createMeal(
     }
   }
 
-  const { resolved } = await resolveItems(env, input.items)
+  const { resolved } = await resolveItems(env, userId, input.items)
   const totals = sumTotals(resolved)
   const mealId = await mealsRepo.createMealWithItems(
     env,
@@ -180,7 +203,7 @@ export async function updateMeal(
   })
 
   if (input.items) {
-    const { resolved } = await resolveItems(env, input.items)
+    const { resolved } = await resolveItems(env, userId, input.items)
     const totals = sumTotals(resolved)
     await mealsRepo.replaceMealItemsAndTotals(env, mealId, totals, resolved)
     await recordUsage(

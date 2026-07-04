@@ -44,6 +44,30 @@ export interface FoodRecord {
   isFavourite?: boolean
 }
 
+export interface RecipeItemRecord {
+  id: string
+  foodId: string
+  food?: FoodRecord
+  quantity: number
+  unit: string
+}
+
+export interface RecipeRecord {
+  id: string
+  name: string
+  servings: number
+  instructions: string | null
+  items: RecipeItemRecord[]
+  /** Per-serving totals, derived from items and `servings`. */
+  caloriesPerServing: number
+  proteinGPerServing: number
+  carbsGPerServing: number
+  fatGPerServing: number
+  fibreGPerServing: number
+  createdAt: string
+  updatedAt: string
+}
+
 export interface MealItemRecord {
   id: string
   foodId: string | null

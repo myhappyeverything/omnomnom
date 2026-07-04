@@ -1,11 +1,17 @@
 import { z } from 'zod'
 import { MEAL_TYPE_VALUES } from '../constants.js'
 
-export const mealItemInputSchema = z.object({
-  foodId: z.string().uuid(),
-  quantity: z.number().positive(),
-  unit: z.string().min(1).max(20),
-})
+export const mealItemInputSchema = z
+  .object({
+    foodId: z.string().uuid().optional(),
+    recipeId: z.string().uuid().optional(),
+    quantity: z.number().positive(),
+    unit: z.string().min(1).max(20),
+  })
+  .refine((data) => Boolean(data.foodId) !== Boolean(data.recipeId), {
+    message: 'Provide exactly one of foodId or recipeId',
+    path: ['foodId'],
+  })
 export type MealItemInput = z.infer<typeof mealItemInputSchema>
 
 export const createMealSchema = z.object({

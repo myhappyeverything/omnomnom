@@ -3,7 +3,8 @@ import type { MealItemRow, MealRow } from '../types/models.js'
 import { newId, nowIso } from '../lib/db.js'
 
 export interface ResolvedMealItem {
-  foodId: string
+  foodId: string | null
+  recipeId: string | null
   quantity: number
   unit: string
   calories: number
@@ -112,12 +113,13 @@ export async function createMealWithItems(
     ),
     ...items.map((item, index) =>
       env.DB.prepare(
-        `INSERT INTO meal_items (id, meal_id, food_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO meal_items (id, meal_id, food_id, recipe_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
         newId(),
         id,
         item.foodId,
+        item.recipeId,
         item.quantity,
         item.unit,
         item.calories,
@@ -144,12 +146,13 @@ export async function replaceMealItemsAndTotals(
     env.DB.prepare('DELETE FROM meal_items WHERE meal_id = ?').bind(mealId),
     ...items.map((item, index) =>
       env.DB.prepare(
-        `INSERT INTO meal_items (id, meal_id, food_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO meal_items (id, meal_id, food_id, recipe_id, quantity, unit, calories, protein_g, carbs_g, fat_g, fibre_g, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).bind(
         newId(),
         mealId,
         item.foodId,
+        item.recipeId,
         item.quantity,
         item.unit,
         item.calories,
