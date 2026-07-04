@@ -1,0 +1,40 @@
+{
+  "name": "purple",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Purple — personal nutrition & health tracker",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @purple/web",
+    "dev:api": "npm run dev -w @purple/api",
+    "build": "npm run build -w @purple/shared && npm run build -w @purple/web && npm run build -w @purple/api",
+    "build:web": "npm run build -w @purple/shared && npm run build -w @purple/web",
+    "build:api": "npm run build -w @purple/shared && npm run build -w @purple/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate:local": "npm run db:migrate:local -w @purple/api",
+    "db:migrate:remote": "npm run db:migrate:remote -w @purple/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
