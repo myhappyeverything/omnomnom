@@ -1,4 +1,4 @@
-# Purple
+# OmNomNom
 
 Personal nutrition & health tracker — PWA frontend on Cloudflare Pages, API on Cloudflare Workers, D1/KV/R2 for storage. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the system design and cost model.
 
@@ -48,7 +48,8 @@ Copy `apps/api/.dev.vars.example` → `apps/api/.dev.vars` and `apps/web/.env.ex
 One-time manual provisioning (D1/KV/R2/Pages/secrets, all under your own Cloudflare account — this can't be done on your behalf) is in [docs/cloudflare-setup.md](./docs/cloudflare-setup.md). Once that's done:
 
 - **CI** ([.github/workflows/ci.yml](./.github/workflows/ci.yml)) runs lint, format check, typecheck, build, and tests on every PR and push to `main`.
-- **Deploy** ([.github/workflows/deploy.yml](./.github/workflows/deploy.yml)) runs the same checks, then applies any pending D1 migrations and deploys the Worker and Pages, on every push to `main`. It needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets described in [docs/cloudflare-setup.md](./docs/cloudflare-setup.md#9-github-actions-deploy-access-for-stage-22).
+- **Deploy** ([.github/workflows/deploy.yml](./.github/workflows/deploy.yml)) runs the same checks, then applies any pending D1 migrations and deploys the Worker, on every push to `main`. It needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets described in [docs/cloudflare-setup.md](./docs/cloudflare-setup.md#9-github-actions-deploy-access-for-stage-22).
+- The frontend deploys separately via **Cloudflare Pages' own Git integration** (connected directly to this repo — see [docs/cloudflare-setup.md](./docs/cloudflare-setup.md#8-create-the-cloudflare-pages-project-frontend) for the build settings a monorepo needs). Deliberately not duplicated into the GitHub Actions workflow, to avoid two deployments racing each other on every push.
 
 There's a single production environment — no staging cluster, matching a two-user personal app. Manual deploys work the same way from a local machine: `npm run deploy -w @omnomnom/api` for the Worker, `npm run build:web && npx wrangler pages deploy apps/web/dist --project-name omnomnom` for the frontend.
 

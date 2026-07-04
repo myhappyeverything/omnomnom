@@ -87,7 +87,7 @@ npm run deploy -w @omnomnom/api
 
 ## 8. Create the Cloudflare Pages project (frontend)
 
-Run from the repo root, since the frontend build depends on `@omnomnom/shared`:
+One-time creation, from the repo root:
 
 ```bash
 npm run build:web
@@ -95,16 +95,38 @@ npx wrangler pages project create omnomnom --production-branch main
 npx wrangler pages deploy apps/web/dist --project-name omnomnom
 ```
 
-Note the `*.pages.dev` URL Wrangler prints. Set the frontend's own env vars
-either in a `.env.production` file before building, or as Pages environment
-variables in the dashboard (Settings → Environment variables):
+Note the `*.pages.dev` URL Wrangler prints, then go back to Step 6 and set
+`ALLOWED_ORIGIN` in `apps/api/wrangler.toml` to it, and redeploy the Worker
+(Step 7) — until that matches exactly, the API will reject the frontend's
+requests via CORS.
+
+**Ongoing deploys — connect GitHub instead of running `wrangler pages deploy`
+by hand every time.** Dashboard → Workers & Pages → omnomnom → Settings →
+Build → connect the GitHub repo, production branch `main`. This is a
+monorepo, so the build settings must be set explicitly (Cloudflare can't
+infer them since there's no framework preset):
+
+- **Build command**: `npm run build:web`
+- **Build output directory**: `apps/web/dist`
+- **Root directory**: leave blank (repo root — needed so npm workspaces can
+  resolve `@omnomnom/shared`)
+
+Every push to `main` then rebuilds and redeploys the frontend automatically,
+and PRs get their own preview URL for free. This replaces manually running
+`wrangler pages deploy` (and `.github/workflows/deploy.yml` deliberately
+doesn't do it either, to avoid two deployments racing each other on every
+push) — the Worker still deploys via that workflow, since Cloudflare's Git
+integration only covers Pages.
+
+Set the frontend's env vars as Pages environment variables in the dashboard
+(Settings → Environment variables) so the Git-triggered build picks them up:
 
 - `VITE_API_BASE_URL` — your Worker's URL (`https://omnomnom-api.<your-subdomain>.workers.dev`, or a custom domain)
 - `VITE_ONESIGNAL_APP_ID` — same OneSignal app ID as Step 6
 
-Then go back to Step 6 and set `ALLOWED_ORIGIN` in `apps/api/wrangler.toml` to
-this Pages URL, and redeploy the Worker (Step 7) — until that matches
-exactly, the API will reject the frontend's requests via CORS.
+(A local `.env.production` file also works for one-off manual deploys, but
+won't affect the Git-triggered build, which only sees dashboard-configured
+variables.)
 
 ## 9. GitHub Actions deploy access (for Stage 22)
 
