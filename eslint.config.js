@@ -43,5 +43,14 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    // shadcn/ui's own convention (e.g. exporting `buttonVariants` alongside
+    // `Button`) trips react-refresh/only-export-components. These files are
+    // vendored from the shadcn registry, not hand-authored to our lint rules.
+    files: ['apps/web/src/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
   prettier,
 ]

@@ -27,6 +27,18 @@
   --accent: var(--color-accent-600);
   --accent-foreground: #ffffff;
   --ring: var(--color-primary-700);
+
+  /* shadcn/ui's expected vocabulary, mapped onto the tokens above so every
+     generated primitive (Card, Popover, Select, Dialog...) themes correctly
+     without editing each component's classnames. */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --input: var(--border);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 }
 
 .dark {
@@ -46,6 +58,15 @@
   --accent: var(--color-accent-400);
   --accent-foreground: var(--color-neutral-950);
   --ring: var(--color-primary-400);
+
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --muted: var(--surface-muted);
+  --input: var(--border);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 }
 
 @theme {
@@ -112,6 +133,14 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
   /* Rounder than Tailwind's own `rounded-xl` — the app's signature card shape. */
   --radius-control: 0.75rem;
