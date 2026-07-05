@@ -11,12 +11,6 @@ export interface CalorieRingProps {
   children?: ReactNode
 }
 
-// A fixed angle (in degrees, measured clockwise from 12 o'clock) for the
-// small "bite" notch — a subtle, recurring OmNomNom branding mark rather
-// than a literal food bite. Placed on the upper-right so it reads as
-// intentional rather than like a rendering glitch.
-const BITE_ANGLE_DEG = 35
-
 export function CalorieRing({
   value,
   size = 240,
@@ -31,11 +25,6 @@ export function CalorieRing({
   const circumference = 2 * Math.PI * radius
   const offset = circumference * (1 - clamped / 100)
   const center = size / 2
-
-  const biteRad = (BITE_ANGLE_DEG * Math.PI) / 180
-  const biteX = center + radius * Math.sin(biteRad)
-  const biteY = center - radius * Math.cos(biteRad)
-  const biteRadius = strokeWidth * 0.62
 
   return (
     <div
@@ -76,8 +65,6 @@ export function CalorieRing({
             prefersReducedMotion ? { duration: 0 } : { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
           }
         />
-        {/* The "bite" — a small background-colored circle notched into the ring's edge. */}
-        <circle cx={biteX} cy={biteY} r={biteRadius} className="fill-background" />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">{children}</div>
     </div>
