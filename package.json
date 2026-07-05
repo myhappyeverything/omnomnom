@@ -14,7 +14,7 @@
     "build": "npm run build -w @omnomnom/shared && npm run build -w @omnomnom/web && npm run build -w @omnomnom/api",
     "build:web": "npm run build -w @omnomnom/shared && npm run build -w @omnomnom/web",
     "build:api": "npm run build -w @omnomnom/shared && npm run build -w @omnomnom/api",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run build -w @omnomnom/shared && npm run typecheck --workspaces --if-present",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
