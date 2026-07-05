@@ -2,7 +2,12 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { LoginInput, PublicUser, RegisterInput, UpdateProfileInput } from '@omnomnom/shared'
 import * as authApi from '@/api/auth'
-import { tryRestoreSession } from '@/api/client'
+import { refreshAccessToken, tryRestoreSession } from '@/api/client'
+
+// Well under the 15-minute access token TTL, so a proactive renewal always
+// lands before expiry — the reactive refresh-on-401 in apiRequest is then
+// just a fallback rather than the normal path.
+const PROACTIVE_REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
 interface AuthContextValue {
   user: PublicUser | null
@@ -26,6 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     tryRestoreSession().then(setHasSession)
   }, [])
+
+  useEffect(() => {
+    if (!hasSession) return
+    const interval = setInterval(() => {
+      void refreshAccessToken()
+    }, PROACTIVE_REFRESH_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [hasSession])
 
   const meQuery = useQuery({
     queryKey: ME_QUERY_KEY,

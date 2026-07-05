@@ -8,8 +8,13 @@ import { createUser, deleteUser, findUserByEmail } from '../repositories/users.j
 import {
   createRefreshToken,
   findActiveRefreshTokenByHash,
+  graceExpireRefreshToken,
   revokeRefreshToken,
 } from '../repositories/refreshTokens.js'
+
+// How long a just-rotated refresh token still works — covers concurrent
+// refresh calls from multiple tabs/devices sharing the same browser cookie.
+const REFRESH_GRACE_PERIOD_SECONDS = 30
 
 export interface AuthTokens {
   accessToken: string
@@ -93,8 +98,10 @@ export async function refreshSession(env: Env, rawRefreshToken: string): Promise
     throw new UnauthorizedError('Invalid or expired refresh token')
   }
 
-  // Rotate on every use: the old token is single-use, limiting replay if it leaked.
-  await revokeRefreshToken(env, existing.id)
+  // Rotate on every use. The old token isn't revoked outright — it's given a
+  // short grace period (see graceExpireRefreshToken) so a concurrent refresh
+  // from another tab/device using the same cookie doesn't spuriously fail.
+  await graceExpireRefreshToken(env, existing.id, REFRESH_GRACE_PERIOD_SECONDS)
   return issueTokens(env, existing.user_id)
 }
 

@@ -1,7 +1,11 @@
 import { sign, verify } from 'hono/jwt'
 
 export const ACCESS_TOKEN_TTL_SECONDS = 15 * 60
-export const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60
+// Rotated on every refresh (see services/auth.ts), so this is really a
+// sliding window, not a hard expiry — a user who opens the app at least once
+// within this period stays signed in indefinitely. 400 days is the longest
+// lifetime Chrome (and now other browsers) will actually honor for a cookie.
+export const REFRESH_TOKEN_TTL_SECONDS = 400 * 24 * 60 * 60
 
 export interface AccessTokenPayload {
   sub: string

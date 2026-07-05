@@ -23,11 +23,19 @@ const REFRESH_COOKIE_PATH = '/api/auth'
 
 export const authRoute = new Hono<AppEnv>()
 
+// The frontend (Cloudflare Pages, *.pages.dev) and this API (Cloudflare
+// Workers, *.workers.dev) are different registrable domains, so every request
+// between them is cross-site. `SameSite=Strict` (and even `Lax`, for a POST
+// like /refresh) is silently dropped by the browser on cross-site fetches —
+// the cookie would never actually be sent back, which is what caused sessions
+// to intermittently "log out" whenever the in-memory access token expired or
+// the app was reloaded. `None` is the only setting that works cross-site, and
+// requires `Secure` (already true outside local dev).
 function setRefreshCookie(c: Context<AppEnv>, token: string) {
   setCookie(c, REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
     secure: c.env.ENVIRONMENT !== 'development',
-    sameSite: 'Strict',
+    sameSite: c.env.ENVIRONMENT !== 'development' ? 'None' : 'Lax',
     path: REFRESH_COOKIE_PATH,
     maxAge: REFRESH_TOKEN_TTL_SECONDS,
   })
