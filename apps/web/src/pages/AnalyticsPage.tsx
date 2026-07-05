@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Divider } from '@/components/ui/divider'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScoreTrendChart } from '@/components/analytics/ScoreTrendChart'
 import { CountedList } from '@/components/analytics/CountedList'
@@ -27,117 +27,125 @@ export function AnalyticsPage() {
   } = useAnalytics(range)
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="px-6 pt-8 pb-6">
+      <h1 className="text-foreground mb-6 text-3xl font-bold tracking-tight">Analytics</h1>
+
       <Tabs value={range} onValueChange={(v) => setRange(v as AnalyticsRange)}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList variant="line" className="w-full justify-start gap-6 p-0">
           {(Object.keys(RANGE_LABELS) as AnalyticsRange[]).map((key) => (
-            <TabsTrigger key={key} value={key}>
+            <TabsTrigger key={key} value={key} className="flex-none px-0 text-base">
               {RANGE_LABELS[key]}
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
 
+      <Divider className="mt-4" />
+
       {isLoading ? (
-        <div className="space-y-4">
-          <Skeleton className="rounded-card h-32 w-full" />
-          <Skeleton className="rounded-card h-24 w-full" />
-          <Skeleton className="rounded-card h-40 w-full" />
+        <div className="mt-8 space-y-6">
+          <Skeleton className="h-32 w-full rounded-3xl" />
+          <Skeleton className="h-16 w-full rounded-3xl" />
+          <Skeleton className="h-32 w-full rounded-3xl" />
         </div>
       ) : (
         <>
-          <Card>
-            <CardContent className="space-y-1">
-              <div className="flex items-baseline justify-between">
-                <p className="text-foreground text-sm font-medium">Nutrition score trend</p>
-                <p className="text-muted-foreground text-xs">
-                  avg {Math.round(averages.score)}/100 · last {days} days
-                </p>
-              </div>
+          <div className="mt-8">
+            <div className="flex items-baseline justify-between">
+              <p className="text-foreground text-lg font-semibold">Nutrition score trend</p>
+              <p className="text-muted-foreground text-xs">
+                avg {Math.round(averages.score)}/100 · last {days} days
+              </p>
+            </div>
+            <div className="mt-4">
               <ScoreTrendChart points={scoreTrend} />
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Card>
-              <CardContent>
-                <p className="text-muted-foreground text-xs">Avg. calories/day</p>
-                <p className="text-foreground mt-1 text-lg font-semibold">
-                  {Math.round(averages.calories).toLocaleString()}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent>
-                <p className="text-muted-foreground text-xs">Avg. protein/day</p>
-                <p className="text-foreground mt-1 text-lg font-semibold">
-                  {Math.round(averages.proteinG)}g
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent>
-                <p className="text-muted-foreground text-xs">Avg. fibre/day</p>
-                <p className="text-foreground mt-1 text-lg font-semibold">
-                  {Math.round(averages.fibreG)}g
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent>
-                <p className="text-muted-foreground text-xs">Avg. water/day</p>
-                <p className="text-foreground mt-1 text-lg font-semibold">
-                  {(averages.waterMl / 1000).toFixed(1)}L
-                </p>
-              </CardContent>
-            </Card>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Card>
-              <CardContent>
-                <p className="text-muted-foreground text-xs">Weight trend</p>
-                <div className="text-foreground mt-1 flex items-center gap-1.5 text-lg font-semibold">
-                  {weightTrendKgPerWeek === null ? (
-                    <span className="text-muted-foreground text-base font-normal">No data</span>
-                  ) : (
-                    <>
-                      {weightTrendKgPerWeek > 0.05 ? (
-                        <TrendingUp size={18} className="text-accent" />
-                      ) : weightTrendKgPerWeek < -0.05 ? (
-                        <TrendingDown size={18} className="text-accent" />
-                      ) : (
-                        <Minus size={18} />
-                      )}
-                      {Math.abs(weightTrendKgPerWeek).toFixed(2)} kg/wk
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent>
-                <p className="text-muted-foreground text-xs">Logging streak</p>
-                <p className="text-foreground mt-1 text-lg font-semibold">
-                  {streak} day{streak === 1 ? '' : 's'}
-                </p>
-              </CardContent>
-            </Card>
+          <Divider className="my-8" />
+
+          <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+            <div>
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Avg. calories/day
+              </p>
+              <p className="text-foreground mt-1 text-2xl font-bold tabular-nums">
+                {Math.round(averages.calories).toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Avg. protein/day
+              </p>
+              <p className="text-foreground mt-1 text-2xl font-bold tabular-nums">
+                {Math.round(averages.proteinG)}g
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Avg. fibre/day
+              </p>
+              <p className="text-foreground mt-1 text-2xl font-bold tabular-nums">
+                {Math.round(averages.fibreG)}g
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Avg. water/day
+              </p>
+              <p className="text-foreground mt-1 text-2xl font-bold tabular-nums">
+                {(averages.waterMl / 1000).toFixed(1)}L
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Weight trend
+              </p>
+              <div className="text-foreground mt-1 flex items-center gap-1.5 text-2xl font-bold">
+                {weightTrendKgPerWeek === null ? (
+                  <span className="text-muted-foreground text-base font-normal">No data</span>
+                ) : (
+                  <>
+                    {weightTrendKgPerWeek > 0.05 ? (
+                      <TrendingUp size={20} className="text-olive" />
+                    ) : weightTrendKgPerWeek < -0.05 ? (
+                      <TrendingDown size={20} className="text-olive" />
+                    ) : (
+                      <Minus size={20} />
+                    )}
+                    {Math.abs(weightTrendKgPerWeek).toFixed(2)}
+                    <span className="text-muted-foreground text-sm font-normal">kg/wk</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                Logging streak
+              </p>
+              <p className="text-foreground mt-1 text-2xl font-bold tabular-nums">
+                {streak} day{streak === 1 ? '' : 's'}
+              </p>
+            </div>
           </div>
 
-          <Card>
-            <CardContent className="space-y-2">
-              <p className="text-foreground text-sm font-medium">Most common foods</p>
+          <Divider className="my-8" />
+
+          <div>
+            <p className="text-foreground text-lg font-semibold">Most common foods</p>
+            <div className="mt-4">
               <CountedList items={topFoods} emptyText="No foods logged in this period yet." />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardContent className="space-y-2">
-              <p className="text-foreground text-sm font-medium">Most common meals</p>
+          <Divider className="my-8" />
+
+          <div>
+            <p className="text-foreground text-lg font-semibold">Most common meals</p>
+            <div className="mt-4">
               <CountedList items={topMealTypes} emptyText="No meals logged in this period yet." />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </>
       )}
     </div>

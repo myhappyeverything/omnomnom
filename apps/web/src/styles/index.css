@@ -6,34 +6,41 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Semantic tokens (light). Palette scales are declared inside @theme below;
- * these plain custom properties exist *outside* @theme so `.dark` can
- * override them via ordinary CSS cascade/inheritance — components that use
- * `bg-background`, `text-foreground`, etc. adapt to dark mode with no
- * `dark:` prefix required.
+ * Editorial palette — flat, single-value accents rather than 11-step scales.
+ * The brief this redesign follows explicitly asks for flat colour used
+ * sparingly, so most accents don't need light/dark variants: they're mid-toned
+ * enough to sit on both a cream and a warm-charcoal background unchanged
+ * ("accent colours remain warm"). Only background/surface/text/divider swap
+ * between modes.
  */
 :root {
-  --background: #fff3e7;
-  --foreground: var(--color-neutral-900);
+  --background: #fcfbf8;
   --surface: #ffffff;
-  --surface-muted: var(--color-neutral-50);
-  --border: var(--color-neutral-200);
-  --muted-foreground: var(--color-neutral-500);
+  --surface-muted: #f2ece3;
+  --foreground: #25221f;
+  --muted-foreground: #7a726a;
+  --border: #ece5dd;
 
-  --primary: var(--color-primary-500);
-  --primary-foreground: #ffffff;
-  --secondary: var(--color-secondary-100);
-  --secondary-foreground: var(--color-primary-700);
-  --accent: var(--color-accent-600);
-  --accent-foreground: #ffffff;
-  --info: var(--color-info-500);
-  --info-foreground: #ffffff;
-  --warning: var(--color-warning-500);
-  --warning-foreground: var(--color-warning-950);
-  --ring: var(--color-primary-600);
+  /* A fixed dark "ink" used as text sitting on top of an accent fill (button
+     labels, the FAB icon, filled chips) — every accent below is mid-toned
+     enough that dark text clears AA contrast against it in both themes,
+     whereas white text on Burnt Orange falls short (~3.1:1). */
+  --ink: #211b16;
+
+  --primary: var(--color-burnt-orange);
+  --primary-foreground: var(--ink);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --accent: var(--color-sage);
+  --accent-foreground: var(--ink);
+  --info: var(--color-sky-blue);
+  --info-foreground: var(--ink);
+  --warning: var(--color-mustard);
+  --warning-foreground: var(--ink);
+  --ring: var(--color-burnt-orange);
 
   /* shadcn/ui's expected vocabulary, mapped onto the tokens above so every
-     generated primitive (Card, Popover, Select, Dialog...) themes correctly
+     generated primitive (Popover, Select, Dialog...) themes correctly
      without editing each component's classnames. */
   --card: var(--surface);
   --card-foreground: var(--foreground);
@@ -41,37 +48,33 @@
   --popover-foreground: var(--foreground);
   --muted: var(--surface-muted);
   --input: var(--border);
-  --destructive: #dc2626;
+  --destructive: #c0442f;
   --destructive-foreground: #ffffff;
 }
 
 .dark {
-  /* A dedicated, desaturated near-black scale rather than the warm "neutral"
-     scale above — reusing neutral (tuned for light-mode text/borders) as the
-     dark background made every surface read as the same muddy brown and
-     dulled the primary/accent colors sitting on top of it (analogous hues
-     have little contrast). A near-neutral backdrop is what actually makes
-     colors pop, per Material's dark theme guidance. */
-  --background: var(--color-dark-950);
-  --foreground: var(--color-dark-50);
-  --surface: var(--color-dark-900);
-  --surface-muted: var(--color-dark-800);
-  --border: var(--color-dark-700);
-  --muted-foreground: var(--color-dark-400);
+  /* Warm charcoal, not an inverted/near-black theme — avoids pure black and
+     keeps the same family of warmth as light mode. */
+  --background: #1c1816;
+  --surface: #241f1b;
+  --surface-muted: #2b2521;
+  --foreground: #f7f4f1;
+  --muted-foreground: #b3a89e;
+  --border: #342d27;
 
-  /* Burnt Orange (500) has almost no contrast against a near-black background,
-     so dark mode reaches for a lighter step of the same scale instead. */
-  --primary: var(--color-primary-300);
-  --primary-foreground: var(--color-dark-950);
-  --secondary: var(--color-secondary-800);
-  --secondary-foreground: var(--color-secondary-100);
-  --accent: var(--color-accent-400);
-  --accent-foreground: var(--color-dark-950);
-  --info: var(--color-info-300);
-  --info-foreground: var(--color-dark-950);
-  --warning: var(--color-warning-300);
-  --warning-foreground: var(--color-dark-950);
-  --ring: var(--color-primary-300);
+  --ink: #211b16;
+
+  --primary: var(--color-burnt-orange);
+  --primary-foreground: var(--ink);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --accent: var(--color-sage);
+  --accent-foreground: var(--ink);
+  --info: var(--color-sky-blue);
+  --info-foreground: var(--ink);
+  --warning: var(--color-mustard);
+  --warning-foreground: var(--ink);
+  --ring: var(--color-burnt-orange);
 
   --card: var(--surface);
   --card-foreground: var(--foreground);
@@ -79,94 +82,31 @@
   --popover-foreground: var(--foreground);
   --muted: var(--surface-muted);
   --input: var(--border);
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
+  --destructive: #e0604a;
+  --destructive-foreground: var(--ink);
 }
 
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* Primary — Burnt Orange */
-  --color-primary-50: #fdf2ec;
-  --color-primary-100: #fbe0d1;
-  --color-primary-200: #f6c2a7;
-  --color-primary-300: #f0a37c;
-  --color-primary-400: #e88d61;
-  --color-primary-500: #e07a4f;
-  --color-primary-600: #c2623a;
-  --color-primary-700: #9c4d2d;
-  --color-primary-800: #763a22;
-  --color-primary-900: #572b19;
-  --color-primary-950: #3a1c10;
+  /* Flat accent palette. Each has one job — see the meal/macro mapping used
+     throughout the dashboard — rather than a light/dark or hover ramp. */
+  --color-burnt-orange: #d97745;
+  --color-terracotta: #c96a4a;
+  --color-dusty-coral: #dd8d7a;
+  --color-sage: #91a98a;
+  --color-olive: #71825e;
+  --color-mustard: #c9a642;
+  --color-sky-blue: #7ab7e6;
 
-  /* Secondary — Dusty Peach: a gentler, pinker tint than Primary, not just Primary-but-lighter */
-  --color-secondary-50: #fdf6f4;
-  --color-secondary-100: #fbe9e4;
-  --color-secondary-200: #f6d1c6;
-  --color-secondary-300: #f6b6a6;
-  --color-secondary-400: #ec9483;
-  --color-secondary-500: #dd7560;
-  --color-secondary-600: #c05b49;
-  --color-secondary-700: #984738;
-  --color-secondary-800: #723528;
-
-  /* Accent — Sage/Olive Green: cooler and calmer against the warm primary/secondary, for tertiary emphasis */
-  --color-accent-300: #c2cdb6;
-  --color-accent-400: #a7b89a;
-  --color-accent-500: #93a67e;
-  --color-accent-600: #7d8b57;
-  --color-accent-700: #656f45;
-  --color-accent-800: #4f5636;
-
-  /* Info — Sky Blue: the palette's one cool, un-warm hue. Reserved for water
-     (the obvious convention) and anywhere else that needs to visually stand
-     apart from the orange/peach/sage trio instead of blending into it. */
-  --color-info-50: #eef7fb;
-  --color-info-100: #d7edf6;
-  --color-info-300: #8fcbe8;
-  --color-info-400: #5cb2db;
-  --color-info-500: #3a97c4;
-  --color-info-600: #2c7ba3;
-  --color-info-700: #235f7d;
-  --color-info-950: #142831;
-
-  /* Warning — Golden Amber: a warm but distinctly yellow hue, kept apart from
-     Primary/Secondary so "needs attention" states don't read as just another
-     shade of orange. */
-  --color-warning-50: #fdf8ec;
-  --color-warning-100: #faedc4;
-  --color-warning-300: #f2cc6b;
-  --color-warning-400: #e8b93f;
-  --color-warning-500: #d9a12a;
-  --color-warning-600: #b6841e;
-  --color-warning-700: #8f6717;
-  --color-warning-950: #2e2308;
-
-  /* Neutral — grey with a faint warm-brown undertone, used for light-mode
-     text/borders/surfaces. Dark mode uses the separate --color-dark-* scale
-     below rather than this one — see the .dark block for why. */
-  --color-neutral-50: #faf7f5;
-  --color-neutral-100: #f2eae3;
-  --color-neutral-200: #e3d3c6;
-  --color-neutral-300: #cbb3a0;
-  --color-neutral-400: #a68b76;
-  --color-neutral-500: #8a7060;
-  --color-neutral-600: #6d5749;
-  --color-neutral-700: #59473b;
-  --color-neutral-800: #4b3b30;
-  --color-neutral-900: #362a22;
-  --color-neutral-950: #241b16;
-
-  /* Dark — desaturated, near-black scale for dark-mode backgrounds/surfaces
-     only. A whisper of warmth (not a full brown tint) keeps it feeling like
-     part of the same family without dulling the primary/accent/info/warning
-     colors that sit on top of it. */
-  --color-dark-50: #f6f3f0;
-  --color-dark-400: #9c9389;
-  --color-dark-700: #3a352f;
-  --color-dark-800: #26221e;
-  --color-dark-900: #1c1916;
-  --color-dark-950: #14120f;
+  /* Meal-type identity colours — used as icon/stripe/text accents, never as
+     a large filled background (several of these are too light for AA text
+     contrast against white, and the brief wants colour used sparingly). */
+  --color-breakfast: var(--color-burnt-orange);
+  --color-lunch: var(--color-sage);
+  --color-dinner: var(--color-olive);
+  --color-snack: var(--color-dusty-coral);
+  --color-water: var(--color-sky-blue);
 
   /* Semantic mappings — these generate bg-background, text-foreground, bg-primary, etc.
      and stay in sync with .dark automatically because they point at the plain vars above. */
@@ -176,6 +116,7 @@
   --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
   --color-muted-foreground: var(--muted-foreground);
+  --color-ink: var(--ink);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -196,14 +137,14 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 
-  /* Rounder than Tailwind's own `rounded-xl` — the app's signature card shape. */
-  --radius-control: 0.75rem;
-  --radius-card: 1.25rem;
+  /* Soft, premium rounding — used for buttons, inputs, and sheets. */
+  --radius-control: 1rem;
+  --radius-card: 1.5rem;
 
-  /* A soft, diffuse, warm-tinted shadow rather than a flat black one. */
-  --shadow-card:
-    0 1px 2px color-mix(in srgb, var(--color-neutral-900) 4%, transparent),
-    0 8px 24px color-mix(in srgb, var(--color-neutral-900) 6%, transparent);
+  /* Almost no shadow anywhere; a single soft one for the handful of things
+     that genuinely float (FAB, sheets, toasts). */
+  --shadow-card: none;
+  --shadow-soft: 0 2px 10px rgba(37, 34, 31, 0.08);
 
   --ease-out-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -229,8 +170,8 @@ body {
 }
 
 ::selection {
-  background-color: var(--color-primary-200);
-  color: var(--color-primary-900);
+  background-color: color-mix(in srgb, var(--color-burnt-orange) 30%, transparent);
+  color: var(--color-foreground);
 }
 
 :focus-visible {
@@ -251,6 +192,25 @@ body {
 
 .page-transition {
   animation: page-enter 0.22s var(--ease-out-smooth);
+}
+
+@keyframes sparkle-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-10deg);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.15) rotate(4deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9) rotate(0deg);
+  }
+}
+
+.sparkle-pop {
+  animation: sparkle-pop 0.6s var(--ease-out-smooth);
 }
 
 @media (prefers-reduced-motion: reduce) {

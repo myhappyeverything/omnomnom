@@ -8,12 +8,8 @@ export function RecipeListItem({
   onSelect: (recipe: RecipeRecord) => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(recipe)}
-      className="rounded-control border-border bg-surface w-full border p-3 text-left"
-    >
-      <p className="text-foreground text-sm font-medium">{recipe.name}</p>
+    <button type="button" onClick={() => onSelect(recipe)} className="w-full py-3 text-left">
+      <p className="text-foreground font-medium">{recipe.name}</p>
       <p className="text-muted-foreground text-xs">
         {recipe.servings} serving{recipe.servings === 1 ? '' : 's'} ·{' '}
         {Math.round(recipe.caloriesPerServing)} kcal/serving

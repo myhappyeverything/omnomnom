@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { PublicUser } from '@omnomnom/shared'
-import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { ApiError } from '@/api/client'
@@ -74,50 +73,46 @@ export function ProfileCard({ user }: { user: PublicUser }) {
   const age = calculateAge(user.dateOfBirth)
 
   return (
-    <Card>
-      <CardContent className="space-y-4">
-        <p className="text-foreground text-sm font-medium">Your profile</p>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-4">
+        <Label htmlFor="dateOfBirth">
+          Date of birth <span className="text-muted-foreground font-normal">· {age}y</span>
+        </Label>
+        <Input
+          id="dateOfBirth"
+          type="date"
+          className="w-36"
+          value={dateOfBirth}
+          onChange={(e) => setDateOfBirth(e.target.value)}
+          onBlur={() => void handleDateOfBirthBlur()}
+        />
+      </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <Label htmlFor="dateOfBirth">
-            Date of birth <span className="text-muted-foreground font-normal">· {age}y</span>
-          </Label>
-          <Input
-            id="dateOfBirth"
-            type="date"
-            className="w-36"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            onBlur={() => void handleDateOfBirthBlur()}
-          />
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <Label htmlFor="heightCm">Height (cm)</Label>
+        <Input
+          id="heightCm"
+          type="number"
+          inputMode="decimal"
+          className="w-36"
+          value={heightCm}
+          onChange={(e) => setHeightCm(e.target.value)}
+          onBlur={() => void handleHeightBlur()}
+        />
+      </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <Label htmlFor="heightCm">Height (cm)</Label>
-          <Input
-            id="heightCm"
-            type="number"
-            inputMode="decimal"
-            className="w-36"
-            value={heightCm}
-            onChange={(e) => setHeightCm(e.target.value)}
-            onBlur={() => void handleHeightBlur()}
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-4">
-          <Label htmlFor="weightKg">Current weight (kg)</Label>
-          <Input
-            id="weightKg"
-            type="number"
-            inputMode="decimal"
-            className="w-36"
-            value={weightKg}
-            onChange={(e) => setWeightKg(e.target.value)}
-            onBlur={handleWeightBlur}
-          />
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex items-center justify-between gap-4">
+        <Label htmlFor="weightKg">Current weight (kg)</Label>
+        <Input
+          id="weightKg"
+          type="number"
+          inputMode="decimal"
+          className="w-36"
+          value={weightKg}
+          onChange={(e) => setWeightKg(e.target.value)}
+          onBlur={handleWeightBlur}
+        />
+      </div>
+    </div>
   )
 }

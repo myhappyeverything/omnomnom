@@ -2,12 +2,11 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Bell, BellOff, Plus, Trash2 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
+import { Divider } from '@/components/ui/divider'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Select,
@@ -63,7 +62,7 @@ function DayOfWeekPicker({
               )
             }
             className={`flex size-8 items-center justify-center rounded-full text-xs font-medium transition-colors ${
-              selected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              selected ? 'bg-primary text-primary-foreground' : 'bg-surface-muted text-muted-foreground'
             }`}
           >
             {label}
@@ -147,10 +146,10 @@ export function NotificationsPage() {
 
   if (settingsQuery.isLoading || remindersQuery.isLoading) {
     return (
-      <div className="space-y-4 p-4">
-        <Skeleton className="rounded-card h-24 w-full" />
-        <Skeleton className="rounded-card h-48 w-full" />
-        <Skeleton className="rounded-card h-32 w-full" />
+      <div className="space-y-6 px-6 pt-8 pb-6">
+        <Skeleton className="h-16 w-full rounded-3xl" />
+        <Skeleton className="h-40 w-full rounded-3xl" />
+        <Skeleton className="h-24 w-full rounded-3xl" />
       </div>
     )
   }
@@ -163,236 +162,242 @@ export function NotificationsPage() {
   const supported = isPushSupported()
 
   return (
-    <div className="space-y-4 p-4">
-      <h1 className="text-foreground text-lg font-semibold">Notifications</h1>
+    <div className="px-6 pt-8 pb-6">
+      <h1 className="text-foreground mb-8 text-3xl font-bold tracking-tight">Notifications</h1>
 
-      <Card>
-        <CardContent className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {pushEnabled ? (
-              <Bell className="text-primary" size={20} />
-            ) : (
-              <BellOff className="text-muted-foreground" size={20} />
-            )}
-            <div>
-              <p className="text-foreground text-sm font-medium">Push notifications</p>
-              <p className="text-muted-foreground text-xs">
-                {!supported
-                  ? 'Not supported in this browser'
-                  : pushEnabled
-                    ? 'Enabled on this device'
-                    : 'Off — enable to get reminders'}
-              </p>
-            </div>
-          </div>
-          {supported &&
-            (pushEnabled ? (
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={updateMutation.isPending}
-                onClick={() => updateMutation.mutate({ onesignalPlayerId: null })}
-              >
-                Disable
-              </Button>
-            ) : (
-              <Button size="sm" disabled={subscribing} onClick={handleEnablePush}>
-                Enable
-              </Button>
-            ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="space-y-4">
-          <p className="text-foreground text-sm font-medium">Meal reminders</p>
-          {(
-            [
-              ['breakfastReminderTime', 'Breakfast'],
-              ['lunchReminderTime', 'Lunch'],
-              ['dinnerReminderTime', 'Dinner'],
-            ] as const
-          ).map(([field, label]) => (
-            <div key={field} className="flex items-center justify-between gap-4">
-              <Label htmlFor={field}>{label}</Label>
-              <Input
-                id={field}
-                type="time"
-                className="w-32"
-                value={settings[field] ?? ''}
-                onChange={(e) => updateMutation.mutate({ [field]: e.target.value || null })}
-              />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <Label htmlFor="waterReminderEnabled">Water reminders</Label>
-            <Switch
-              id="waterReminderEnabled"
-              checked={settings.waterReminderEnabled}
-              onCheckedChange={(checked) =>
-                updateMutation.mutate({
-                  waterReminderEnabled: checked,
-                  waterReminderIntervalMinutes: settings.waterReminderIntervalMinutes ?? 60,
-                })
-              }
-            />
-          </div>
-          {settings.waterReminderEnabled && (
-            <div className="flex items-center justify-between gap-4">
-              <Label htmlFor="waterReminderInterval">Every</Label>
-              <Select
-                value={String(settings.waterReminderIntervalMinutes ?? 60)}
-                onValueChange={(value) =>
-                  updateMutation.mutate({ waterReminderIntervalMinutes: Number(value) })
-                }
-              >
-                <SelectTrigger id="waterReminderInterval" className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {WATER_INTERVAL_OPTIONS.map((minutes) => (
-                    <SelectItem key={minutes} value={String(minutes)}>
-                      {minutes} minutes
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          {pushEnabled ? (
+            <Bell className="text-primary" size={20} />
+          ) : (
+            <BellOff className="text-muted-foreground" size={20} />
           )}
-        </CardContent>
-      </Card>
+          <div>
+            <p className="text-foreground font-semibold">Push notifications</p>
+            <p className="text-muted-foreground text-xs">
+              {!supported
+                ? 'Not supported in this browser'
+                : pushEnabled
+                  ? 'Enabled on this device'
+                  : 'Off — enable to get reminders'}
+            </p>
+          </div>
+        </div>
+        {supported &&
+          (pushEnabled ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={updateMutation.isPending}
+              onClick={() => updateMutation.mutate({ onesignalPlayerId: null })}
+            >
+              Disable
+            </Button>
+          ) : (
+            <Button size="sm" disabled={subscribing} onClick={handleEnablePush}>
+              Enable
+            </Button>
+          ))}
+      </div>
 
-      <Card>
-        <CardContent className="space-y-4">
-          <p className="text-foreground text-sm font-medium">Weigh-in reminder</p>
-          <div className="flex items-center justify-between gap-4">
-            <Label htmlFor="weighInReminderTime">Time</Label>
+      <Divider className="my-8" />
+
+      <div className="space-y-4">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          Meal reminders
+        </p>
+        {(
+          [
+            ['breakfastReminderTime', 'Breakfast'],
+            ['lunchReminderTime', 'Lunch'],
+            ['dinnerReminderTime', 'Dinner'],
+          ] as const
+        ).map(([field, label]) => (
+          <div key={field} className="flex items-center justify-between gap-4">
+            <Label htmlFor={field}>{label}</Label>
             <Input
-              id="weighInReminderTime"
+              id={field}
               type="time"
               className="w-32"
-              value={settings.weighInReminderTime ?? ''}
-              onChange={(e) =>
-                updateMutation.mutate({ weighInReminderTime: e.target.value || null })
+              value={settings[field] ?? ''}
+              onChange={(e) => updateMutation.mutate({ [field]: e.target.value || null })}
+            />
+          </div>
+        ))}
+      </div>
+
+      <Divider className="my-8" />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="waterReminderEnabled">Water reminders</Label>
+          <Switch
+            id="waterReminderEnabled"
+            checked={settings.waterReminderEnabled}
+            onCheckedChange={(checked) =>
+              updateMutation.mutate({
+                waterReminderEnabled: checked,
+                waterReminderIntervalMinutes: settings.waterReminderIntervalMinutes ?? 60,
+              })
+            }
+          />
+        </div>
+        {settings.waterReminderEnabled && (
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="waterReminderInterval">Every</Label>
+            <Select
+              value={String(settings.waterReminderIntervalMinutes ?? 60)}
+              onValueChange={(value) =>
+                updateMutation.mutate({ waterReminderIntervalMinutes: Number(value) })
               }
-            />
+            >
+              <SelectTrigger id="waterReminderInterval" className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {WATER_INTERVAL_OPTIONS.map((minutes) => (
+                  <SelectItem key={minutes} value={String(minutes)}>
+                    {minutes} minutes
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <Label>Days</Label>
-            <DayOfWeekPicker
-              value={settings.weighInReminderDays}
-              onChange={(days) => updateMutation.mutate({ weighInReminderDays: days })}
-            />
-          </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
-      <Card>
-        <CardContent className="space-y-4">
-          <p className="text-foreground text-sm font-medium">Quiet hours</p>
-          <p className="text-muted-foreground text-xs">
-            No reminders will be sent during this window.
+      <Divider className="my-8" />
+
+      <div className="space-y-4">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          Weigh-in reminder
+        </p>
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="weighInReminderTime">Time</Label>
+          <Input
+            id="weighInReminderTime"
+            type="time"
+            className="w-32"
+            value={settings.weighInReminderTime ?? ''}
+            onChange={(e) => updateMutation.mutate({ weighInReminderTime: e.target.value || null })}
+          />
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <Label>Days</Label>
+          <DayOfWeekPicker
+            value={settings.weighInReminderDays}
+            onChange={(days) => updateMutation.mutate({ weighInReminderDays: days })}
+          />
+        </div>
+      </div>
+
+      <Divider className="my-8" />
+
+      <div className="space-y-4">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          Quiet hours
+        </p>
+        <p className="text-muted-foreground text-sm">
+          No reminders will be sent during this window.
+        </p>
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="quietHoursStart">From</Label>
+          <Input
+            id="quietHoursStart"
+            type="time"
+            className="w-32"
+            value={settings.quietHoursStart ?? ''}
+            onChange={(e) => updateMutation.mutate({ quietHoursStart: e.target.value || null })}
+          />
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="quietHoursEnd">To</Label>
+          <Input
+            id="quietHoursEnd"
+            type="time"
+            className="w-32"
+            value={settings.quietHoursEnd ?? ''}
+            onChange={(e) => updateMutation.mutate({ quietHoursEnd: e.target.value || null })}
+          />
+        </div>
+      </div>
+
+      <Divider className="my-8" />
+
+      <div>
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+            Custom reminders
           </p>
-          <div className="flex items-center justify-between gap-4">
-            <Label htmlFor="quietHoursStart">From</Label>
-            <Input
-              id="quietHoursStart"
-              type="time"
-              className="w-32"
-              value={settings.quietHoursStart ?? ''}
-              onChange={(e) => updateMutation.mutate({ quietHoursStart: e.target.value || null })}
-            />
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <Label htmlFor="quietHoursEnd">To</Label>
-            <Input
-              id="quietHoursEnd"
-              type="time"
-              className="w-32"
-              value={settings.quietHoursEnd ?? ''}
-              onChange={(e) => updateMutation.mutate({ quietHoursEnd: e.target.value || null })}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-foreground text-sm font-medium">Custom reminders</p>
-            <Dialog open={addOpen} onOpenChange={setAddOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Plus size={14} /> Add
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>New reminder</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="newReminderLabel">Label</Label>
-                    <Input
-                      id="newReminderLabel"
-                      value={newLabel}
-                      maxLength={100}
-                      onChange={(e) => setNewLabel(e.target.value)}
-                      placeholder="e.g. Take vitamins"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="newReminderTime">Time</Label>
-                    <Input
-                      id="newReminderTime"
-                      type="time"
-                      value={newTime}
-                      onChange={(e) => setNewTime(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Days</Label>
-                    <DayOfWeekPicker value={newDays} onChange={setNewDays} />
-                  </div>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger asChild>
+              <Button variant="secondary" size="sm">
+                <Plus size={14} /> Add
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>New reminder</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="newReminderLabel">Label</Label>
+                  <Input
+                    id="newReminderLabel"
+                    value={newLabel}
+                    maxLength={100}
+                    onChange={(e) => setNewLabel(e.target.value)}
+                    placeholder="e.g. Take vitamins"
+                  />
                 </div>
-                <DialogFooter>
-                  <Button
-                    className="w-full"
-                    disabled={
-                      newLabel.trim().length === 0 ||
-                      newDays.length === 0 ||
-                      createReminderMutation.isPending
-                    }
-                    onClick={() =>
-                      createReminderMutation.mutate({
-                        label: newLabel.trim(),
-                        time: newTime,
-                        daysOfWeek: newDays,
-                        enabled: true,
-                      })
-                    }
-                  >
-                    Add reminder
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="newReminderTime">Time</Label>
+                  <Input
+                    id="newReminderTime"
+                    type="time"
+                    value={newTime}
+                    onChange={(e) => setNewTime(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Days</Label>
+                  <DayOfWeekPicker value={newDays} onChange={setNewDays} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  className="w-full"
+                  disabled={
+                    newLabel.trim().length === 0 ||
+                    newDays.length === 0 ||
+                    createReminderMutation.isPending
+                  }
+                  onClick={() =>
+                    createReminderMutation.mutate({
+                      label: newLabel.trim(),
+                      time: newTime,
+                      daysOfWeek: newDays,
+                      enabled: true,
+                    })
+                  }
+                >
+                  Add reminder
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
 
+        <div className="mt-4">
           {reminders.length === 0 ? (
             <p className="text-muted-foreground text-sm">No custom reminders yet.</p>
           ) : (
             reminders.map((reminder, index) => (
               <div key={reminder.id}>
-                {index > 0 && <Separator className="mb-3" />}
+                {index > 0 && <Divider className="my-3" />}
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-foreground text-sm font-medium">{reminder.label}</p>
+                    <p className="text-foreground font-medium">{reminder.label}</p>
                     <p className="text-muted-foreground text-xs">
                       {reminder.time} · {reminder.daysOfWeek.map((d) => DAY_LABELS[d]).join(' ')}
                     </p>
@@ -418,8 +423,8 @@ export function NotificationsPage() {
               </div>
             ))
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

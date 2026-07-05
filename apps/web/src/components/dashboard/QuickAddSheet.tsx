@@ -1,18 +1,22 @@
-import { Camera, Cookie, Moon, Search, Soup, Sun } from 'lucide-react'
+import { Camera, Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { WATER_QUICK_ADD_ML, type MealType } from '@omnomnom/shared'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+import { Divider } from '@/components/ui/divider'
+import { BreakfastIllustration } from '@/components/illustrations/BreakfastIllustration'
+import { LunchIllustration } from '@/components/illustrations/LunchIllustration'
+import { DinnerIllustration } from '@/components/illustrations/DinnerIllustration'
+import { SnackIllustration } from '@/components/illustrations/SnackIllustration'
 import { createWaterLog } from '@/api/water'
 import { ApiError } from '@/api/client'
 
-const MEAL_OPTIONS: { type: MealType; label: string; icon: typeof Sun }[] = [
-  { type: 'breakfast', label: 'Breakfast', icon: Sun },
-  { type: 'lunch', label: 'Lunch', icon: Soup },
-  { type: 'dinner', label: 'Dinner', icon: Moon },
-  { type: 'snack', label: 'Snack', icon: Cookie },
+const MEAL_OPTIONS: { type: MealType; label: string; Illustration: typeof BreakfastIllustration }[] = [
+  { type: 'breakfast', label: 'Breakfast', Illustration: BreakfastIllustration },
+  { type: 'lunch', label: 'Lunch', Illustration: LunchIllustration },
+  { type: 'dinner', label: 'Dinner', Illustration: DinnerIllustration },
+  { type: 'snack', label: 'Snack', Illustration: SnackIllustration },
 ]
 
 export function QuickAddSheet({
@@ -51,48 +55,64 @@ export function QuickAddSheet({
 
         <div className="space-y-6 px-4 pb-6">
           <div>
-            <p className="text-foreground mb-2 text-sm font-medium">Log a meal</p>
+            <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase">
+              Log a meal
+            </p>
             <div className="grid grid-cols-4 gap-2">
-              {MEAL_OPTIONS.map(({ type, label, icon: Icon }) => (
+              {MEAL_OPTIONS.map(({ type, label, Illustration }) => (
                 <button
                   key={type}
                   type="button"
                   onClick={() => goTo(`/foods?meal=${type}`)}
-                  className="rounded-control border-border text-foreground hover:bg-surface-muted flex flex-col items-center gap-1.5 border p-3 text-xs"
+                  className="hover:bg-surface-muted flex flex-col items-center gap-2 rounded-2xl p-3 text-xs transition-colors active:scale-95"
                 >
-                  <Icon size={20} />
+                  <Illustration size={32} />
                   {label}
                 </button>
               ))}
             </div>
           </div>
 
+          <Divider />
+
           <div>
-            <p className="text-foreground mb-2 text-sm font-medium">Add water</p>
+            <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase">
+              Add water
+            </p>
             <div className="grid grid-cols-4 gap-2">
               {WATER_QUICK_ADD_ML.map((amount) => (
-                <Button
+                <button
                   key={amount}
                   type="button"
-                  variant="outline"
                   disabled={addWaterMutation.isPending}
                   onClick={() => addWaterMutation.mutate(amount)}
+                  className="bg-surface-muted text-foreground hover:bg-sky-blue/20 rounded-full py-2.5 text-sm font-medium transition-colors active:scale-95 disabled:opacity-50"
                 >
                   {amount >= 1000 ? `${amount / 1000}L` : `${amount}ml`}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
 
+          <Divider />
+
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="secondary" onClick={() => goTo('/foods')}>
+            <button
+              type="button"
+              onClick={() => goTo('/foods')}
+              className="bg-surface-muted text-foreground flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-medium transition-transform active:scale-95"
+            >
               <Search size={16} />
               Search food
-            </Button>
-            <Button variant="secondary" onClick={() => goTo('/log/photo')}>
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo('/log/photo')}
+              className="bg-surface-muted text-foreground flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-medium transition-transform active:scale-95"
+            >
               <Camera size={16} />
               Take photo
-            </Button>
+            </button>
           </div>
         </div>
       </SheetContent>

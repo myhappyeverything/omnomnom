@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { ScaleIllustration } from '@/components/illustrations/ScaleIllustration'
 
 export interface WeightChartPoint {
   loggedAt: string
@@ -21,8 +22,9 @@ export function WeightChart({
 
   if (points.length === 0) {
     return (
-      <div className="text-muted-foreground flex h-40 items-center justify-center text-sm">
-        No weight logs in this range yet.
+      <div className="flex h-40 flex-col items-center justify-center gap-3 text-center">
+        <ScaleIllustration size={48} />
+        <p className="text-muted-foreground text-sm">No weight logs in this range yet.</p>
       </div>
     )
   }
@@ -50,8 +52,8 @@ export function WeightChart({
     <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="h-40 w-full" preserveAspectRatio="none">
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.25} />
-          <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
+          <stop offset="0%" stopColor="var(--color-olive)" stopOpacity={0.25} />
+          <stop offset="100%" stopColor="var(--color-olive)" stopOpacity={0} />
         </linearGradient>
       </defs>
 
@@ -61,7 +63,7 @@ export function WeightChart({
           x2={WIDTH - PADDING_X}
           y1={toY(targetWeightKg)}
           y2={toY(targetWeightKg)}
-          className="stroke-accent"
+          className="stroke-mustard"
           strokeWidth={1}
           strokeDasharray="4 4"
         />
@@ -71,12 +73,12 @@ export function WeightChart({
       <path
         d={linePath}
         fill="none"
-        className="stroke-primary"
+        className="stroke-olive"
         strokeWidth={2.5}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx={toX(points.length - 1)} cy={toY(last.weightKg)} r={4} className="fill-primary" />
+      <circle cx={toX(points.length - 1)} cy={toY(last.weightKg)} r={4} className="fill-olive" />
     </svg>
   )
 }

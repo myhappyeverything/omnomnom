@@ -1,34 +1,36 @@
-import { Droplet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import { WaterGlassIllustration } from '@/components/illustrations/WaterGlassIllustration'
+
+const GLASS_COUNT = 8
 
 export function WaterCard({ consumedMl, targetMl }: { consumedMl: number; targetMl: number }) {
   const navigate = useNavigate()
-  const percent = targetMl > 0 ? (consumedMl / targetMl) * 100 : 0
-  const remainingMl = Math.max(targetMl - consumedMl, 0)
+  const perGlassMl = targetMl / GLASS_COUNT
+  const filledGlasses = perGlassMl > 0 ? Math.floor(consumedMl / perGlassMl) : 0
 
   return (
     <button type="button" onClick={() => navigate('/water')} className="w-full text-left">
-      <Card>
-        <CardContent className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="text-foreground flex items-center gap-2 text-sm font-medium">
-              <Droplet size={16} className="text-info" />
-              Water
-            </div>
-            <span className="text-muted-foreground text-xs">
-              {(consumedMl / 1000).toFixed(1)}L / {(targetMl / 1000).toFixed(1)}L
-            </span>
-          </div>
-          <Progress value={percent} color="info" />
-          {remainingMl > 0 && (
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <WaterGlassIllustration fillPercent={100} size={22} />
+          <div>
+            <p className="text-foreground text-sm font-semibold">Water</p>
             <p className="text-muted-foreground text-xs">
-              {(remainingMl / 1000).toFixed(1)}L to go
+              {filledGlasses} of {GLASS_COUNT} glasses
             </p>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+        <span className="text-muted-foreground text-xs">
+          {(consumedMl / 1000).toFixed(1)}L / {(targetMl / 1000).toFixed(1)}L
+        </span>
+      </div>
+      <div className="mt-3 flex gap-2">
+        {Array.from({ length: GLASS_COUNT }, (_, index) => {
+          const glassAmount = Math.min(Math.max(consumedMl - index * perGlassMl, 0), perGlassMl)
+          const fillPercent = perGlassMl > 0 ? (glassAmount / perGlassMl) * 100 : 0
+          return <WaterGlassIllustration key={index} fillPercent={fillPercent} size={20} />
+        })}
+      </div>
     </button>
   )
 }

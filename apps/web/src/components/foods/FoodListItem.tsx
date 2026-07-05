@@ -12,9 +12,9 @@ export function FoodListItem({
   onToggleFavourite?: (food: FoodRecord) => void
 }) {
   return (
-    <div className="rounded-control border-border bg-surface flex items-center gap-2 border p-3">
+    <div className="flex items-center gap-2 py-3">
       <button type="button" onClick={() => onSelect(food)} className="min-w-0 flex-1 text-left">
-        <p className="text-foreground truncate text-sm font-medium">{food.name}</p>
+        <p className="text-foreground truncate font-medium">{food.name}</p>
         <p className="text-muted-foreground truncate text-xs">
           {food.brand ? `${food.brand} · ` : ''}
           {food.servingSize}
@@ -29,9 +29,9 @@ export function FoodListItem({
           type="button"
           aria-label={food.isFavourite ? 'Remove favourite' : 'Add favourite'}
           onClick={() => onToggleFavourite(food)}
-          className="text-muted-foreground hover:text-primary shrink-0 p-1.5"
+          className="text-muted-foreground hover:text-mustard shrink-0 p-1.5"
         >
-          <Star size={18} className={cn(food.isFavourite && 'fill-primary text-primary')} />
+          <Star size={18} className={cn(food.isFavourite && 'fill-mustard text-mustard')} />
         </button>
       )}
     </div>

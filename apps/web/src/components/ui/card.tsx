@@ -2,14 +2,14 @@ import * as React from 'react'
 
 import { cn } from '@/utils/cn'
 
+/** Near-invisible grouping surface — the editorial redesign prefers plain
+ * headings + <Divider> over boxing content, so this is now a rare escape
+ * hatch rather than the default section wrapper. */
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card"
-      className={cn(
-        'rounded-card bg-card text-card-foreground shadow-card flex flex-col gap-6 border py-6',
-        className,
-      )}
+      className={cn('text-card-foreground flex flex-col gap-6 py-6', className)}
       {...props}
     />
   )

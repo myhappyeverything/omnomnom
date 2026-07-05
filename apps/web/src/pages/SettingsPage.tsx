@@ -3,10 +3,9 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Download, LogOut, Trash2, Upload } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
+import { Divider } from '@/components/ui/divider'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Footer } from '@/components/Footer'
 import { ProfileCard } from '@/components/settings/ProfileCard'
@@ -99,10 +98,10 @@ export function SettingsPage() {
 
   if (settingsQuery.isLoading) {
     return (
-      <div className="space-y-4 p-4">
-        <Skeleton className="rounded-card h-40 w-full" />
-        <Skeleton className="rounded-card h-32 w-full" />
-        <Skeleton className="rounded-card h-32 w-full" />
+      <div className="space-y-6 px-6 pt-8 pb-6">
+        <Skeleton className="h-8 w-32 rounded-full" />
+        <Skeleton className="h-40 w-full rounded-3xl" />
+        <Skeleton className="h-32 w-full rounded-3xl" />
       </div>
     )
   }
@@ -111,137 +110,139 @@ export function SettingsPage() {
   if (!settings) return null
 
   return (
-    <div className="space-y-4 p-4">
-      <h1 className="text-foreground text-lg font-semibold">Settings</h1>
+    <div className="px-6 pt-8 pb-6">
+      <h1 className="text-foreground mb-8 text-3xl font-bold tracking-tight">Settings</h1>
 
       {user && (
-        <Card>
-          <CardContent>
-            <p className="text-foreground text-sm font-medium">{user.name}</p>
-            <p className="text-muted-foreground text-xs">{user.email}</p>
-          </CardContent>
-        </Card>
+        <>
+          <p className="text-foreground text-lg font-semibold">{user.name}</p>
+          <p className="text-muted-foreground mb-5 text-sm">{user.email}</p>
+          <ProfileCard user={user} />
+        </>
       )}
 
-      {user && <ProfileCard user={user} />}
+      <Divider className="my-8" />
 
       {user && <GoalCard user={user} />}
 
-      <Card>
-        <CardContent className="space-y-4">
-          <p className="text-foreground text-sm font-medium">Preferences</p>
-          <div className="flex items-center justify-between gap-4">
-            <Label htmlFor="unitSystem">Units</Label>
-            <Select
-              value={settings.unitSystem}
-              onValueChange={(value) =>
-                updateSettingsMutation.mutate({ unitSystem: value as 'metric' | 'imperial' })
-              }
-            >
-              <SelectTrigger id="unitSystem" className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="metric">Metric (kg)</SelectItem>
-                <SelectItem value="imperial">Imperial (lb)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <Label htmlFor="theme">Appearance</Label>
-            <Select
-              value={theme}
-              onValueChange={(value) => {
-                const next = value as 'light' | 'dark' | 'system'
-                setTheme(next)
-                updateSettingsMutation.mutate({ theme: next })
-              }}
-            >
-              <SelectTrigger id="theme" className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Separator />
-          <Button asChild variant="outline" className="w-full">
-            <Link to="/notifications">Notification settings</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <Divider className="my-8" />
 
-      <Card>
-        <CardContent className="space-y-3">
-          <p className="text-foreground text-sm font-medium">Your data</p>
-          <p className="text-muted-foreground text-xs">
-            Download everything OmNomNom has stored for you as a single JSON file. Importing
-            restores water and weight entries from an OmNomNom export — safe to re-run, existing
-            entries won&apos;t be duplicated.
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" disabled={isExporting} onClick={handleExport}>
-              <Download size={16} /> {isExporting ? 'Exporting…' : 'Download my data'}
-            </Button>
-            <Button
-              variant="outline"
-              disabled={isImporting}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload size={16} /> {isImporting ? 'Importing…' : 'Import data'}
-            </Button>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/json"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) void handleImportFile(file)
+      <div className="space-y-5">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          Preferences
+        </p>
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="unitSystem">Units</Label>
+          <Select
+            value={settings.unitSystem}
+            onValueChange={(value) =>
+              updateSettingsMutation.mutate({ unitSystem: value as 'metric' | 'imperial' })
+            }
+          >
+            <SelectTrigger id="unitSystem" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="metric">Metric (kg)</SelectItem>
+              <SelectItem value="imperial">Imperial (lb)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="theme">Appearance</Label>
+          <Select
+            value={theme}
+            onValueChange={(value) => {
+              const next = value as 'light' | 'dark' | 'system'
+              setTheme(next)
+              updateSettingsMutation.mutate({ theme: next })
             }}
-          />
-        </CardContent>
-      </Card>
+          >
+            <SelectTrigger id="theme" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">Light</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+              <SelectItem value="system">System</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button asChild variant="secondary" className="w-full">
+          <Link to="/notifications">Notification settings</Link>
+        </Button>
+      </div>
 
-      <Card>
-        <CardContent className="space-y-3">
-          <Button variant="outline" className="w-full" onClick={() => void logout()}>
-            <LogOut size={16} /> Log out
+      <Divider className="my-8" />
+
+      <div className="space-y-3">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          Your data
+        </p>
+        <p className="text-muted-foreground text-sm">
+          Download everything OmNomNom has stored for you as a single JSON file. Importing
+          restores water and weight entries from an OmNomNom export — safe to re-run, existing
+          entries won&apos;t be duplicated.
+        </p>
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          <Button variant="secondary" disabled={isExporting} onClick={handleExport}>
+            <Download size={16} /> {isExporting ? 'Exporting…' : 'Download my data'}
           </Button>
+          <Button
+            variant="secondary"
+            disabled={isImporting}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload size={16} /> {isImporting ? 'Importing…' : 'Import data'}
+          </Button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void handleImportFile(file)
+          }}
+        />
+      </div>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="text-destructive hover:text-destructive w-full">
-                <Trash2 size={16} /> Delete account
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This permanently deletes your account and everything in it — meals, water and
-                  weight logs, goals, and settings. This can&apos;t be undone. Consider downloading
-                  your data first.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  disabled={deleteAccountMutation.isPending}
-                  onClick={() => deleteAccountMutation.mutate()}
-                >
-                  Delete account
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </CardContent>
-      </Card>
+      <Divider className="my-8" />
+
+      <div className="space-y-3">
+        <Button variant="secondary" className="w-full" onClick={() => void logout()}>
+          <LogOut size={16} /> Log out
+        </Button>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="secondary" className="text-destructive hover:text-destructive w-full">
+              <Trash2 size={16} /> Delete account
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes your account and everything in it — meals, water and
+                weight logs, goals, and settings. This can&apos;t be undone. Consider downloading
+                your data first.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={deleteAccountMutation.isPending}
+                onClick={() => deleteAccountMutation.mutate()}
+              >
+                Delete account
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
 
       <Footer />
     </div>

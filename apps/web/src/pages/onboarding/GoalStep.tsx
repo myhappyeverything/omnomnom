@@ -153,7 +153,7 @@ export function GoalStep({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button type="button" variant="outline" onClick={onBack}>
+        <Button type="button" variant="secondary" onClick={onBack}>
           Back
         </Button>
         <Button type="submit">Continue</Button>

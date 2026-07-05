@@ -42,6 +42,14 @@ export function lastNDayKeys(days: number, date: Date = new Date()): string[] {
   })
 }
 
+/** A time-of-day greeting for the dashboard header. */
+export function getGreeting(date: Date = new Date()): string {
+  const hour = date.getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}
+
 /** Whole years elapsed since a `YYYY-MM-DD` date of birth, as of today. */
 export function calculateAge(dateOfBirth: string, today: Date = new Date()): number {
   const dob = new Date(dateOfBirth)

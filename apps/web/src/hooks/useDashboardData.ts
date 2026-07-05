@@ -95,6 +95,7 @@ export function useDashboardData() {
     isLoading,
     goal,
     totals,
+    todayMeals,
     waterTotalMl,
     currentWeightKg,
     weightTrendKgPerWeek,

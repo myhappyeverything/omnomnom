@@ -19,6 +19,8 @@ import { AddFoodToMealDialog } from '@/components/foods/AddFoodToMealDialog'
 import { AddRecipeToMealDialog } from '@/components/foods/AddRecipeToMealDialog'
 import { CreateCustomFoodDialog } from '@/components/foods/CreateCustomFoodDialog'
 import { CreateRecipeDialog } from '@/components/foods/CreateRecipeDialog'
+import { EmptyPlateIllustration } from '@/components/illustrations/EmptyPlateIllustration'
+import { StarIllustration } from '@/components/illustrations/StarIllustration'
 import {
   searchFoods,
   listRecentFoods,
@@ -37,6 +39,15 @@ const MEAL_LABELS: Record<MealType, string> = {
   lunch: 'Lunch',
   dinner: 'Dinner',
   snack: 'Snack',
+}
+
+function EmptyList({ text, illustration }: { text: string; illustration?: 'star' }) {
+  return (
+    <div className="flex flex-col items-center gap-3 py-10 text-center">
+      {illustration === 'star' ? <StarIllustration size={56} /> : <EmptyPlateIllustration size={56} />}
+      <p className="text-muted-foreground text-sm">{text}</p>
+    </div>
+  )
 }
 
 export function FoodsPage() {
@@ -84,13 +95,14 @@ export function FoodsPage() {
     foods: FoodRecord[] | undefined,
     isLoading: boolean,
     emptyText: string,
+    illustration?: 'star',
   ) => {
-    if (isLoading) return <p className="text-muted-foreground p-4 text-sm">Loading…</p>
+    if (isLoading) return <p className="text-muted-foreground py-6 text-sm">Loading…</p>
     if (!foods || foods.length === 0) {
-      return <p className="text-muted-foreground p-4 text-sm">{emptyText}</p>
+      return <EmptyList text={emptyText} illustration={illustration} />
     }
     return (
-      <div className="space-y-2">
+      <div className="divide-border divide-y">
         {foods.map((food) => (
           <FoodListItem
             key={food.id}
@@ -104,8 +116,10 @@ export function FoodsPage() {
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
+    <div className="px-6 pt-8 pb-6">
+      <h1 className="text-foreground mb-6 text-3xl font-bold tracking-tight">Foods</h1>
+
+      <div className="mb-6 flex items-center gap-2">
         <span className="text-muted-foreground text-sm">Logging to</span>
         <Select value={mealType} onValueChange={setMealType}>
           <SelectTrigger className="w-40">
@@ -122,15 +136,27 @@ export function FoodsPage() {
       </div>
 
       <Tabs defaultValue="search">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="search">Search</TabsTrigger>
-          <TabsTrigger value="recent">Recent</TabsTrigger>
-          <TabsTrigger value="favourites">Favs</TabsTrigger>
-          <TabsTrigger value="frequent">Frequent</TabsTrigger>
-          <TabsTrigger value="recipes">Recipes</TabsTrigger>
+        <TabsList variant="line" className="w-full justify-start gap-5 overflow-x-auto p-0">
+          <TabsTrigger value="search" className="flex-none px-0">
+            Search
+          </TabsTrigger>
+          <TabsTrigger value="recent" className="flex-none px-0">
+            Recent
+          </TabsTrigger>
+          <TabsTrigger value="favourites" className="flex-none px-0">
+            Favs
+          </TabsTrigger>
+          <TabsTrigger value="frequent" className="flex-none px-0">
+            Frequent
+          </TabsTrigger>
+          <TabsTrigger value="recipes" className="flex-none px-0">
+            Recipes
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="search" className="space-y-3">
+        <div className="border-border border-t" />
+
+        <TabsContent value="search" className="space-y-3 pt-5">
           <Input
             placeholder="Search foods..."
             value={query}
@@ -138,22 +164,22 @@ export function FoodsPage() {
             autoFocus
           />
           {debouncedQuery.length <= 1 ? (
-            <p className="text-muted-foreground p-4 text-sm">Start typing to search foods.</p>
+            <p className="text-muted-foreground py-6 text-sm">Start typing to search foods.</p>
           ) : (
             renderFoodList(searchQuery.data, searchQuery.isLoading, 'No foods found.')
           )}
           <CreateCustomFoodDialog />
         </TabsContent>
 
-        <TabsContent value="recent">
+        <TabsContent value="recent" className="pt-5">
           {renderFoodList(recentQuery.data, recentQuery.isLoading, 'No recently logged foods yet.')}
         </TabsContent>
 
-        <TabsContent value="favourites">
-          {renderFoodList(favouritesQuery.data, favouritesQuery.isLoading, 'No favourites yet.')}
+        <TabsContent value="favourites" className="pt-5">
+          {renderFoodList(favouritesQuery.data, favouritesQuery.isLoading, 'No favourites yet.', 'star')}
         </TabsContent>
 
-        <TabsContent value="frequent">
+        <TabsContent value="frequent" className="pt-5">
           {renderFoodList(
             frequentQuery.data,
             frequentQuery.isLoading,
@@ -161,13 +187,13 @@ export function FoodsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="recipes" className="space-y-3">
+        <TabsContent value="recipes" className="space-y-3 pt-5">
           {recipesQuery.isLoading ? (
-            <p className="text-muted-foreground p-4 text-sm">Loading…</p>
+            <p className="text-muted-foreground py-6 text-sm">Loading…</p>
           ) : (recipesQuery.data ?? []).length === 0 ? (
-            <p className="text-muted-foreground p-4 text-sm">No recipes yet.</p>
+            <EmptyList text="No recipes yet." />
           ) : (
-            <div className="space-y-2">
+            <div className="divide-border divide-y">
               {recipesQuery.data!.map((recipe) => (
                 <RecipeListItem key={recipe.id} recipe={recipe} onSelect={setSelectedRecipe} />
               ))}

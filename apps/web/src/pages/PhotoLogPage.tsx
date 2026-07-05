@@ -112,7 +112,7 @@ export function PhotoLogPage() {
   if (stage === 'capture') {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 p-6">
-        <h1 className="text-foreground text-xl font-semibold">Log with a photo</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">Log with a photo</h1>
         <p className="text-muted-foreground text-center text-sm">
           Take or upload a photo — we&apos;ll identify what&apos;s on the plate.
         </p>
@@ -166,8 +166,9 @@ export function PhotoLogPage() {
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
+    <div className="px-6 pt-8 pb-6">
+      <h1 className="text-foreground mb-6 text-3xl font-bold tracking-tight">Review</h1>
+      <div className="mb-6 flex items-center gap-2">
         <span className="text-muted-foreground text-sm">Logging to</span>
         <Select value={mealType} onValueChange={(v) => setMealType(v as MealType)}>
           <SelectTrigger className="w-40">

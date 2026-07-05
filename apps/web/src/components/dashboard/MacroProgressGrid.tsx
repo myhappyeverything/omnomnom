@@ -1,4 +1,3 @@
-import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 
 interface MacroItem {
@@ -8,9 +7,8 @@ interface MacroItem {
   unit: string
 }
 
-// Each macro gets its own hue rather than four identical orange bars — makes
-// the grid scannable at a glance and gives the card some visual variety.
-const MACRO_COLORS = ['accent', 'warning', 'primary', 'info'] as const
+// Each macro gets its own hue rather than four identical bars.
+const MACRO_COLORS = ['sage', 'mustard', 'olive', 'water'] as const
 
 export function MacroProgressGrid({
   protein,
@@ -26,24 +24,24 @@ export function MacroProgressGrid({
   const items = [protein, carbs, fat, fibre]
 
   return (
-    <Card>
-      <CardContent className="grid grid-cols-2 gap-4">
-        {items.map((item, index) => (
-          <div key={item.label} className="space-y-1.5">
-            <div className="flex items-baseline justify-between text-sm">
-              <span className="text-foreground font-medium">{item.label}</span>
-              <span className="text-muted-foreground text-xs">
-                {Math.round(item.consumed)}/{Math.round(item.target)}
-                {item.unit}
-              </span>
-            </div>
-            <Progress
-              value={item.target > 0 ? (item.consumed / item.target) * 100 : 0}
-              color={MACRO_COLORS[index]}
-            />
+    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+      {items.map((item, index) => (
+        <div key={item.label} className="space-y-2">
+          <div className="flex items-baseline justify-between">
+            <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              {item.label}
+            </span>
+            <span className="text-foreground text-sm tabular-nums">
+              {Math.round(item.consumed)}
+              <span className="text-muted-foreground">/{Math.round(item.target)}{item.unit}</span>
+            </span>
           </div>
-        ))}
-      </CardContent>
-    </Card>
+          <Progress
+            value={item.target > 0 ? (item.consumed / item.target) * 100 : 0}
+            color={MACRO_COLORS[index]}
+          />
+        </div>
+      ))}
+    </div>
   )
 }

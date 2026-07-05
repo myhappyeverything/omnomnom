@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Camera, Droplet, Scale, Bell, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Divider } from '@/components/ui/divider'
 import { Footer } from '@/components/Footer'
 import mascot from '@/assets/omnomnom-mascot.png'
 
@@ -39,14 +39,14 @@ export function LandingPage() {
       <main className="flex-1">
         <section className="mx-auto flex max-w-md flex-col items-center px-6 pt-16 pb-10 text-center">
           <img src={mascot} alt="OmNomNom mascot" className="h-40 w-40" width={640} height={640} />
-          <h1 className="text-foreground mt-4 text-4xl font-bold">OmNomNom</h1>
+          <h1 className="text-foreground mt-4 text-4xl font-bold tracking-tight">OmNomNom</h1>
           <p className="text-primary mt-2 text-lg font-medium">Track less. Live more.</p>
           <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
             A nutrition tracker that doesn't take itself too seriously. Snap a photo, log a bite,
             get on with your day.
           </p>
           <div className="mt-8 grid w-full grid-cols-2 gap-3">
-            <Button asChild variant="outline">
+            <Button asChild variant="secondary">
               <Link to="/login">Sign in</Link>
             </Button>
             <Button asChild>
@@ -55,19 +55,21 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-md space-y-3 px-6 pb-16">
-          {FEATURES.map((feature) => (
-            <Card key={feature.title}>
-              <CardContent className="flex items-start gap-3">
-                <div className="bg-secondary text-primary flex size-10 shrink-0 items-center justify-center rounded-full">
-                  <feature.icon size={18} />
+        <section className="mx-auto max-w-md px-6 pb-16">
+          <Divider className="mb-2" />
+          {FEATURES.map((feature, index) => (
+            <div key={feature.title}>
+              {index > 0 && <Divider />}
+              <div className="flex items-start gap-4 py-5">
+                <div className="text-primary flex size-10 shrink-0 items-center justify-center">
+                  <feature.icon size={22} strokeWidth={1.75} />
                 </div>
                 <div>
-                  <p className="text-foreground text-sm font-medium">{feature.title}</p>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  <p className="text-foreground font-semibold">{feature.title}</p>
+                  <p className="text-muted-foreground mt-0.5 text-sm">{feature.description}</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </section>
       </main>

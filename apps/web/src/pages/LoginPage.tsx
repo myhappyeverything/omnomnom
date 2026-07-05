@@ -35,7 +35,7 @@ export function LoginPage() {
     <div className="bg-background flex min-h-screen flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-foreground text-2xl font-semibold">Welcome back</h1>
+          <h1 className="text-foreground text-3xl font-bold tracking-tight">Welcome back</h1>
           <p className="text-muted-foreground mt-1 text-sm">Sign in to OmNomNom</p>
         </div>
 

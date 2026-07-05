@@ -95,7 +95,7 @@ export function ReviewStep({
             <Label htmlFor={key} className="flex items-center gap-1.5">
               {label}
               {isOverridden(key) && (
-                <span className="bg-secondary text-secondary-foreground rounded-full px-1.5 py-0.5 text-[10px] font-medium">
+                <span className="bg-mustard/20 text-mustard rounded-full px-1.5 py-0.5 text-[10px] font-medium">
                   edited
                 </span>
               )}
@@ -118,7 +118,7 @@ export function ReviewStep({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button type="button" variant="outline" onClick={onBack}>
+        <Button type="button" variant="secondary" onClick={onBack}>
           Back
         </Button>
         <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { PublicUser } from '@omnomnom/shared'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { ApiError } from '@/api/client'
@@ -63,38 +62,38 @@ export function GoalCard({ user }: { user: PublicUser }) {
       : null
 
   return (
-    <Card>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-foreground text-sm font-medium">Your goal</p>
-          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-            Edit goal
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          Your goal
+        </p>
+        <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+          Edit goal
+        </Button>
+      </div>
 
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-          <div>
-            <dt className="text-muted-foreground text-xs">Goal</dt>
-            <dd className="text-foreground">{GOAL_LABELS[goal.goalType]}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground text-xs">Target weight</dt>
-            <dd className="text-foreground">{goal.targetWeightKg}kg</dd>
-          </div>
-          <div className="col-span-2">
-            <dt className="text-muted-foreground text-xs">Activity level</dt>
-            <dd className="text-foreground">{ACTIVITY_LABELS[goal.activityLevel]}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground text-xs">Daily calories</dt>
-            <dd className="text-foreground">{goal.calorieTarget} kcal</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground text-xs">Water</dt>
-            <dd className="text-foreground">{(goal.waterTargetMl / 1000).toFixed(1)}L</dd>
-          </div>
-        </dl>
-      </CardContent>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+        <div>
+          <dt className="text-muted-foreground text-xs">Goal</dt>
+          <dd className="text-foreground font-medium">{GOAL_LABELS[goal.goalType]}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground text-xs">Target weight</dt>
+          <dd className="text-foreground font-medium">{goal.targetWeightKg}kg</dd>
+        </div>
+        <div className="col-span-2">
+          <dt className="text-muted-foreground text-xs">Activity level</dt>
+          <dd className="text-foreground font-medium">{ACTIVITY_LABELS[goal.activityLevel]}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground text-xs">Daily calories</dt>
+          <dd className="text-foreground font-medium">{goal.calorieTarget} kcal</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground text-xs">Water</dt>
+          <dd className="text-foreground font-medium">{(goal.waterTargetMl / 1000).toFixed(1)}L</dd>
+        </div>
+      </dl>
 
       <Sheet open={editing} onOpenChange={closeSheet}>
         <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
@@ -155,6 +154,6 @@ export function GoalCard({ user }: { user: PublicUser }) {
           </div>
         </SheetContent>
       </Sheet>
-    </Card>
+    </div>
   )
 }

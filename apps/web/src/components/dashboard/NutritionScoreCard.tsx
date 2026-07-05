@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { NutritionScoreBreakdown } from '@omnomnom/shared'
-import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { Confetti } from '@/components/Confetti'
 import {
   Dialog,
   DialogContent,
@@ -27,23 +27,37 @@ const LABEL_STYLES: Record<string, string> = {
   'Needs Improvement': 'text-destructive',
 }
 
+const CONFETTI_THRESHOLD = 90
+
 export function NutritionScoreCard({ breakdown }: { breakdown: NutritionScoreBreakdown }) {
   const [open, setOpen] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
+  const previousScore = useRef(breakdown.score)
+
+  useEffect(() => {
+    if (previousScore.current < CONFETTI_THRESHOLD && breakdown.score >= CONFETTI_THRESHOLD) {
+      setShowConfetti(true)
+      const timeout = setTimeout(() => setShowConfetti(false), 1000)
+      return () => clearTimeout(timeout)
+    }
+    previousScore.current = breakdown.score
+  }, [breakdown.score])
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="w-full text-left">
-        <Card>
-          <CardContent className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Daily nutrition score</p>
-              <p className={`text-2xl font-semibold ${LABEL_STYLES[breakdown.label]}`}>
-                {breakdown.label}
-              </p>
-            </div>
-            <div className="text-foreground text-3xl font-semibold">{breakdown.score}</div>
-          </CardContent>
-        </Card>
+      <button type="button" onClick={() => setOpen(true)} className="relative w-full text-left">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              Nutrition score
+            </p>
+            <p className={`text-lg font-semibold ${LABEL_STYLES[breakdown.label]}`}>
+              {breakdown.label}
+            </p>
+          </div>
+          <div className="text-foreground text-3xl font-bold tabular-nums">{breakdown.score}</div>
+        </div>
+        {showConfetti && <Confetti />}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
