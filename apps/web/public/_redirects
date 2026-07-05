@@ -7,4 +7,4 @@
 # view, which Safari's Intelligent Tracking Prevention blocks outright
 # regardless of SameSite=None — silently breaking persistent login on iOS.
 # Proxying makes every request same-origin, so the cookie is first-party.
-/api/*  https://omnomnom-api.wasim-811.workers.dev/api/*  200
+/api/*  https://omnomnom-api.wasim-811.workers.dev/api/:splat  200
