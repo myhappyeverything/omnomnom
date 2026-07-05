@@ -106,7 +106,15 @@ export async function requestPushSubscription(): Promise<string | null> {
   await initOneSignal()
   return withSdk(async (sdk) => {
     await sdk.Notifications.requestPermission()
-    if (!sdk.Notifications.permission) return null
+    // Checking the browser's own Notification.permission here, not
+    // sdk.Notifications.permission: the latter is OneSignal's own mirror of
+    // that state, updated via its internal listeners some time after the
+    // browser's real permission flips — reading it synchronously right after
+    // requestPermission() resolves could still see the pre-grant value and
+    // wrongly report "not granted" even on a real grant. The native property
+    // is authoritative and updates the instant the user responds to the
+    // prompt, before requestPermission()'s own promise even settles.
+    if (Notification.permission !== 'granted') return null
     return waitForSubscriptionId(sdk)
   })
 }
@@ -114,5 +122,7 @@ export async function requestPushSubscription(): Promise<string | null> {
 /** Reads the current subscription id without prompting — null if not subscribed. */
 export async function getPushSubscriptionId(): Promise<string | null> {
   await initOneSignal()
-  return withSdk((sdk) => (sdk.Notifications.permission ? sdk.User.PushSubscription.id : null))
+  return withSdk((sdk) =>
+    Notification.permission === 'granted' ? sdk.User.PushSubscription.id : null,
+  )
 }
