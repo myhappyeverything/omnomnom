@@ -11,6 +11,7 @@ interface OneSignalPushSubscription {
 interface OneSignalSdk {
   init(options: {
     appId: string
+    path: string
     serviceWorkerPath: string
     allowLocalhostAsSecureOrigin?: boolean
   }): Promise<void>
@@ -67,6 +68,13 @@ export function initOneSignal(): Promise<void> {
       appId: APP_ID!,
       // Our own service worker (see src/sw.ts) already imports OneSignal's
       // worker script, so it — not a second, separate one — handles push.
+      // `path` has to be set alongside `serviceWorkerPath`: reading OneSignal's
+      // own SDK source, the custom `serviceWorkerPath` override is only
+      // applied when `path` is also present — without it, the whole override
+      // is silently skipped and it falls back to requesting the default
+      // /OneSignalSDKWorker.js (which this site never serves), failing to
+      // load with no usable error surfaced back to `requestPermission()`.
+      path: '/',
       serviceWorkerPath: 'sw.js',
       allowLocalhostAsSecureOrigin: import.meta.env.DEV,
     }),
