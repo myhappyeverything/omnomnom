@@ -6,15 +6,11 @@
 interface OneSignalPushSubscription {
   id: string | null
   optedIn: boolean
+  optIn(): Promise<void>
 }
 
 interface OneSignalSdk {
-  init(options: {
-    appId: string
-    path: string
-    serviceWorkerPath: string
-    allowLocalhostAsSecureOrigin?: boolean
-  }): Promise<void>
+  init(options: { appId: string; allowLocalhostAsSecureOrigin?: boolean }): Promise<void>
   Notifications: {
     permission: boolean
     requestPermission(): Promise<void>
@@ -66,16 +62,14 @@ export function initOneSignal(): Promise<void> {
   initPromise ??= withSdk((sdk) =>
     sdk.init({
       appId: APP_ID!,
-      // Our own service worker (see src/sw.ts) already imports OneSignal's
-      // worker script, so it — not a second, separate one — handles push.
-      // `path` has to be set alongside `serviceWorkerPath`: reading OneSignal's
-      // own SDK source, the custom `serviceWorkerPath` override is only
-      // applied when `path` is also present — without it, the whole override
-      // is silently skipped and it falls back to requesting the default
-      // /OneSignalSDKWorker.js (which this site never serves), failing to
-      // load with no usable error surfaced back to `requestPermission()`.
-      path: '/',
-      serviceWorkerPath: 'sw.js',
+      // No serviceWorkerPath override — OneSignal registers its own worker
+      // at the default public/OneSignalSDKWorker.js (see that file), kept
+      // entirely separate from our own Workbox worker (src/sw.ts). Merging
+      // the two into one script via importScripts is OneSignal's documented
+      // alternative, but two other apps hit the same failure mode with it in
+      // practice: a custom Workbox worker and OneSignal end up fighting over
+      // the same scope, and push silently misbehaves. Separate workers is
+      // the version that's actually proven to work.
       allowLocalhostAsSecureOrigin: import.meta.env.DEV,
     }),
   )
@@ -115,6 +109,12 @@ export async function requestPushSubscription(): Promise<string | null> {
     // is authoritative and updates the instant the user responds to the
     // prompt, before requestPermission()'s own promise even settles.
     if (Notification.permission !== 'granted') return null
+    // OS-level permission being granted doesn't automatically activate the
+    // OneSignal subscription — it can stay `optedIn: false` until this is
+    // called explicitly, in which case PushSubscription.id/token never
+    // populate and waitForSubscriptionId below times out even though the
+    // user genuinely granted permission.
+    if (!sdk.User.PushSubscription.optedIn) await sdk.User.PushSubscription.optIn()
     return waitForSubscriptionId(sdk)
   })
 }

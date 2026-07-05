@@ -8,21 +8,15 @@ import { NavigationRoute, registerRoute } from 'workbox-routing'
 
 declare const self: ServiceWorkerGlobalScope
 
-// Merges OneSignal's push/notificationclick handling into this same worker
-// instead of registering a second, separate service worker — this is
-// OneSignal's documented integration path for apps that already ship a
-// custom service worker. With no app configured client-side (see
-// lib/oneSignal.ts), no push subscription is ever created, so this normally
-// just sits idle. Wrapped in try/catch because importScripts is a hard,
-// synchronous dependency for the whole service worker's evaluation — if
-// OneSignal's CDN is ever unreachable or renames this file again, push
-// notifications failing is fine, but that must never take down offline
-// precaching and PWA updates (everything below this line) along with it.
-try {
-  importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js')
-} catch (error) {
-  console.error('OneSignal service worker script failed to load', error)
-}
+// OneSignal gets its own separate service worker (public/OneSignalSDKWorker.js)
+// rather than being merged into this one via importScripts. That merged
+// pattern is OneSignal's own documented option, but in practice — confirmed
+// against two other production apps that hit this exact problem — a custom
+// Workbox worker and OneSignal fighting over the same scope from inside one
+// script causes push to silently misbehave (subscriptions that never
+// activate, or the wrong worker ending up as the page's actual controller).
+// Registering OneSignal separately, at the plain default path it expects,
+// is the version that's actually proven to work.
 
 // Precache the app shell (JS/CSS/fonts/icons + index.html) at install time.
 // __WB_MANIFEST is injected by vite-plugin-pwa's injectManifest build step.

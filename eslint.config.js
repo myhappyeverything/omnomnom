@@ -8,7 +8,17 @@ import prettier from 'eslint-config-prettier'
 
 export default [
   {
-    ignores: ['**/dist/**', '**/build/**', '**/.wrangler/**', '**/node_modules/**', '**/*.d.ts'],
+    ignores: [
+      '**/dist/**',
+      '**/build/**',
+      '**/.wrangler/**',
+      '**/node_modules/**',
+      '**/*.d.ts',
+      // A static, un-bundled bootstrap script served as-is by Cloudflare
+      // Pages — a service worker context, not application code, so no-undef
+      // (which flags `importScripts`) doesn't apply here.
+      'apps/web/public/OneSignalSDKWorker.js',
+    ],
   },
   js.configs.recommended,
   {
