@@ -23,14 +23,17 @@ const REFRESH_COOKIE_PATH = '/api/auth'
 
 export const authRoute = new Hono<AppEnv>()
 
-// The frontend (Cloudflare Pages, *.pages.dev) and this API (Cloudflare
-// Workers, *.workers.dev) are different registrable domains, so every request
-// between them is cross-site. `SameSite=Strict` (and even `Lax`, for a POST
-// like /refresh) is silently dropped by the browser on cross-site fetches —
-// the cookie would never actually be sent back, which is what caused sessions
-// to intermittently "log out" whenever the in-memory access token expired or
-// the app was reloaded. `None` is the only setting that works cross-site, and
-// requires `Secure` (already true outside local dev).
+// The frontend now proxies /api/* to this Worker at the edge (see
+// apps/web/public/_redirects) so requests are same-origin against
+// omnomnom.pages.dev — but this still needs to keep working for any request
+// that arrives cross-site too (e.g. mid-rollout, before the Pages env var
+// pointing at the *.workers.dev URL directly is retired). `None` is a
+// superset of what `Lax` allows — it's sent on both same-site and cross-site
+// requests — so it's safe either way, unlike `Lax`, which would silently
+// break refresh again for anyone still on the old cross-origin path.
+// `SameSite=None` alone doesn't fix Safari's Intelligent Tracking Prevention,
+// which blocks third-party cookies outright regardless of SameSite — that's
+// what the proxy itself (not this attribute) fixes for iOS.
 function setRefreshCookie(c: Context<AppEnv>, token: string) {
   setCookie(c, REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
