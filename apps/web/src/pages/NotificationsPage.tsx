@@ -62,7 +62,9 @@ function DayOfWeekPicker({
               )
             }
             className={`flex size-8 items-center justify-center rounded-full text-xs font-medium transition-colors ${
-              selected ? 'bg-primary text-primary-foreground' : 'bg-surface-muted text-muted-foreground'
+              selected
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-surface-muted text-muted-foreground'
             }`}
           >
             {label}

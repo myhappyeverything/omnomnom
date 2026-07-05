@@ -38,7 +38,11 @@ export function WaterGlassIllustration({
         className={isFilled ? 'stroke-sky-blue' : 'stroke-border'}
         strokeWidth={1.75}
       />
-      <path d="M3.5 8 h17" className={isFilled ? 'stroke-sky-blue' : 'stroke-border'} strokeWidth={1.75} />
+      <path
+        d="M3.5 8 h17"
+        className={isFilled ? 'stroke-sky-blue' : 'stroke-border'}
+        strokeWidth={1.75}
+      />
       <g clipPath={`url(#${clipId})`}>
         <motion.rect
           x={2}
@@ -48,7 +52,9 @@ export function WaterGlassIllustration({
           fillOpacity={0.55}
           initial={false}
           animate={{ y: waterTop }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={
+            prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+          }
         />
       </g>
     </svg>

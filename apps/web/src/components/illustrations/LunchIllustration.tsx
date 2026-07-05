@@ -11,7 +11,10 @@ export function LunchIllustration({ className, size = 40 }: { className?: string
       aria-hidden="true"
     >
       {/* Bottom bread */}
-      <path d="M8 32 h32 l-3 5 a3 3 0 0 1 -2.6 1.5 h-20.8 a3 3 0 0 1 -2.6 -1.5 z" className="fill-mustard" />
+      <path
+        d="M8 32 h32 l-3 5 a3 3 0 0 1 -2.6 1.5 h-20.8 a3 3 0 0 1 -2.6 -1.5 z"
+        className="fill-mustard"
+      />
       {/* Filling */}
       <rect x="9" y="27" width="30" height="5" rx="1.5" className="fill-sage" />
       <rect x="9.5" y="23" width="29" height="4" rx="1.5" className="fill-dusty-coral" />

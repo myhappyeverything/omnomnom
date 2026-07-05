@@ -44,7 +44,11 @@ const MEAL_LABELS: Record<MealType, string> = {
 function EmptyList({ text, illustration }: { text: string; illustration?: 'star' }) {
   return (
     <div className="flex flex-col items-center gap-3 py-10 text-center">
-      {illustration === 'star' ? <StarIllustration size={56} /> : <EmptyPlateIllustration size={56} />}
+      {illustration === 'star' ? (
+        <StarIllustration size={56} />
+      ) : (
+        <EmptyPlateIllustration size={56} />
+      )}
       <p className="text-muted-foreground text-sm">{text}</p>
     </div>
   )
@@ -176,7 +180,12 @@ export function FoodsPage() {
         </TabsContent>
 
         <TabsContent value="favourites" className="pt-5">
-          {renderFoodList(favouritesQuery.data, favouritesQuery.isLoading, 'No favourites yet.', 'star')}
+          {renderFoodList(
+            favouritesQuery.data,
+            favouritesQuery.isLoading,
+            'No favourites yet.',
+            'star',
+          )}
         </TabsContent>
 
         <TabsContent value="frequent" className="pt-5">

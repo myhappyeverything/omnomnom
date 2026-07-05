@@ -180,9 +180,9 @@ export function SettingsPage() {
           Your data
         </p>
         <p className="text-muted-foreground text-sm">
-          Download everything OmNomNom has stored for you as a single JSON file. Importing
-          restores water and weight entries from an OmNomNom export — safe to re-run, existing
-          entries won&apos;t be duplicated.
+          Download everything OmNomNom has stored for you as a single JSON file. Importing restores
+          water and weight entries from an OmNomNom export — safe to re-run, existing entries
+          won&apos;t be duplicated.
         </p>
         <div className="grid grid-cols-2 gap-3 pt-1">
           <Button variant="secondary" disabled={isExporting} onClick={handleExport}>
@@ -225,9 +225,9 @@ export function SettingsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete your account?</AlertDialogTitle>
               <AlertDialogDescription>
-                This permanently deletes your account and everything in it — meals, water and
-                weight logs, goals, and settings. This can&apos;t be undone. Consider downloading
-                your data first.
+                This permanently deletes your account and everything in it — meals, water and weight
+                logs, goals, and settings. This can&apos;t be undone. Consider downloading your data
+                first.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

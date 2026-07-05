@@ -33,7 +33,10 @@ export function MacroProgressGrid({
             </span>
             <span className="text-foreground text-sm tabular-nums">
               {Math.round(item.consumed)}
-              <span className="text-muted-foreground">/{Math.round(item.target)}{item.unit}</span>
+              <span className="text-muted-foreground">
+                /{Math.round(item.target)}
+                {item.unit}
+              </span>
             </span>
           </div>
           <Progress

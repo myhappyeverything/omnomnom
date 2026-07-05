@@ -1,7 +1,13 @@
 import { cn } from '@/utils/cn'
 
 /** An empty plate — used where no meals/foods have been logged yet. */
-export function EmptyPlateIllustration({ className, size = 72 }: { className?: string; size?: number }) {
+export function EmptyPlateIllustration({
+  className,
+  size = 72,
+}: {
+  className?: string
+  size?: number
+}) {
   return (
     <svg
       viewBox="0 0 96 96"

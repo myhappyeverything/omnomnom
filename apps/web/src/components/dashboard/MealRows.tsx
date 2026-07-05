@@ -26,7 +26,9 @@ export function MealRows({ meals }: { meals: MealRecord[] }) {
     return (
       <div className="flex flex-col items-center gap-3 py-10 text-center">
         <EmptyPlateIllustration />
-        <p className="text-muted-foreground text-sm">Nothing logged yet today — when you're ready.</p>
+        <p className="text-muted-foreground text-sm">
+          Nothing logged yet today — when you're ready.
+        </p>
       </div>
     )
   }

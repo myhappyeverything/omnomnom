@@ -16,8 +16,16 @@ import { FloatingActionButton } from '@/components/FloatingActionButton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function DashboardPage() {
-  const { isLoading, goal, totals, todayMeals, waterTotalMl, currentWeightKg, weightTrendKgPerWeek, score } =
-    useDashboardData()
+  const {
+    isLoading,
+    goal,
+    totals,
+    todayMeals,
+    waterTotalMl,
+    currentWeightKg,
+    weightTrendKgPerWeek,
+    score,
+  } = useDashboardData()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [quickAddOpen, setQuickAddOpen] = useState(false)
@@ -61,7 +69,11 @@ export function DashboardPage() {
       <header className="mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-foreground text-3xl font-bold tracking-tight">OmNomNom</h1>
-          {firstName && <p className="text-muted-foreground mt-1 text-sm">{getGreeting()}, {firstName} 👋</p>}
+          {firstName && (
+            <p className="text-muted-foreground mt-1 text-sm">
+              {getGreeting()}, {firstName} 👋
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -73,7 +85,11 @@ export function DashboardPage() {
         </button>
       </header>
 
-      <CalorieCard consumed={totals.calories} target={goal.calorieTarget} mascotTrigger={mascotTrigger} />
+      <CalorieCard
+        consumed={totals.calories}
+        target={goal.calorieTarget}
+        mascotTrigger={mascotTrigger}
+      />
 
       <Divider className="my-6" />
 

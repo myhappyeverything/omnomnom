@@ -45,7 +45,10 @@ export function Confetti() {
   if (prefersReducedMotion) return null
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+    <div
+      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+      aria-hidden="true"
+    >
       {particles.map((particle) => {
         const radians = (particle.angle * Math.PI) / 180
         const x = Math.cos(radians) * particle.distance

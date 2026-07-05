@@ -1,7 +1,13 @@
 import { cn } from '@/utils/cn'
 
 /** Coffee cup + croissant — flat, minimal, warm line style. */
-export function BreakfastIllustration({ className, size = 40 }: { className?: string; size?: number }) {
+export function BreakfastIllustration({
+  className,
+  size = 40,
+}: {
+  className?: string
+  size?: number
+}) {
   return (
     <svg
       viewBox="0 0 48 48"
@@ -23,7 +29,10 @@ export function BreakfastIllustration({ className, size = 40 }: { className?: st
         strokeLinecap="round"
       />
       {/* Coffee cup */}
-      <path d="M30 26 h11 v6 a5.5 5.5 0 0 1 -5.5 5.5 h-0 a5.5 5.5 0 0 1 -5.5 -5.5 z" className="fill-ink" />
+      <path
+        d="M30 26 h11 v6 a5.5 5.5 0 0 1 -5.5 5.5 h-0 a5.5 5.5 0 0 1 -5.5 -5.5 z"
+        className="fill-ink"
+      />
       <path
         d="M41 28 h2.5 a3 3 0 0 1 0 6 h-2.5"
         fill="none"

@@ -11,7 +11,16 @@ export function ScaleIllustration({ className, size = 72 }: { className?: string
       aria-hidden="true"
     >
       <rect x="16" y="34" width="64" height="44" rx="10" className="fill-surface-muted" />
-      <rect x="16" y="34" width="64" height="44" rx="10" fill="none" className="stroke-border" strokeWidth={2} />
+      <rect
+        x="16"
+        y="34"
+        width="64"
+        height="44"
+        rx="10"
+        fill="none"
+        className="stroke-border"
+        strokeWidth={2}
+      />
       <circle cx="48" cy="56" r="14" fill="none" className="stroke-olive" strokeWidth={2.4} />
       <path d="M48 56 l6 -8" className="stroke-olive" strokeWidth={2.4} strokeLinecap="round" />
       <circle cx="48" cy="56" r="1.8" className="fill-olive" />

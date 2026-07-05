@@ -47,14 +47,8 @@ export function Mascot({ className, size = 96, trigger }: MascotProps) {
       }
     >
       {/* Leaves */}
-      <path
-        d="M60 16 C54 4 44 0 36 6 C42 14 50 17 60 16 Z"
-        className="fill-olive"
-      />
-      <path
-        d="M60 16 C66 4 76 0 84 6 C78 14 70 17 60 16 Z"
-        className="fill-sage"
-      />
+      <path d="M60 16 C54 4 44 0 36 6 C42 14 50 17 60 16 Z" className="fill-olive" />
+      <path d="M60 16 C66 4 76 0 84 6 C78 14 70 17 60 16 Z" className="fill-sage" />
 
       {/* Body */}
       <path
@@ -66,25 +60,25 @@ export function Mascot({ className, size = 96, trigger }: MascotProps) {
       <ellipse cx="33" cy="80" rx="7" ry="4.5" className="fill-dusty-coral" opacity={0.55} />
       <ellipse cx="87" cy="80" rx="7" ry="4.5" className="fill-dusty-coral" opacity={0.55} />
 
-      {/* Eyes — closed, happy arcs; flatten briefly to blink */}
+      {/* Eyes — closed, happy arcs; morph to a near-flat line briefly to blink.
+          (Deliberately not a scaleY transform: framer-motion's originX/originY
+          pixel values are resolved against the rendered CSS size, not the
+          viewBox's own units, so at any size other than 1:1 the eyes would
+          scale from the wrong point and stretch off toward the edge.) */}
       <motion.path
-        d="M42 66 Q48 76 54 66"
         fill="none"
         className="stroke-ink"
         strokeWidth={4.5}
         strokeLinecap="round"
-        animate={{ scaleY: isBlinking ? 0.15 : 1 }}
-        style={{ originX: '48px', originY: '66px' }}
+        animate={{ d: isBlinking ? 'M42 70 Q48 71 54 70' : 'M42 66 Q48 76 54 66' }}
         transition={{ duration: 0.1 }}
       />
       <motion.path
-        d="M66 66 Q72 76 78 66"
         fill="none"
         className="stroke-ink"
         strokeWidth={4.5}
         strokeLinecap="round"
-        animate={{ scaleY: isBlinking ? 0.15 : 1 }}
-        style={{ originX: '72px', originY: '66px' }}
+        animate={{ d: isBlinking ? 'M66 70 Q72 71 78 70' : 'M66 66 Q72 76 78 66' }}
         transition={{ duration: 0.1 }}
       />
 

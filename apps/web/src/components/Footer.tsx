@@ -12,7 +12,7 @@ export function Footer() {
           href="https://introvertsmakestuff.com/"
           target="_blank"
           rel="noreferrer"
-          className="text-primary hover:underline whitespace-nowrap"
+          className="text-primary whitespace-nowrap hover:underline"
         >
           Introverts Make Stuff
         </a>

@@ -29,7 +29,9 @@ export function CalorieCard({
         <p className="text-foreground text-6xl font-bold tracking-tight tabular-nums">
           {Math.round(animatedRemaining).toLocaleString()}
         </p>
-        <p className="text-muted-foreground text-sm">of {Math.round(target).toLocaleString()} kcal</p>
+        <p className="text-muted-foreground text-sm">
+          of {Math.round(target).toLocaleString()} kcal
+        </p>
         <p className="text-primary pt-1 text-sm font-medium">
           {remaining >= 0 ? ENCOURAGEMENT.remaining : ENCOURAGEMENT.over} ♡
         </p>

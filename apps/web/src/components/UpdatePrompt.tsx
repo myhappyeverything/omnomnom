@@ -22,7 +22,7 @@ export function UpdatePrompt() {
   const dismiss = () => setNeedRefresh(false)
 
   return (
-    <div className="bg-primary text-primary-foreground fixed inset-x-4 z-50 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm shadow-lg sm:inset-x-auto sm:left-4 sm:w-96 top-[calc(1rem+env(safe-area-inset-top))]">
+    <div className="bg-primary text-primary-foreground fixed inset-x-4 top-[calc(1rem+env(safe-area-inset-top))] z-50 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm shadow-lg sm:inset-x-auto sm:left-4 sm:w-96">
       <p>A new version is ready.</p>
       <div className="flex shrink-0 items-center gap-2">
         <button

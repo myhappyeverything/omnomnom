@@ -1,7 +1,13 @@
 import { cn } from '@/utils/cn'
 
 /** A simple bowl of food — flat, minimal, warm line style. */
-export function DinnerIllustration({ className, size = 40 }: { className?: string; size?: number }) {
+export function DinnerIllustration({
+  className,
+  size = 40,
+}: {
+  className?: string
+  size?: number
+}) {
   return (
     <svg
       viewBox="0 0 48 48"
@@ -11,10 +17,7 @@ export function DinnerIllustration({ className, size = 40 }: { className?: strin
       aria-hidden="true"
     >
       {/* Bowl */}
-      <path
-        d="M6 24 h36 a18 12 0 0 1 -36 0 Z"
-        className="fill-olive"
-      />
+      <path d="M6 24 h36 a18 12 0 0 1 -36 0 Z" className="fill-olive" />
       <path d="M6 24 a18 6 0 0 0 36 0" fill="none" className="stroke-ink/15" strokeWidth={1} />
       {/* Contents */}
       <circle cx="18" cy="20" r="4" className="fill-dusty-coral" />

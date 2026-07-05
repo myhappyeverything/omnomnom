@@ -4,8 +4,8 @@ export function PrivacyPolicyPage() {
       <h1 className="text-foreground mb-8 text-3xl font-bold tracking-tight">Privacy policy</h1>
       <div className="text-muted-foreground space-y-6 text-sm leading-relaxed">
         <p>
-          OmNomNom is a personal nutrition and health tracker. This page explains what data it
-          keeps and why.
+          OmNomNom is a personal nutrition and health tracker. This page explains what data it keeps
+          and why.
         </p>
 
         <section className="space-y-1">
@@ -21,11 +21,10 @@ export function PrivacyPolicyPage() {
         <section className="space-y-1">
           <h2 className="text-foreground text-base font-semibold">Meal photos</h2>
           <p>
-            Photos you take to log a meal are uploaded to Cloudflare R2 storage and sent to
-            OpenAI's Vision API to identify what's in them. OpenAI does not receive your name,
-            email, or any other account details — only the photo itself. The actual nutrition
-            values used in your log always come from OpenFoodFacts or the USDA food database,
-            never invented by the AI.
+            Photos you take to log a meal are uploaded to Cloudflare R2 storage and sent to OpenAI's
+            Vision API to identify what's in them. OpenAI does not receive your name, email, or any
+            other account details — only the photo itself. The actual nutrition values used in your
+            log always come from OpenFoodFacts or the USDA food database, never invented by the AI.
           </p>
         </section>
 
@@ -33,8 +32,8 @@ export function PrivacyPolicyPage() {
           <h2 className="text-foreground text-base font-semibold">Push notifications</h2>
           <p>
             If you enable reminders, your device registers a subscription with OneSignal, which
-            delivers the notification. OneSignal only receives a device identifier — not your
-            meal, weight, or water history.
+            delivers the notification. OneSignal only receives a device identifier — not your meal,
+            weight, or water history.
           </p>
         </section>
 
@@ -50,8 +49,8 @@ export function PrivacyPolicyPage() {
           <h2 className="text-foreground text-base font-semibold">Your control over this data</h2>
           <p>
             From Settings you can download a full copy of your data at any time, or permanently
-            delete your account — which immediately and irreversibly removes every record tied to
-            it from the database.
+            delete your account — which immediately and irreversibly removes every record tied to it
+            from the database.
           </p>
         </section>
 

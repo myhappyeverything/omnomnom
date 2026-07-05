@@ -17,7 +17,13 @@ export interface CalorieRingProps {
 // intentional rather than like a rendering glitch.
 const BITE_ANGLE_DEG = 35
 
-export function CalorieRing({ value, size = 240, strokeWidth = 18, className, children }: CalorieRingProps) {
+export function CalorieRing({
+  value,
+  size = 240,
+  strokeWidth = 18,
+  className,
+  children,
+}: CalorieRingProps) {
   const prefersReducedMotion = useReducedMotion()
   const clamped = Math.min(100, Math.max(0, value))
   const isOverflowing = value > 100

@@ -74,12 +74,32 @@ export function initOneSignal(): Promise<void> {
   return initPromise
 }
 
+// After the browser grants permission, OneSignal still needs a moment to
+// register the subscription with the Push API and its own backend before
+// `PushSubscription.id` is populated — reading it immediately after
+// `requestPermission()` resolves can see `null` even on a real grant, which
+// previously surfaced as a false "permission was not granted" error (and
+// then repeated on every retry, since the OS-level prompt only appears once).
+async function waitForSubscriptionId(
+  sdk: OneSignalSdk,
+  timeoutMs = 6000,
+  pollIntervalMs = 300,
+): Promise<string | null> {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    if (sdk.User.PushSubscription.id) return sdk.User.PushSubscription.id
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
+  }
+  return sdk.User.PushSubscription.id
+}
+
 /** Prompts the browser permission dialog and returns the resulting subscription id, or null if denied. */
 export async function requestPushSubscription(): Promise<string | null> {
   await initOneSignal()
   return withSdk(async (sdk) => {
     await sdk.Notifications.requestPermission()
-    return sdk.Notifications.permission ? sdk.User.PushSubscription.id : null
+    if (!sdk.Notifications.permission) return null
+    return waitForSubscriptionId(sdk)
   })
 }
 

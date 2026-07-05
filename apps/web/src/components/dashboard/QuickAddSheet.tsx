@@ -12,7 +12,11 @@ import { SnackIllustration } from '@/components/illustrations/SnackIllustration'
 import { createWaterLog } from '@/api/water'
 import { ApiError } from '@/api/client'
 
-const MEAL_OPTIONS: { type: MealType; label: string; Illustration: typeof BreakfastIllustration }[] = [
+const MEAL_OPTIONS: {
+  type: MealType
+  label: string
+  Illustration: typeof BreakfastIllustration
+}[] = [
   { type: 'breakfast', label: 'Breakfast', Illustration: BreakfastIllustration },
   { type: 'lunch', label: 'Lunch', Illustration: LunchIllustration },
   { type: 'dinner', label: 'Dinner', Illustration: DinnerIllustration },
