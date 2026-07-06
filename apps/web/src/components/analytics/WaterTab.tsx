@@ -22,7 +22,7 @@ import { useWaterHistory } from '@/hooks/useWaterHistory'
 
 const GLASS_COUNT = 8
 
-export function WaterPage() {
+export function WaterTab() {
   const { isLoading, targetMl, todayTotalMl, dailyTotals, streak, todayLogs } = useWaterHistory()
   const [customAmount, setCustomAmount] = useState(200)
   const [customOpen, setCustomOpen] = useState(false)
@@ -60,7 +60,7 @@ export function WaterPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 px-6 pt-8 pb-6">
+      <div className="space-y-6 pt-6">
         <Skeleton className="h-48 w-full rounded-3xl" />
         <Skeleton className="h-16 w-full rounded-3xl" />
         <Skeleton className="h-32 w-full rounded-3xl" />
@@ -72,9 +72,7 @@ export function WaterPage() {
   const perGlassMl = targetMl / GLASS_COUNT
 
   return (
-    <div className="px-6 pt-8 pb-6">
-      <h1 className="text-foreground mb-8 text-3xl font-bold tracking-tight">Water</h1>
-
+    <div className="pt-6">
       <div className="flex flex-col items-center text-center">
         <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">Today</p>
         <p className="text-foreground mt-1 text-6xl font-bold tabular-nums">

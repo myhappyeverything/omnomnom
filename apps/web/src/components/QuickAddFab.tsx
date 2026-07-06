@@ -4,9 +4,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Camera, Droplet, Plus, ScanLine, Search, type LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { WATER_QUICK_ADD_ML } from '@omnomnom/shared'
 import { createWaterLog } from '@/api/water'
 import { ApiError } from '@/api/client'
+import { WaterAmountDialog } from '@/components/WaterAmountDialog'
 import { cn } from '@/utils/cn'
 
 // A shallow arc above the trigger, widest options nearest horizontal, tallest
@@ -28,6 +28,7 @@ interface FanOption {
 
 export function QuickAddFab() {
   const [open, setOpen] = useState(false)
+  const [waterDialogOpen, setWaterDialogOpen] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -36,6 +37,7 @@ export function QuickAddFab() {
     onSuccess: (_data, amountMl) => {
       queryClient.invalidateQueries({ queryKey: ['water'] })
       toast.success(`${amountMl}ml logged`)
+      setWaterDialogOpen(false)
     },
     onError: (error) => {
       toast.error(error instanceof ApiError ? error.message : 'Could not log water')
@@ -56,13 +58,19 @@ export function QuickAddFab() {
       icon: Droplet,
       onSelect: () => {
         setOpen(false)
-        addWaterMutation.mutate(WATER_QUICK_ADD_ML[0])
+        setWaterDialogOpen(true)
       },
     },
   ]
 
   return (
     <>
+      <WaterAmountDialog
+        open={waterDialogOpen}
+        onOpenChange={setWaterDialogOpen}
+        onAdd={(amountMl) => addWaterMutation.mutate(amountMl)}
+        isPending={addWaterMutation.isPending}
+      />
       <AnimatePresence>
         {open && (
           <motion.button

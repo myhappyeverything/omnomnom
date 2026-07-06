@@ -50,6 +50,42 @@ export function getGreeting(date: Date = new Date()): string {
   return 'Good evening'
 }
 
+/** ISO bounds covering every local day in the given calendar month. */
+export function getMonthRange(year: number, month: number): { from: string; to: string } {
+  const start = new Date(year, month, 1)
+  const end = new Date(year, month + 1, 1)
+  end.setMilliseconds(-1)
+  return { from: start.toISOString(), to: end.toISOString() }
+}
+
+export interface MonthGridDay {
+  dateKey: string
+  dayOfMonth: number
+  inMonth: boolean
+}
+
+/**
+ * A full-weeks grid (Sun–Sat) for the given month, padded with the trailing
+ * days of the previous month and leading days of the next so every row has
+ * 7 cells — `inMonth: false` cells are rendered blank/disabled by the caller.
+ */
+export function getMonthGrid(year: number, month: number): MonthGridDay[] {
+  const firstOfMonth = new Date(year, month, 1)
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const startOffset = firstOfMonth.getDay() // 0 (Sun) – 6 (Sat)
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7
+
+  return Array.from({ length: totalCells }, (_, i) => {
+    const dayOfMonth = i - startOffset + 1
+    const date = new Date(year, month, dayOfMonth)
+    return {
+      dateKey: localDateKey(date),
+      dayOfMonth: date.getDate(),
+      inMonth: dayOfMonth >= 1 && dayOfMonth <= daysInMonth,
+    }
+  })
+}
+
 /** Whole years elapsed since a `YYYY-MM-DD` date of birth, as of today. */
 export function calculateAge(dateOfBirth: string, today: Date = new Date()): number {
   const dob = new Date(dateOfBirth)

@@ -28,7 +28,6 @@ const PhotoLogPage = lazy(() =>
 const ScanLabelPage = lazy(() =>
   import('./pages/ScanLabelPage').then((m) => ({ default: m.ScanLabelPage })),
 )
-const WaterPage = lazy(() => import('./pages/WaterPage').then((m) => ({ default: m.WaterPage })))
 const WeightPage = lazy(() => import('./pages/WeightPage').then((m) => ({ default: m.WeightPage })))
 const AnalyticsPage = lazy(() =>
   import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
@@ -90,7 +89,8 @@ export function App() {
             <Route path="/foods" element={<FoodsPage />} />
             <Route path="/log/photo" element={<PhotoLogPage />} />
             <Route path="/log/label" element={<ScanLabelPage />} />
-            <Route path="/water" element={<WaterPage />} />
+            {/* Water moved under Analytics — kept as a redirect for old links/bookmarks. */}
+            <Route path="/water" element={<Navigate to="/analytics?tab=water" replace />} />
             <Route path="/weight" element={<WeightPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />

@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { ChevronDown, Plus } from 'lucide-react'
 import { MEAL_TYPE_VALUES, type MealRecord, type MealType } from '@omnomnom/shared'
 import { Divider } from '@/components/ui/divider'
 import { EmptyPlateIllustration } from '@/components/illustrations/EmptyPlateIllustration'
@@ -21,6 +22,7 @@ const MEAL_META: Record<
 
 export function MealRows({ meals }: { meals: MealRecord[] }) {
   const navigate = useNavigate()
+  const [expandedType, setExpandedType] = useState<MealType | null>(null)
 
   if (meals.length === 0) {
     return (
@@ -48,6 +50,9 @@ export function MealRows({ meals }: { meals: MealRecord[] }) {
       {MEAL_TYPE_VALUES.map((type, index) => {
         const { label, accent, Illustration } = MEAL_META[type]
         const calories = caloriesByType[type]
+        const isExpanded = expandedType === type
+        const items = meals.filter((meal) => meal.mealType === type).flatMap((meal) => meal.items)
+
         return (
           <motion.div
             key={type}
@@ -69,6 +74,22 @@ export function MealRows({ meals }: { meals: MealRecord[] }) {
                   {calories > 0 ? `${Math.round(calories)} kcal` : 'Not logged'}
                 </span>
               </button>
+              {calories > 0 && (
+                <button
+                  type="button"
+                  aria-label={isExpanded ? `Hide ${label.toLowerCase()} items` : `Show ${label.toLowerCase()} items`}
+                  aria-expanded={isExpanded}
+                  onClick={() => setExpandedType(isExpanded ? null : type)}
+                  className="text-muted-foreground hover:text-foreground flex size-9 shrink-0 items-center justify-center"
+                >
+                  <motion.span
+                    animate={{ rotate: isExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown size={18} />
+                  </motion.span>
+                </button>
+              )}
               <button
                 type="button"
                 aria-label={`Add ${label.toLowerCase()}`}
@@ -78,6 +99,37 @@ export function MealRows({ meals }: { meals: MealRecord[] }) {
                 <Plus size={16} />
               </button>
             </div>
+
+            <AnimatePresence initial={false}>
+              {isExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="space-y-2 pb-3.5 pl-9">
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="text-muted-foreground flex items-center justify-between text-sm"
+                      >
+                        <span className="text-foreground">
+                          {item.food?.name ?? 'Recipe item'}
+                          <span className="text-muted-foreground">
+                            {' '}
+                            · {item.quantity}
+                            {item.unit}
+                          </span>
+                        </span>
+                        <span>{Math.round(item.calories)} kcal</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )
       })}
