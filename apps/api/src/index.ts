@@ -12,6 +12,7 @@ import { weightRoute } from './routes/weight.js'
 import { settingsRoute } from './routes/settings.js'
 import { notificationsRoute } from './routes/notifications.js'
 import { aiRoute } from './routes/ai.js'
+import { nutritionScoreRoute } from './routes/nutritionScore.js'
 import { exportRoute } from './routes/export.js'
 import { AppError } from './lib/errors.js'
 import { OpenAiError } from './lib/openai.js'
@@ -51,6 +52,7 @@ app.route('/api/weight', weightRoute)
 app.route('/api/settings', settingsRoute)
 app.route('/api/notifications', notificationsRoute)
 app.route('/api/ai', aiRoute)
+app.route('/api/nutrition-score', nutritionScoreRoute)
 app.route('/api/export', exportRoute)
 
 export default {

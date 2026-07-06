@@ -9,7 +9,7 @@ import { WeightChart } from '@/components/weight/WeightChart'
 import { LogWeightDialog } from '@/components/weight/LogWeightDialog'
 import { useWeightHistory } from '@/hooks/useWeightHistory'
 import { useSettings } from '@/hooks/useSettings'
-import { calculateWeightTrend, estimateGoalDate } from '@/utils/weightTrend'
+import { calculateWeightChangeOverDays, calculateWeightTrend, estimateGoalDate } from '@/utils/weightTrend'
 import { deleteWeightLog } from '@/api/weight'
 import { ApiError } from '@/api/client'
 import { displayWeight, weightUnitLabel } from '@/utils/units'
@@ -49,6 +49,9 @@ export function WeightPage() {
     currentWeightKg !== null && goal
       ? estimateGoalDate(currentWeightKg, goal.targetWeightKg, trendKgPerWeek)
       : null
+  // Always computed from the full history, independent of the chart's range picker above.
+  const change7d = calculateWeightChangeOverDays(logs, 7)
+  const change30d = calculateWeightChangeOverDays(logs, 30)
 
   if (isLoading) {
     return (
@@ -59,9 +62,30 @@ export function WeightPage() {
     )
   }
 
+  const renderChange = (changeKg: number | null) => {
+    if (changeKg === null) {
+      return <span className="text-muted-foreground text-base font-normal">Not enough data</span>
+    }
+    const displayed = displayWeight(changeKg, unitSystem)
+    return (
+      <>
+        {displayed > 0.05 ? (
+          <TrendingUp size={20} className="text-olive" />
+        ) : displayed < -0.05 ? (
+          <TrendingDown size={20} className="text-olive" />
+        ) : (
+          <Minus size={20} />
+        )}
+        {displayed > 0 ? '+' : ''}
+        {displayed.toFixed(1)}
+        <span className="text-muted-foreground text-sm font-normal">{unitLabel}</span>
+      </>
+    )
+  }
+
   return (
     <div className="px-6 pt-8 pb-6">
-      <h1 className="text-foreground mb-8 text-3xl font-bold tracking-tight">Weight</h1>
+      <h1 className="text-foreground mb-8 text-3xl font-bold tracking-tight">Health Trends</h1>
 
       <div className="flex items-baseline justify-between">
         <div>
@@ -93,6 +117,22 @@ export function WeightPage() {
       <Divider className="my-8" />
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+        <div>
+          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+            7-day change
+          </p>
+          <div className="text-foreground mt-1 flex items-center gap-1.5 text-2xl font-bold">
+            {renderChange(change7d)}
+          </div>
+        </div>
+        <div>
+          <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+            30-day change
+          </p>
+          <div className="text-foreground mt-1 flex items-center gap-1.5 text-2xl font-bold">
+            {renderChange(change30d)}
+          </div>
+        </div>
         <div>
           <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             Avg. weekly change

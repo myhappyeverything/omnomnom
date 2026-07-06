@@ -1,26 +1,23 @@
-import { NUTRITION_SCORE_BANDS, type Goal, type NutritionScoreLabel } from '../constants.js'
+import { NUTRITION_SCORE_BANDS, type NutritionScoreLabel } from '../constants.js'
 
-export interface NutritionScoreWeights {
-  calories: number
-  protein: number
-  fibre: number
-  water: number
-  consistency: number
-  mealTiming: number
-  weightTrend: number
-}
+/**
+ * Today's Nutrition Score answers "how well did I nourish my body today?" —
+ * a daily habit score, not a measure of overall health. Each metric is a
+ * fixed point allocation (not a weighted percentage) so the total is always
+ * literally the sum of what's shown on screen: 26 + 18 + 12 + 8 + 9 + 4 + 5
+ * really does add up to 82, with no separate rounding step to explain away.
+ */
+export const NUTRITION_SCORE_POINTS = {
+  calories: 30,
+  protein: 25,
+  fibre: 15,
+  foodQuality: 10,
+  consistency: 10,
+  water: 5,
+  loggingCompleteness: 5,
+} as const
 
-/** Matches the spec's weighting exactly; pass a different object to `calculateNutritionScore`
- *  to experiment without touching the scoring logic itself. */
-export const DEFAULT_NUTRITION_SCORE_WEIGHTS: NutritionScoreWeights = {
-  calories: 0.3,
-  protein: 0.25,
-  fibre: 0.15,
-  water: 0.1,
-  consistency: 0.1,
-  mealTiming: 0.05,
-  weightTrend: 0.05,
-}
+export type NutritionScoreMetric = keyof typeof NUTRITION_SCORE_POINTS
 
 export interface NutritionScoreInput {
   caloriesConsumed: number
@@ -31,19 +28,17 @@ export interface NutritionScoreInput {
   fibreTargetG: number
   waterConsumedMl: number
   waterTargetMl: number
-  /** How many of the last 7 days (including today) had at least one meal logged. */
-  daysLoggedInLastWeek: number
-  /** ISO timestamps of every meal logged today, used for the meal-timing heuristic. */
-  mealTimestamps: string[]
-  goalType: Goal
-  /** Positive = gaining, negative = losing, null = not enough weigh-ins to compute a trend. */
-  weightTrendKgPerWeek: number | null
+  /** 0-100 — the AI's assessment of today's logged meals as a whole (see the api's assessFoodQuality). */
+  foodQualityPercent: number
+  /** 0-100 — a rolling 14-day habit-consistency percentage (see calculateConsistencyPercent). */
+  consistencyPercent: number
+  /** How many of the 4 meal types (breakfast/lunch/dinner/snack) have at least one item logged today. */
+  mealTypesLoggedToday: number
 }
 
 export interface ScoreComponent {
-  score: number
-  weight: number
-  contribution: number
+  points: number
+  maxPoints: number
 }
 
 export interface NutritionScoreBreakdown {
@@ -53,10 +48,10 @@ export interface NutritionScoreBreakdown {
     calories: ScoreComponent
     protein: ScoreComponent
     fibre: ScoreComponent
-    water: ScoreComponent
+    foodQuality: ScoreComponent
     consistency: ScoreComponent
-    mealTiming: ScoreComponent
-    weightTrend: ScoreComponent
+    water: ScoreComponent
+    loggingCompleteness: ScoreComponent
   }
 }
 
@@ -64,52 +59,33 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-/** Full marks within 10% of target either direction; falls off past that band. */
-function scoreCalories(consumed: number, target: number): number {
+/**
+ * Full marks within 10% of target either direction; falls off past that band.
+ * Exported so the api's rolling 14-day consistency window can score each
+ * lookback day's calories with the exact same curve as today's own score.
+ */
+export function scoreCaloriesPercent(consumed: number, target: number): number {
   if (target <= 0) return 100
   const deviation = Math.abs(consumed - target) / target
   if (deviation <= 0.1) return 100
   return clamp(100 - (deviation - 0.1) * 200, 0, 100)
 }
 
-/** Meeting or exceeding the target is full marks — there's no downside to extra protein/fibre/water. */
-function scoreMeetOrExceed(consumed: number, target: number): number {
+/**
+ * Meeting or exceeding the target is full marks — there's no downside to
+ * extra protein/fibre/water. Exported for the same reason as above.
+ */
+export function scoreMeetOrExceedPercent(consumed: number, target: number): number {
   if (target <= 0) return 100
   return clamp((consumed / target) * 100, 0, 100)
 }
 
-function scoreConsistency(daysLoggedInLastWeek: number): number {
-  return clamp((daysLoggedInLastWeek / 7) * 100, 0, 100)
+function scoreLoggingCompleteness(mealTypesLoggedToday: number): number {
+  return clamp((mealTypesLoggedToday / 4) * 100, 0, 100)
 }
 
-const MEAL_TIMING_WINDOWS = [
-  { startHour: 5, endHour: 11 }, // morning
-  { startHour: 11, endHour: 16 }, // midday
-  { startHour: 16, endHour: 22 }, // evening
-]
-
-/** Rewards spreading meals across the day rather than skipping windows or eating everything at once. */
-function scoreMealTiming(mealTimestamps: string[]): number {
-  if (mealTimestamps.length === 0) return 0
-  const hours = mealTimestamps.map((ts) => new Date(ts).getHours())
-  const windowsHit = MEAL_TIMING_WINDOWS.filter(({ startHour, endHour }) =>
-    hours.some((hour) => hour >= startHour && hour < endHour),
-  ).length
-  return (windowsHit / MEAL_TIMING_WINDOWS.length) * 100
-}
-
-/** Rewards trending toward the goal; no weigh-in data is treated as neutral, not penalized. */
-function scoreWeightTrend(trendKgPerWeek: number | null, goalType: Goal): number {
-  if (trendKgPerWeek === null) return 100
-
-  if (goalType === 'maintain') {
-    return clamp(100 - Math.abs(trendKgPerWeek) * 100, 0, 100)
-  }
-  if (goalType === 'lose_weight') {
-    return trendKgPerWeek <= 0 ? 100 : clamp(100 - trendKgPerWeek * 100, 0, 100)
-  }
-  // gain_weight
-  return trendKgPerWeek >= 0 ? 100 : clamp(100 + trendKgPerWeek * 100, 0, 100)
+function toPoints(percent: number, maxPoints: number): number {
+  return Math.round((clamp(percent, 0, 100) / 100) * maxPoints)
 }
 
 function labelForScore(score: number): NutritionScoreLabel {
@@ -119,30 +95,64 @@ function labelForScore(score: number): NutritionScoreLabel {
   return NUTRITION_SCORE_BANDS.needsImprovement.label
 }
 
-export function calculateNutritionScore(
-  input: NutritionScoreInput,
-  weights: NutritionScoreWeights = DEFAULT_NUTRITION_SCORE_WEIGHTS,
-): NutritionScoreBreakdown {
-  const rawScores = {
-    calories: scoreCalories(input.caloriesConsumed, input.calorieTarget),
-    protein: scoreMeetOrExceed(input.proteinConsumedG, input.proteinTargetG),
-    fibre: scoreMeetOrExceed(input.fibreConsumedG, input.fibreTargetG),
-    water: scoreMeetOrExceed(input.waterConsumedMl, input.waterTargetMl),
-    consistency: scoreConsistency(input.daysLoggedInLastWeek),
-    mealTiming: scoreMealTiming(input.mealTimestamps),
-    weightTrend: scoreWeightTrend(input.weightTrendKgPerWeek, input.goalType),
+export function calculateNutritionScore(input: NutritionScoreInput): NutritionScoreBreakdown {
+  const percents: Record<NutritionScoreMetric, number> = {
+    calories: scoreCaloriesPercent(input.caloriesConsumed, input.calorieTarget),
+    protein: scoreMeetOrExceedPercent(input.proteinConsumedG, input.proteinTargetG),
+    fibre: scoreMeetOrExceedPercent(input.fibreConsumedG, input.fibreTargetG),
+    foodQuality: clamp(input.foodQualityPercent, 0, 100),
+    consistency: clamp(input.consistencyPercent, 0, 100),
+    water: scoreMeetOrExceedPercent(input.waterConsumedMl, input.waterTargetMl),
+    loggingCompleteness: scoreLoggingCompleteness(input.mealTypesLoggedToday),
   }
 
   const components = Object.fromEntries(
-    Object.entries(rawScores).map(([key, score]) => {
-      const weight = weights[key as keyof NutritionScoreWeights]
-      return [key, { score: Math.round(score), weight, contribution: score * weight }]
+    Object.entries(percents).map(([key, percent]) => {
+      const maxPoints = NUTRITION_SCORE_POINTS[key as NutritionScoreMetric]
+      return [key, { points: toPoints(percent, maxPoints), maxPoints }]
     }),
   ) as NutritionScoreBreakdown['components']
 
-  const score = Math.round(
-    Object.values(components).reduce((sum, component) => sum + component.contribution, 0),
-  )
+  // The total is the sum of the points actually shown, never a separately
+  // rounded weighted average — those can silently disagree by a point.
+  const score = Object.values(components).reduce((sum, component) => sum + component.points, 0)
 
   return { score, label: labelForScore(score), components }
+}
+
+export interface DailyHabitSnapshot {
+  caloriesPercent: number
+  proteinPercent: number
+  fibrePercent: number
+  mealsLoggedPercent: number
+  /** null when there's nothing to grade (no meals that day) — excluded from that day's average rather than counted as 0. */
+  foodQualityPercent: number | null
+}
+
+/**
+ * Healthy Consistency, rolling over (up to) the last 14 days: each day's
+ * habit dimensions are averaged together, then those daily averages are
+ * averaged across the window. Deliberately a smooth average rather than a
+ * pass/fail streak — one rough day barely moves it, matching "reward
+ * sustainable habits rather than perfection."
+ */
+export function calculateConsistencyPercent(days: DailyHabitSnapshot[]): number {
+  if (days.length === 0) return 100 // Not enough history yet — treated as neutral, not penalized.
+
+  const perDayAverages = days.map((day) => {
+    const values = [
+      day.caloriesPercent,
+      day.proteinPercent,
+      day.fibrePercent,
+      day.mealsLoggedPercent,
+    ]
+    if (day.foodQualityPercent !== null) values.push(day.foodQualityPercent)
+    return values.reduce((sum, v) => sum + v, 0) / values.length
+  })
+
+  return clamp(
+    perDayAverages.reduce((sum, v) => sum + v, 0) / perDayAverages.length,
+    0,
+    100,
+  )
 }

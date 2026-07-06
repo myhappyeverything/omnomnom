@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { calculateNutritionScore, DEFAULT_NUTRITION_SCORE_WEIGHTS } from './nutritionScore.js'
-
-// scoreMealTiming buckets by the JS Date's *local* hour (correct for a real user
-// in their own timezone). Built with the local Date constructor rather than
-// hardcoded UTC strings so these tests pass regardless of the runner's TZ.
-const localHourIso = (hour: number) => new Date(2026, 0, 1, hour).toISOString()
+import {
+  calculateConsistencyPercent,
+  calculateNutritionScore,
+  NUTRITION_SCORE_POINTS,
+} from './nutritionScore.js'
 
 const baseInput = {
   caloriesConsumed: 2000,
@@ -15,52 +14,57 @@ const baseInput = {
   fibreTargetG: 30,
   waterConsumedMl: 2500,
   waterTargetMl: 2500,
-  daysLoggedInLastWeek: 7,
-  mealTimestamps: [localHourIso(8), localHourIso(13), localHourIso(19)],
-  goalType: 'maintain' as const,
-  weightTrendKgPerWeek: 0,
+  foodQualityPercent: 100,
+  consistencyPercent: 100,
+  mealTypesLoggedToday: 4,
 }
 
-describe('DEFAULT_NUTRITION_SCORE_WEIGHTS', () => {
-  it('matches the spec exactly and sums to 1', () => {
-    expect(DEFAULT_NUTRITION_SCORE_WEIGHTS).toEqual({
-      calories: 0.3,
-      protein: 0.25,
-      fibre: 0.15,
-      water: 0.1,
-      consistency: 0.1,
-      mealTiming: 0.05,
-      weightTrend: 0.05,
+describe('NUTRITION_SCORE_POINTS', () => {
+  it('sums to 100', () => {
+    const total = Object.values(NUTRITION_SCORE_POINTS).reduce((a, b) => a + b, 0)
+    expect(total).toBe(100)
+  })
+
+  it('matches the spec exactly', () => {
+    expect(NUTRITION_SCORE_POINTS).toEqual({
+      calories: 30,
+      protein: 25,
+      fibre: 15,
+      foodQuality: 10,
+      consistency: 10,
+      water: 5,
+      loggingCompleteness: 5,
     })
-    const total = Object.values(DEFAULT_NUTRITION_SCORE_WEIGHTS).reduce((a, b) => a + b, 0)
-    expect(total).toBeCloseTo(1, 10)
   })
 })
 
 describe('calculateNutritionScore', () => {
-  it('scores a perfect day at 100 / Excellent', () => {
+  it('scores a perfect day at 100 / Excellent, with every component at max points', () => {
     const result = calculateNutritionScore(baseInput)
     expect(result.score).toBe(100)
     expect(result.label).toBe('Excellent')
-  })
-
-  it('every component contribution respects its configured weight', () => {
-    const result = calculateNutritionScore(baseInput)
-    for (const component of Object.values(result.components)) {
-      expect(component.contribution).toBeCloseTo(component.score * component.weight, 5)
+    for (const [key, component] of Object.entries(result.components)) {
+      expect(component.points).toBe(component.maxPoints)
+      expect(component.maxPoints).toBe(NUTRITION_SCORE_POINTS[key as keyof typeof NUTRITION_SCORE_POINTS])
     }
   })
 
-  it('penalizes eating far over target calories', () => {
-    const result = calculateNutritionScore({ ...baseInput, caloriesConsumed: 3000 })
-    expect(result.components.calories.score).toBeLessThan(100)
-    expect(result.score).toBeLessThan(100)
+  it('the total is exactly the sum of the displayed points, not a separately rounded average', () => {
+    const result = calculateNutritionScore({
+      ...baseInput,
+      caloriesConsumed: 1700, // < 100%
+      foodQualityPercent: 82,
+      consistencyPercent: 91,
+    })
+    const summed = Object.values(result.components).reduce((sum, c) => sum + c.points, 0)
+    expect(result.score).toBe(summed)
   })
 
-  it('penalizes eating far under target calories the same as far over', () => {
+  it('penalizes eating far over or under target calories equally', () => {
     const over = calculateNutritionScore({ ...baseInput, caloriesConsumed: 2500 })
     const under = calculateNutritionScore({ ...baseInput, caloriesConsumed: 1500 })
-    expect(over.components.calories.score).toBe(under.components.calories.score)
+    expect(over.components.calories.points).toBeLessThan(NUTRITION_SCORE_POINTS.calories)
+    expect(over.components.calories.points).toBe(under.components.calories.points)
   })
 
   it('does not penalize exceeding protein/fibre/water targets', () => {
@@ -70,79 +74,106 @@ describe('calculateNutritionScore', () => {
       fibreConsumedG: 60,
       waterConsumedMl: 5000,
     })
-    expect(result.components.protein.score).toBe(100)
-    expect(result.components.fibre.score).toBe(100)
-    expect(result.components.water.score).toBe(100)
+    expect(result.components.protein.points).toBe(NUTRITION_SCORE_POINTS.protein)
+    expect(result.components.fibre.points).toBe(NUTRITION_SCORE_POINTS.fibre)
+    expect(result.components.water.points).toBe(NUTRITION_SCORE_POINTS.water)
   })
 
-  it('scores consistency proportionally to days logged this week', () => {
-    const result = calculateNutritionScore({ ...baseInput, daysLoggedInLastWeek: 3.5 })
-    expect(result.components.consistency.score).toBe(50)
+  it('converts the AI food-quality percent straight to points out of 10', () => {
+    const result = calculateNutritionScore({ ...baseInput, foodQualityPercent: 82 })
+    expect(result.components.foodQuality.points).toBe(8) // round(82/100*10) = 8.2 -> 8
   })
 
-  it('rewards spreading meals across the day over clustering them', () => {
-    const spread = calculateNutritionScore(baseInput) // morning, midday, evening
-    const clustered = calculateNutritionScore({
-      ...baseInput,
-      mealTimestamps: [localHourIso(19), localHourIso(19), localHourIso(19)],
-    })
-    expect(spread.components.mealTiming.score).toBeGreaterThan(
-      clustered.components.mealTiming.score,
-    )
+  it('converts the rolling consistency percent straight to points out of 10', () => {
+    const result = calculateNutritionScore({ ...baseInput, consistencyPercent: 91 })
+    expect(result.components.consistency.points).toBe(9) // round(91/100*10) = 9.1 -> 9
   })
 
-  it('gives no meal-timing credit when nothing has been logged yet today', () => {
-    const result = calculateNutritionScore({ ...baseInput, mealTimestamps: [] })
-    expect(result.components.mealTiming.score).toBe(0)
-  })
-
-  it('treats missing weight-trend data as neutral rather than penalizing it', () => {
-    const result = calculateNutritionScore({ ...baseInput, weightTrendKgPerWeek: null })
-    expect(result.components.weightTrend.score).toBe(100)
-  })
-
-  it('rewards a lose_weight goal for a downward trend and penalizes an upward one', () => {
-    const losing = calculateNutritionScore({
-      ...baseInput,
-      goalType: 'lose_weight',
-      weightTrendKgPerWeek: -0.5,
-    })
-    const gaining = calculateNutritionScore({
-      ...baseInput,
-      goalType: 'lose_weight',
-      weightTrendKgPerWeek: 0.5,
-    })
-    expect(losing.components.weightTrend.score).toBe(100)
-    expect(gaining.components.weightTrend.score).toBeLessThan(100)
-  })
-
-  it('rewards a gain_weight goal for an upward trend and penalizes a downward one', () => {
-    const gaining = calculateNutritionScore({
-      ...baseInput,
-      goalType: 'gain_weight',
-      weightTrendKgPerWeek: 0.3,
-    })
-    const losing = calculateNutritionScore({
-      ...baseInput,
-      goalType: 'gain_weight',
-      weightTrendKgPerWeek: -0.3,
-    })
-    expect(gaining.components.weightTrend.score).toBe(100)
-    expect(losing.components.weightTrend.score).toBeLessThan(100)
-  })
-
-  it('accepts custom weights without changing the underlying component scores', () => {
-    const customWeights = { ...DEFAULT_NUTRITION_SCORE_WEIGHTS, calories: 0.5, protein: 0.05 }
-    const result = calculateNutritionScore(baseInput, customWeights)
-    expect(result.components.calories.weight).toBe(0.5)
-    expect(result.components.calories.score).toBe(100)
+  it('matches the spec examples for logging completeness', () => {
+    expect(calculateNutritionScore({ ...baseInput, mealTypesLoggedToday: 4 }).components.loggingCompleteness.points).toBe(5)
+    expect(calculateNutritionScore({ ...baseInput, mealTypesLoggedToday: 1 }).components.loggingCompleteness.points).toBe(1)
+    expect(calculateNutritionScore({ ...baseInput, mealTypesLoggedToday: 2 }).components.loggingCompleteness.points).toBe(3)
+    expect(calculateNutritionScore({ ...baseInput, mealTypesLoggedToday: 0 }).components.loggingCompleteness.points).toBe(0)
   })
 
   it('maps scores to the correct label bands', () => {
     expect(calculateNutritionScore(baseInput).label).toBe('Excellent')
     expect(
-      calculateNutritionScore({ ...baseInput, caloriesConsumed: 2900, daysLoggedInLastWeek: 3 })
-        .label,
+      calculateNutritionScore({
+        ...baseInput,
+        caloriesConsumed: 2900,
+        foodQualityPercent: 20,
+        consistencyPercent: 20,
+      }).label,
     ).not.toBe('Excellent')
+  })
+})
+
+describe('calculateConsistencyPercent', () => {
+  it('treats no history as neutral rather than penalizing a new user', () => {
+    expect(calculateConsistencyPercent([])).toBe(100)
+  })
+
+  it('averages a perfect day at 100', () => {
+    const result = calculateConsistencyPercent([
+      {
+        caloriesPercent: 100,
+        proteinPercent: 100,
+        fibrePercent: 100,
+        mealsLoggedPercent: 100,
+        foodQualityPercent: 100,
+      },
+    ])
+    expect(result).toBe(100)
+  })
+
+  it('excludes a null food-quality day from that day\'s average rather than scoring it as 0', () => {
+    const withNull = calculateConsistencyPercent([
+      {
+        caloriesPercent: 80,
+        proteinPercent: 80,
+        fibrePercent: 80,
+        mealsLoggedPercent: 80,
+        foodQualityPercent: null,
+      },
+    ])
+    const withMatchingScore = calculateConsistencyPercent([
+      {
+        caloriesPercent: 80,
+        proteinPercent: 80,
+        fibrePercent: 80,
+        mealsLoggedPercent: 80,
+        foodQualityPercent: 80,
+      },
+    ])
+    expect(withNull).toBe(80)
+    expect(withMatchingScore).toBe(80)
+  })
+
+  it('one rough day only barely moves a mostly-consistent window', () => {
+    const goodDay = {
+      caloriesPercent: 95,
+      proteinPercent: 95,
+      fibrePercent: 95,
+      mealsLoggedPercent: 100,
+      foodQualityPercent: 90,
+    }
+    const roughDay = {
+      caloriesPercent: 20,
+      proteinPercent: 20,
+      fibrePercent: 20,
+      mealsLoggedPercent: 0,
+      foodQualityPercent: 15,
+    }
+    const mostlyGood = calculateConsistencyPercent([
+      goodDay,
+      goodDay,
+      goodDay,
+      goodDay,
+      goodDay,
+      goodDay,
+      roughDay,
+    ])
+    expect(mostlyGood).toBeGreaterThan(75)
   })
 })

@@ -1,3 +1,6 @@
+export { localDateKey } from '@omnomnom/shared'
+import { localDateKey } from '@omnomnom/shared'
+
 /** Local-day boundaries (not UTC) — a user's "today" is their own wall-clock day. */
 export function getDayRange(date: Date = new Date()): { from: string; to: string } {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -23,14 +26,6 @@ export function isSameLocalDay(a: Date, b: Date): boolean {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
   )
-}
-
-/** Stable per-local-day grouping key, e.g. "2026-07-04" in the viewer's own timezone. */
-export function localDateKey(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
 }
 
 /** The last `days` local-day keys, most recent (today) first. */

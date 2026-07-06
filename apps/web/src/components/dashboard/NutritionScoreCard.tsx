@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { HelpCircle } from 'lucide-react'
 import type { NutritionScoreBreakdown } from '@omnomnom/shared'
 import { Progress } from '@/components/ui/progress'
 import { Confetti } from '@/components/Confetti'
@@ -9,15 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { ScoreHelpModal } from '@/components/dashboard/ScoreHelpModal'
 
 const COMPONENT_LABELS: Record<keyof NutritionScoreBreakdown['components'], string> = {
   calories: 'Calories',
   protein: 'Protein',
   fibre: 'Fibre',
+  foodQuality: 'Food Quality',
+  consistency: 'Healthy Consistency',
   water: 'Water',
-  consistency: 'Healthy consistency',
-  mealTiming: 'Meal timing',
-  weightTrend: 'Weight trend',
+  loggingCompleteness: 'Logging Completeness',
 }
 
 const LABEL_STYLES: Record<string, string> = {
@@ -31,6 +33,7 @@ const CONFETTI_THRESHOLD = 90
 
 export function NutritionScoreCard({ breakdown }: { breakdown: NutritionScoreBreakdown }) {
   const [open, setOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const previousScore = useRef(breakdown.score)
 
@@ -45,28 +48,54 @@ export function NutritionScoreCard({ breakdown }: { breakdown: NutritionScoreBre
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="relative w-full text-left">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="relative w-full">
+        <div className="flex items-center justify-between gap-2">
+          <button type="button" onClick={() => setOpen(true)} className="flex-1 text-left">
             <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-              Nutrition score
+              Today&apos;s Nutrition Score
             </p>
             <p className={`text-lg font-semibold ${LABEL_STYLES[breakdown.label]}`}>
               {breakdown.label}
             </p>
-          </div>
-          <div className="text-foreground text-3xl font-bold tabular-nums">{breakdown.score}</div>
+          </button>
+          <button
+            type="button"
+            aria-label="How your nutrition score works"
+            onClick={() => setHelpOpen(true)}
+            className="text-muted-foreground hover:text-foreground shrink-0 p-1"
+          >
+            <HelpCircle size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="text-foreground shrink-0 text-3xl font-bold tabular-nums"
+          >
+            {breakdown.score}
+            <span className="text-muted-foreground text-base font-normal">/100</span>
+          </button>
         </div>
         {showConfetti && <Confetti />}
-      </button>
+      </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Score breakdown</DialogTitle>
-            <DialogDescription>
-              How today&apos;s {breakdown.score} was calculated.
-            </DialogDescription>
+            <div className="flex items-center gap-2">
+              <DialogTitle>Today&apos;s Nutrition Score</DialogTitle>
+              <button
+                type="button"
+                aria-label="How your nutrition score works"
+                onClick={() => setHelpOpen(true)}
+                className="text-muted-foreground hover:text-foreground p-0.5"
+              >
+                <HelpCircle size={15} />
+              </button>
+            </div>
+            <p className="text-foreground text-2xl font-bold tabular-nums">
+              {breakdown.score} / 100 points
+            </p>
+            <DialogDescription>Here&apos;s where your points came from today.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {(
@@ -79,15 +108,17 @@ export function NutritionScoreCard({ breakdown }: { breakdown: NutritionScoreBre
                 <div className="flex items-baseline justify-between text-sm">
                   <span className="text-foreground font-medium">{COMPONENT_LABELS[key]}</span>
                   <span className="text-muted-foreground text-xs">
-                    {component.score}/100 · {Math.round(component.weight * 100)}% weight
+                    {component.points} / {component.maxPoints} pts
                   </span>
                 </div>
-                <Progress value={component.score} />
+                <Progress value={(component.points / component.maxPoints) * 100} />
               </div>
             ))}
           </div>
         </DialogContent>
       </Dialog>
+
+      <ScoreHelpModal open={helpOpen} onOpenChange={setHelpOpen} />
     </>
   )
 }

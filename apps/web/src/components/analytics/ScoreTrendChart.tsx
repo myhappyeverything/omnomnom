@@ -1,6 +1,6 @@
-import type { ScoreTrendPoint } from '@/utils/analytics'
+import type { DailyScoreSummary } from '@/api/nutritionScore'
 
-export function ScoreTrendChart({ points }: { points: ScoreTrendPoint[] }) {
+export function ScoreTrendChart({ points }: { points: DailyScoreSummary[] }) {
   if (points.length === 0) {
     return (
       <div className="text-muted-foreground flex h-24 items-center justify-center text-sm">

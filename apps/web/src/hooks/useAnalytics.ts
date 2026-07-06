@@ -3,16 +3,10 @@ import { fetchActiveGoal } from '@/api/goals'
 import { listMeals } from '@/api/meals'
 import { listWaterLogs } from '@/api/water'
 import { listWeightLogs } from '@/api/weight'
+import { fetchNutritionScoreRange } from '@/api/nutritionScore'
 import { getLastNDaysRange, lastNDayKeys } from '@/utils/date'
 import { calculateWeightTrend } from '@/utils/weightTrend'
-import {
-  aggregateByDay,
-  average,
-  computeLoggingStreak,
-  computeScoreTrend,
-  mostCommonFoods,
-  mostCommonMealTypes,
-} from '@/utils/analytics'
+import { aggregateByDay, average, computeLoggingStreak, mostCommonFoods, mostCommonMealTypes } from '@/utils/analytics'
 
 export type AnalyticsRange = 'daily' | 'weekly' | 'monthly'
 
@@ -25,6 +19,7 @@ const RANGE_DAYS: Record<AnalyticsRange, number> = {
 export function useAnalytics(range: AnalyticsRange) {
   const days = RANGE_DAYS[range]
   const dateRange = getLastNDaysRange(days)
+  const dayKeys = lastNDayKeys(days).reverse() // ascending, oldest first
 
   const goalQuery = useQuery({ queryKey: ['goals', 'active'], queryFn: fetchActiveGoal })
   const mealsQuery = useQuery({
@@ -39,20 +34,27 @@ export function useAnalytics(range: AnalyticsRange) {
     queryKey: ['weight', 'analytics', dateRange.from],
     queryFn: () => listWeightLogs(dateRange),
   })
+  const scoreTrendQuery = useQuery({
+    queryKey: ['nutrition-score', 'range', dateRange.from, days],
+    queryFn: () => fetchNutritionScoreRange({ dateKeys: dayKeys, ...dateRange }),
+    enabled: !!goalQuery.data,
+  })
 
   const isLoading =
-    goalQuery.isLoading || mealsQuery.isLoading || waterQuery.isLoading || weightQuery.isLoading
+    goalQuery.isLoading ||
+    mealsQuery.isLoading ||
+    waterQuery.isLoading ||
+    weightQuery.isLoading ||
+    scoreTrendQuery.isLoading
 
-  const goal = goalQuery.data ?? null
   const meals = mealsQuery.data ?? []
   const waterLogs = waterQuery.data ?? []
   const weightLogs = weightQuery.data ?? []
+  const scoreTrend = scoreTrendQuery.data ?? []
 
-  const dayKeys = lastNDayKeys(days).reverse() // ascending, oldest first
   const dayAggregates = aggregateByDay(meals, waterLogs, dayKeys)
 
   const weightTrendKgPerWeek = calculateWeightTrend(weightLogs)
-  const scoreTrend = goal ? computeScoreTrend(dayAggregates, goal, weightTrendKgPerWeek) : []
   const streak = computeLoggingStreak(dayAggregates)
 
   const averages = {
@@ -65,7 +67,6 @@ export function useAnalytics(range: AnalyticsRange) {
 
   return {
     isLoading,
-    goal,
     days,
     averages,
     scoreTrend,

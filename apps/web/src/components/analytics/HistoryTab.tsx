@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { MEAL_TYPE_VALUES, type MealType } from '@omnomnom/shared'
-import { fetchActiveGoal } from '@/api/goals'
 import { listMeals } from '@/api/meals'
 import { listWaterLogs } from '@/api/water'
+import { fetchNutritionScoreRange } from '@/api/nutritionScore'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Divider } from '@/components/ui/divider'
 import { DayScoreRing } from '@/components/analytics/DayScoreRing'
@@ -13,7 +13,7 @@ import { LunchIllustration } from '@/components/illustrations/LunchIllustration'
 import { DinnerIllustration } from '@/components/illustrations/DinnerIllustration'
 import { SnackIllustration } from '@/components/illustrations/SnackIllustration'
 import { EmptyPlateIllustration } from '@/components/illustrations/EmptyPlateIllustration'
-import { aggregateByDay, computeScoreTrend } from '@/utils/analytics'
+import { aggregateByDay } from '@/utils/analytics'
 import { getMonthGrid, getMonthRange, localDateKey } from '@/utils/date'
 
 const WEEKDAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -40,7 +40,11 @@ export function HistoryTab() {
   )
   const grid = useMemo(() => getMonthGrid(viewedYear, viewedMonth), [viewedYear, viewedMonth])
 
-  const goalQuery = useQuery({ queryKey: ['goals', 'active'], queryFn: fetchActiveGoal })
+  const inMonthDayKeys = useMemo(
+    () => grid.filter((d) => d.inMonth).map((d) => d.dateKey),
+    [grid],
+  )
+
   const mealsQuery = useQuery({
     queryKey: ['meals', 'history', monthRange.from],
     queryFn: () => listMeals(monthRange),
@@ -49,18 +53,17 @@ export function HistoryTab() {
     queryKey: ['water', 'history-month', monthRange.from],
     queryFn: () => listWaterLogs(monthRange),
   })
+  const scoreQuery = useQuery({
+    queryKey: ['nutrition-score', 'range', monthRange.from],
+    queryFn: () => fetchNutritionScoreRange({ dateKeys: inMonthDayKeys, ...monthRange }),
+  })
 
-  const isLoading = goalQuery.isLoading || mealsQuery.isLoading || waterQuery.isLoading
-  const goal = goalQuery.data ?? null
+  const isLoading = mealsQuery.isLoading || waterQuery.isLoading || scoreQuery.isLoading
   const meals = mealsQuery.data ?? []
   const waterLogs = waterQuery.data ?? []
 
-  const inMonthDayKeys = grid.filter((d) => d.inMonth).map((d) => d.dateKey)
   const dayAggregates = aggregateByDay(meals, waterLogs, inMonthDayKeys)
-  // No per-day weight trend recompute for a calendar of scores — same simplification useAnalytics already makes.
-  const scoreByDay = new Map(
-    (goal ? computeScoreTrend(dayAggregates, goal, null) : []).map((p) => [p.dateKey, p.score]),
-  )
+  const scoreByDay = new Map((scoreQuery.data ?? []).map((p) => [p.dateKey, p.score]))
   const hasLogByDay = new Map(dayAggregates.map((d) => [d.dateKey, d.hasLog]))
 
   const todayKey = localDateKey(today)

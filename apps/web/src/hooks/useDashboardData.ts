@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { calculateNutritionScore, type NutritionScoreBreakdown } from '@omnomnom/shared'
 import { fetchActiveGoal } from '@/api/goals'
 import { listMeals } from '@/api/meals'
 import { listWaterLogs } from '@/api/water'
 import { listWeightLogs } from '@/api/weight'
-import { getDayRange, getLastNDaysRange } from '@/utils/date'
+import { fetchNutritionScore } from '@/api/nutritionScore'
+import { getDayRange, getLastNDaysRange, localDateKey } from '@/utils/date'
 import { calculateWeightTrend } from '@/utils/weightTrend'
 
 export interface DailyTotals {
@@ -19,17 +19,12 @@ const EMPTY_TOTALS: DailyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0, f
 
 export function useDashboardData() {
   const todayRange = getDayRange()
-  const weekRange = getLastNDaysRange(7)
   const weightRange = getLastNDaysRange(30)
 
   const goalQuery = useQuery({ queryKey: ['goals', 'active'], queryFn: fetchActiveGoal })
   const todayMealsQuery = useQuery({
     queryKey: ['meals', 'today', todayRange.from],
     queryFn: () => listMeals(todayRange),
-  })
-  const weekMealsQuery = useQuery({
-    queryKey: ['meals', 'week', weekRange.from],
-    queryFn: () => listMeals(weekRange),
   })
   const todayWaterQuery = useQuery({
     queryKey: ['water', 'today', todayRange.from],
@@ -39,14 +34,23 @@ export function useDashboardData() {
     queryKey: ['weight', 'recent', weightRange.from],
     queryFn: () => listWeightLogs(weightRange),
   })
+  const scoreQuery = useQuery({
+    queryKey: ['nutrition-score', todayRange.from],
+    queryFn: () =>
+      fetchNutritionScore({
+        date: localDateKey(new Date()),
+        from: todayRange.from,
+        to: todayRange.to,
+      }),
+    enabled: !!goalQuery.data,
+  })
 
-  const isLoading = [goalQuery, todayMealsQuery, weekMealsQuery, todayWaterQuery, weightQuery].some(
+  const isLoading = [goalQuery, todayMealsQuery, todayWaterQuery, weightQuery].some(
     (q) => q.isLoading,
   )
 
   const goal = goalQuery.data ?? null
   const todayMeals = todayMealsQuery.data ?? []
-  const weekMeals = weekMealsQuery.data ?? []
   const waterLogs = todayWaterQuery.data ?? []
   const weightLogs = weightQuery.data ?? []
 
@@ -63,33 +67,11 @@ export function useDashboardData() {
 
   const waterTotalMl = waterLogs.reduce((sum, log) => sum + log.amountMl, 0)
 
-  const daysLoggedInLastWeek = new Set(
-    weekMeals.map((meal) => new Date(meal.loggedAt).toDateString()),
-  ).size
-
   const sortedWeights = [...weightLogs].sort(
     (a, b) => new Date(a.loggedAt).getTime() - new Date(b.loggedAt).getTime(),
   )
   const currentWeightKg = sortedWeights.at(-1)?.weightKg ?? null
   const weightTrendKgPerWeek = calculateWeightTrend(weightLogs)
-
-  let score: NutritionScoreBreakdown | null = null
-  if (goal) {
-    score = calculateNutritionScore({
-      caloriesConsumed: totals.calories,
-      calorieTarget: goal.calorieTarget,
-      proteinConsumedG: totals.protein,
-      proteinTargetG: goal.proteinTargetG,
-      fibreConsumedG: totals.fibre,
-      fibreTargetG: goal.fibreTargetG,
-      waterConsumedMl: waterTotalMl,
-      waterTargetMl: goal.waterTargetMl,
-      daysLoggedInLastWeek,
-      mealTimestamps: todayMeals.map((meal) => meal.loggedAt),
-      goalType: goal.goalType,
-      weightTrendKgPerWeek,
-    })
-  }
 
   return {
     isLoading,
@@ -99,6 +81,7 @@ export function useDashboardData() {
     waterTotalMl,
     currentWeightKg,
     weightTrendKgPerWeek,
-    score,
+    score: scoreQuery.data ?? null,
+    isScoreLoading: scoreQuery.isLoading,
   }
 }
