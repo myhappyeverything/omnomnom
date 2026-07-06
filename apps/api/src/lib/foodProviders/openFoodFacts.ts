@@ -31,6 +31,7 @@ export async function searchOpenFoodFacts(
 
   const response = await fetch(url, {
     headers: { 'User-Agent': 'OmNomNom - Personal Nutrition Tracker - Version 1.0' },
+    signal: AbortSignal.timeout(4000),
   })
   if (!response.ok) return []
 

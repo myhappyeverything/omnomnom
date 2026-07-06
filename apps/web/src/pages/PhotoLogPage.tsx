@@ -17,6 +17,7 @@ import { compressImage } from '@/utils/imageCompression'
 import { inferMealTypeFromTime } from '@/utils/mealType'
 import { analyzePhoto } from '@/api/ai'
 import { createMeal } from '@/api/meals'
+import { resolveFoodId } from '@/api/foods'
 import { ApiError } from '@/api/client'
 
 const MEAL_LABELS: Record<MealType, string> = {
@@ -75,18 +76,21 @@ export function PhotoLogPage() {
   }
 
   const saveMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const confirmedItems = items.filter((item) => item.matchedFood)
-      return createMeal({
-        mealType,
-        loggedAt: new Date().toISOString(),
-        photoR2Key: r2Key ?? undefined,
-        items: confirmedItems.map((item) => ({
-          foodId: item.matchedFood!.id,
+      const resolvedItems = await Promise.all(
+        confirmedItems.map(async (item) => ({
+          foodId: await resolveFoodId(item.matchedFood!),
           quantity: item.quantity,
           unit: item.matchedFood!.servingUnit,
           aiConfidence: item.recognized.confidence,
         })),
+      )
+      return createMeal({
+        mealType,
+        loggedAt: new Date().toISOString(),
+        photoR2Key: r2Key ?? undefined,
+        items: resolvedItems,
       })
     },
     onSuccess: () => {

@@ -25,6 +25,9 @@ const FoodsPage = lazy(() => import('./pages/FoodsPage').then((m) => ({ default:
 const PhotoLogPage = lazy(() =>
   import('./pages/PhotoLogPage').then((m) => ({ default: m.PhotoLogPage })),
 )
+const ScanLabelPage = lazy(() =>
+  import('./pages/ScanLabelPage').then((m) => ({ default: m.ScanLabelPage })),
+)
 const WaterPage = lazy(() => import('./pages/WaterPage').then((m) => ({ default: m.WaterPage })))
 const WeightPage = lazy(() => import('./pages/WeightPage').then((m) => ({ default: m.WeightPage })))
 const AnalyticsPage = lazy(() =>
@@ -86,6 +89,7 @@ export function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/foods" element={<FoodsPage />} />
             <Route path="/log/photo" element={<PhotoLogPage />} />
+            <Route path="/log/label" element={<ScanLabelPage />} />
             <Route path="/water" element={<WaterPage />} />
             <Route path="/weight" element={<WeightPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />

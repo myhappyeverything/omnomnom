@@ -8,3 +8,10 @@ export const analyzePhotoSchema = z.object({
   mimeType: z.enum(IMAGE_MIME_TYPES),
 })
 export type AnalyzePhotoInput = z.infer<typeof analyzePhotoSchema>
+
+export const analyzeLabelSchema = z.object({
+  /** Raw base64 (no data: prefix) of a client-compressed photo of a nutrition facts label. */
+  imageBase64: z.string().min(1).max(10_000_000),
+  mimeType: z.enum(IMAGE_MIME_TYPES),
+})
+export type AnalyzeLabelInput = z.infer<typeof analyzeLabelSchema>

@@ -50,7 +50,7 @@ export async function searchUsda(
   url.searchParams.set('query', query)
   url.searchParams.set('pageSize', String(limit))
 
-  const response = await fetch(url)
+  const response = await fetch(url, { signal: AbortSignal.timeout(4000) })
   if (!response.ok) return []
 
   const data = await response.json<UsdaSearchResponse>()

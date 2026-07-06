@@ -1,13 +1,13 @@
-import type { CreateCustomFoodInput, FoodRecord } from '@omnomnom/shared'
+import type {
+  CreateCustomFoodInput,
+  FoodRecord,
+  MaterializeExternalFoodInput,
+} from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import type { FoodRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'
 import * as foodsRepo from '../repositories/foods.js'
-import { searchExternalProviders } from '../lib/foodProviders/index.js'
-
-// Only bother calling external providers when the local cache (everything
-// ever searched or logged before) doesn't already have enough to show.
-const MIN_LOCAL_RESULTS_BEFORE_EXTERNAL_SEARCH = 5
+import { searchExternalProviders, type ExternalFoodResult } from '../lib/foodProviders/index.js'
 
 export function toFoodRecord(row: FoodRow, isFavourite?: boolean): FoodRecord {
   return {
@@ -24,7 +24,30 @@ export function toFoodRecord(row: FoodRow, isFavourite?: boolean): FoodRecord {
     carbsG: row.carbs_g,
     fatG: row.fat_g,
     fibreG: row.fibre_g,
+    isLocal: true,
     ...(isFavourite !== undefined ? { isFavourite } : {}),
+  }
+}
+
+// Not persisted — this is a live provider hit shown alongside local results.
+// Logging or favouriting it calls materializeExternalFood first to get a
+// real D1 row and id.
+function toUnsavedFoodRecord(result: ExternalFoodResult): FoodRecord {
+  return {
+    id: `unsaved:${result.source}:${result.sourceId}`,
+    source: result.source,
+    sourceId: result.sourceId,
+    barcode: result.barcode,
+    name: result.name,
+    brand: result.brand,
+    servingSize: result.servingSize,
+    servingUnit: result.servingUnit,
+    calories: result.calories,
+    proteinG: result.proteinG,
+    carbsG: result.carbsG,
+    fatG: result.fatG,
+    fibreG: result.fibreG,
+    isLocal: false,
   }
 }
 
@@ -47,34 +70,54 @@ export async function searchFoods(
   query: string,
   limit: number,
 ): Promise<FoodRecord[]> {
-  const localRows = await foodsRepo.searchFoodsLocal(env, query, limit)
-  let rows = localRows
+  // Local D1 lookup and the external-provider fan-out run concurrently —
+  // neither has to wait on the other, and unlike before, a search no longer
+  // writes anything to D1 (that now only happens when a result is actually
+  // logged/favourited via materializeExternalFood), so this response is just
+  // two reads.
+  const [localRows, externalResults] = await Promise.all([
+    foodsRepo.searchFoodsLocal(env, query, limit),
+    searchExternalProviders(env, query, limit),
+  ])
 
-  if (localRows.length < MIN_LOCAL_RESULTS_BEFORE_EXTERNAL_SEARCH) {
-    const externalResults = await searchExternalProviders(env, query, limit)
-    const upserted = await Promise.all(
-      externalResults.map((result) =>
-        foodsRepo.upsertFood(env, {
-          source: result.source,
-          source_id: result.sourceId,
-          barcode: result.barcode,
-          name: result.name,
-          brand: result.brand,
-          serving_size: result.servingSize,
-          serving_unit: result.servingUnit,
-          calories: result.calories,
-          protein_g: result.proteinG,
-          carbs_g: result.carbsG,
-          fat_g: result.fatG,
-          fibre_g: result.fibreG,
-        }),
-      ),
-    )
-    const existingIds = new Set(localRows.map((row) => row.id))
-    rows = [...localRows, ...upserted.filter((food) => !existingIds.has(food.id))].slice(0, limit)
-  }
+  const localRecords = await toFoodRecordsWithFavourites(env, userId, localRows)
 
-  return toFoodRecordsWithFavourites(env, userId, rows)
+  const localSourceIds = new Set(
+    localRows.filter((row) => row.source_id).map((row) => `${row.source}:${row.source_id}`),
+  )
+  const unsavedRecords = externalResults
+    .filter((result) => !localSourceIds.has(`${result.source}:${result.sourceId}`))
+    .map(toUnsavedFoodRecord)
+
+  return [...localRecords, ...unsavedRecords].slice(0, limit)
+}
+
+/**
+ * Called when a user logs/favourites a search result that only exists as a
+ * live provider hit (FoodRecord.isLocal === false) — upserts it into D1 so
+ * meal_items/favourite_foods/recent_foods have a real row to reference, and
+ * every future search for the same product finds it locally instead of
+ * calling the provider again.
+ */
+export async function materializeExternalFood(
+  env: Env,
+  input: MaterializeExternalFoodInput,
+): Promise<FoodRecord> {
+  const row = await foodsRepo.upsertFood(env, {
+    source: input.source,
+    source_id: input.sourceId,
+    barcode: input.barcode ?? null,
+    name: input.name,
+    brand: input.brand ?? null,
+    serving_size: input.servingSize,
+    serving_unit: input.servingUnit,
+    calories: input.calories,
+    protein_g: input.proteinG,
+    carbs_g: input.carbsG,
+    fat_g: input.fatG,
+    fibre_g: input.fibreG,
+  })
+  return toFoodRecord(row)
 }
 
 export async function createCustomFood(

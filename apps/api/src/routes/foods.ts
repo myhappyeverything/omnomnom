@@ -1,6 +1,10 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { createCustomFoodSchema, searchFoodsQuerySchema } from '@omnomnom/shared'
+import {
+  createCustomFoodSchema,
+  materializeExternalFoodSchema,
+  searchFoodsQuerySchema,
+} from '@omnomnom/shared'
 import { z } from 'zod'
 import type { AppEnv } from '../types/hono.js'
 import { requireAuth } from '../middleware/auth.js'
@@ -35,6 +39,13 @@ foodsRoute.get('/favourites', async (c) => {
 
 foodsRoute.post('/', zValidator('json', createCustomFoodSchema), async (c) => {
   const food = await foodsService.createCustomFood(c.env, c.get('userId'), c.req.valid('json'))
+  return c.json({ food }, 201)
+})
+
+// Called right before logging/favouriting a search result that came back
+// with isLocal: false — persists it to D1 and hands back a real food id.
+foodsRoute.post('/external', zValidator('json', materializeExternalFoodSchema), async (c) => {
+  const food = await foodsService.materializeExternalFood(c.env, c.req.valid('json'))
   return c.json({ food }, 201)
 })
 

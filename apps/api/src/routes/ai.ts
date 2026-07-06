@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { analyzePhotoSchema } from '@omnomnom/shared'
+import { analyzeLabelSchema, analyzePhotoSchema } from '@omnomnom/shared'
 import { z } from 'zod'
 import type { AppEnv } from '../types/hono.js'
 import { requireAuth } from '../middleware/auth.js'
@@ -12,6 +12,11 @@ aiRoute.use('*', requireAuth)
 
 aiRoute.post('/analyze-photo', zValidator('json', analyzePhotoSchema), async (c) => {
   const result = await aiService.analyzePhoto(c.env, c.get('userId'), c.req.valid('json'))
+  return c.json(result)
+})
+
+aiRoute.post('/analyze-label', zValidator('json', analyzeLabelSchema), async (c) => {
+  const result = await aiService.analyzeLabel(c.env, c.req.valid('json'))
   return c.json(result)
 })
 

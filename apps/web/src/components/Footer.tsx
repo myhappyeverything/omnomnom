@@ -5,7 +5,7 @@ export function Footer() {
 
   return (
     <footer className="text-muted-foreground border-border border-t px-6 py-8 text-center text-sm">
-      <p>Made with love for Sanaa</p>
+      <p>Made for Sanaa</p>
       <p className="mt-1">
         &copy; {year}{' '}
         <a

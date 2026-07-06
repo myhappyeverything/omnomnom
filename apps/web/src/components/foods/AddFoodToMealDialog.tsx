@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createMeal } from '@/api/meals'
+import { resolveFoodId } from '@/api/foods'
 import { ApiError } from '@/api/client'
 
 export function AddFoodToMealDialog({
@@ -36,12 +37,13 @@ export function AddFoodToMealDialog({
   const ratio = food && quantity > 0 ? quantity / food.servingSize : 0
 
   const logMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!food) throw new Error('No food selected')
+      const foodId = await resolveFoodId(food)
       return createMeal({
         mealType,
         loggedAt: new Date().toISOString(),
-        items: [{ foodId: food.id, quantity, unit: food.servingUnit }],
+        items: [{ foodId, quantity, unit: food.servingUnit }],
       })
     },
     onSuccess: () => {

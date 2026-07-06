@@ -42,6 +42,14 @@ export interface FoodRecord {
   fatG: number
   fibreG: number
   isFavourite?: boolean
+  /**
+   * True if this food already has a durable row in D1 (custom, or a
+   * provider result someone has actually logged/favourited before).
+   * False for a live external-provider search hit that only exists in
+   * memory for this response — logging or favouriting it materializes a
+   * real row first (see foods/external).
+   */
+  isLocal: boolean
 }
 
 export interface RecognizedFoodItem {
@@ -60,6 +68,23 @@ export interface PhotoAnalysisResult {
   items: RecognizedFoodItem[]
   /** True if this exact photo (by content hash) was already analyzed before — no new AI call was made. */
   fromCache: boolean
+}
+
+/**
+ * Fields read directly off a nutrition facts label photo — null wherever the
+ * label was illegible or didn't print that field. Pre-fills the custom-food
+ * form for the user to confirm/correct, same as CreateCustomFoodInput's shape.
+ */
+export interface LabelAnalysisResult {
+  name: string | null
+  brand: string | null
+  servingSize: number | null
+  servingUnit: string | null
+  calories: number | null
+  proteinG: number | null
+  carbsG: number | null
+  fatG: number | null
+  fibreG: number | null
 }
 
 export interface RecipeItemRecord {

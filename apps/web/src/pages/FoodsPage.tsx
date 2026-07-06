@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { ScanLine } from 'lucide-react'
 import type { FoodRecord, MealType, RecipeRecord } from '@omnomnom/shared'
 import { MEAL_TYPE_VALUES } from '@omnomnom/shared'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select,
@@ -28,6 +30,7 @@ import {
   listFavouriteFoods,
   addFavourite,
   removeFavourite,
+  resolveFoodId,
 } from '@/api/foods'
 import { listRecipes } from '@/api/recipes'
 import { ApiError } from '@/api/client'
@@ -55,6 +58,7 @@ function EmptyList({ text, illustration }: { text: string; illustration?: 'star'
 }
 
 export function FoodsPage() {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const mealType = (searchParams.get('meal') as MealType | null) ?? inferMealTypeFromTime()
   const [query, setQuery] = useState('')
@@ -77,8 +81,11 @@ export function FoodsPage() {
   const recipesQuery = useQuery({ queryKey: ['recipes'], queryFn: listRecipes })
 
   const favouriteMutation = useMutation({
-    mutationFn: (food: FoodRecord) =>
-      food.isFavourite ? removeFavourite(food.id) : addFavourite(food.id),
+    mutationFn: async (food: FoodRecord) => {
+      if (food.isFavourite) return removeFavourite(food.id)
+      const foodId = await resolveFoodId(food)
+      return addFavourite(foodId)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['foods'] })
     },
@@ -100,6 +107,7 @@ export function FoodsPage() {
     isLoading: boolean,
     emptyText: string,
     illustration?: 'star',
+    showSavedBadge?: boolean,
   ) => {
     if (isLoading) return <p className="text-muted-foreground py-6 text-sm">Loading…</p>
     if (!foods || foods.length === 0) {
@@ -113,6 +121,7 @@ export function FoodsPage() {
             food={food}
             onSelect={setSelectedFood}
             onToggleFavourite={(f) => favouriteMutation.mutate(f)}
+            showSavedBadge={showSavedBadge}
           />
         ))}
       </div>
@@ -170,9 +179,21 @@ export function FoodsPage() {
           {debouncedQuery.length <= 1 ? (
             <p className="text-muted-foreground py-6 text-sm">Start typing to search foods.</p>
           ) : (
-            renderFoodList(searchQuery.data, searchQuery.isLoading, 'No foods found.')
+            renderFoodList(
+              searchQuery.data,
+              searchQuery.isLoading,
+              'No foods found.',
+              undefined,
+              true,
+            )
           )}
-          <CreateCustomFoodDialog />
+          <div className="grid grid-cols-2 gap-2">
+            <CreateCustomFoodDialog />
+            <Button variant="secondary" onClick={() => navigate('/log/label')}>
+              <ScanLine size={16} />
+              Scan label
+            </Button>
+          </div>
         </TabsContent>
 
         <TabsContent value="recent" className="pt-5">

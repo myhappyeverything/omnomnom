@@ -1,9 +1,15 @@
-import type { AnalyzePhotoInput, PhotoAnalysisResult, RecognizedFoodItem } from '@omnomnom/shared'
+import type {
+  AnalyzeLabelInput,
+  AnalyzePhotoInput,
+  LabelAnalysisResult,
+  PhotoAnalysisResult,
+  RecognizedFoodItem,
+} from '@omnomnom/shared'
 import type { Env } from '../types/env.js'
 import { sha256HexFromBytes } from '../lib/crypto.js'
 import { base64ToArrayBuffer } from '../lib/encoding.js'
 import { putMealImage } from '../lib/r2.js'
-import { identifyFoodsInImage, type OpenAiFoodItem } from '../lib/openai.js'
+import { identifyFoodsInImage, extractNutritionLabel, type OpenAiFoodItem } from '../lib/openai.js'
 import * as aiCacheRepo from '../repositories/aiCache.js'
 import * as foodsService from './foods.js'
 
@@ -50,4 +56,14 @@ export async function analyzePhoto(
   )
 
   return { imageHash, r2Key, items, fromCache }
+}
+
+// No caching or R2 storage here, unlike analyzePhoto — a label photo isn't
+// displayed anywhere after the fact, it just pre-fills the custom-food form
+// once, so there's nothing worth persisting.
+export async function analyzeLabel(
+  env: Env,
+  input: AnalyzeLabelInput,
+): Promise<LabelAnalysisResult> {
+  return extractNutritionLabel(env.OPENAI_API_KEY, input.imageBase64, input.mimeType)
 }

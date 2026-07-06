@@ -19,3 +19,23 @@ export const searchFoodsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(50).default(20),
 })
 export type SearchFoodsQuery = z.infer<typeof searchFoodsQuerySchema>
+
+// Persists a single external-provider search result into D1, the moment a
+// user actually logs/favourites it — search itself no longer does this for
+// every hit, so the local table only ever holds custom foods plus foods
+// someone has genuinely used.
+export const materializeExternalFoodSchema = z.object({
+  source: z.enum(['openfoodfacts', 'usda']),
+  sourceId: z.string().trim().min(1),
+  barcode: z.string().trim().max(64).nullable().optional(),
+  name: z.string().trim().min(1).max(200),
+  brand: z.string().trim().max(200).nullable().optional(),
+  servingSize: z.number().positive(),
+  servingUnit: z.string().trim().min(1).max(20),
+  calories: z.number().min(0),
+  proteinG: z.number().min(0),
+  carbsG: z.number().min(0),
+  fatG: z.number().min(0),
+  fibreG: z.number().min(0),
+})
+export type MaterializeExternalFoodInput = z.infer<typeof materializeExternalFoodSchema>
