@@ -6,6 +6,7 @@
 // icon-color: deep-orange; icon-glyph: heartbeat;
 
 const API_BASE = "https://omnomnom-api.wasim-811.workers.dev"
+const APP_URL = "https://omnomnom.pages.dev"
 const MASCOT_URL = "https://omnomnom.pages.dev/mascot.png"
 const KEYCHAIN_KEY = "omnomnom_widget_token"
 
@@ -73,6 +74,7 @@ async function loadMascotImage() {
 
 function errorWidget(message) {
   const widget = new ListWidget()
+  widget.url = APP_URL
   widget.backgroundColor = COLORS.background
   widget.setPadding(16, 16, 16, 16)
   widget.addSpacer()
@@ -88,6 +90,7 @@ function buildSmallWidget(summary, mascotImage) {
   const moodColor = MOOD_COLOR[summary.mascotMood] || COLORS.primary
 
   const widget = new ListWidget()
+  widget.url = APP_URL
   widget.backgroundColor = COLORS.background
   widget.setPadding(14, 12, 14, 12)
   widget.addSpacer()
