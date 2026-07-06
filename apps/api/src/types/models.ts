@@ -24,6 +24,16 @@ export interface RefreshTokenRow {
   created_at: string
 }
 
+export interface WidgetTokenRow {
+  id: string
+  user_id: string
+  token_hash: string
+  label: string
+  last_used_at: string | null
+  revoked_at: string | null
+  created_at: string
+}
+
 export interface GoalRow {
   id: string
   user_id: string

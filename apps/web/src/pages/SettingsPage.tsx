@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Footer } from '@/components/Footer'
 import { ProfileCard } from '@/components/settings/ProfileCard'
 import { GoalCard } from '@/components/settings/GoalCard'
+import { WidgetTokensCard } from '@/components/settings/WidgetTokensCard'
 import {
   Select,
   SelectContent,
@@ -172,6 +173,10 @@ export function SettingsPage() {
           <Link to="/notifications">Notification settings</Link>
         </Button>
       </div>
+
+      <Divider className="my-8" />
+
+      <WidgetTokensCard />
 
       <Divider className="my-8" />
 
