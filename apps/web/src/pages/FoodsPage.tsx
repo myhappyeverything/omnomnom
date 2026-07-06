@@ -189,7 +189,7 @@ export function FoodsPage() {
           )}
           <div className="grid grid-cols-2 gap-2">
             <CreateCustomFoodDialog />
-            <Button variant="secondary" onClick={() => navigate('/log/label')}>
+            <Button variant="secondary" onClick={() => navigate(`/log/label?meal=${mealType}`)}>
               <ScanLine size={16} />
               Scan label
             </Button>

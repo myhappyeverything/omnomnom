@@ -1,23 +1,48 @@
 import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Camera, ImageUp } from 'lucide-react'
-import { createCustomFoodSchema, type CreateCustomFoodInput } from '@omnomnom/shared'
+import {
+  createCustomFoodSchema,
+  MEAL_TYPE_VALUES,
+  type CreateCustomFoodInput,
+  type MealType,
+} from '@omnomnom/shared'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { CustomFoodFormFields } from '@/components/foods/CustomFoodFormFields'
 import { compressImage } from '@/utils/imageCompression'
 import { analyzeLabel } from '@/api/ai'
 import { createCustomFood } from '@/api/foods'
+import { createMeal } from '@/api/meals'
 import { ApiError } from '@/api/client'
+import { inferMealTypeFromTime } from '@/utils/mealType'
+
+const MEAL_LABELS: Record<MealType, string> = {
+  breakfast: 'Breakfast',
+  lunch: 'Lunch',
+  dinner: 'Dinner',
+  snack: 'Snack',
+}
 
 type Stage = 'capture' | 'analyzing' | 'review'
 
 export function ScanLabelPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+  const [mealType, setMealType] = useState<MealType>(
+    (searchParams.get('meal') as MealType | null) ?? inferMealTypeFromTime(),
+  )
   const [stage, setStage] = useState<Stage>('capture')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
@@ -59,11 +84,20 @@ export function ScanLabelPage() {
   })
 
   const saveMutation = useMutation({
-    mutationFn: createCustomFood,
-    onSuccess: () => {
+    mutationFn: async (data: CreateCustomFoodInput) => {
+      const food = await createCustomFood(data)
+      await createMeal({
+        mealType,
+        loggedAt: new Date().toISOString(),
+        items: [{ foodId: food.id, quantity: food.servingSize, unit: food.servingUnit }],
+      })
+      return food
+    },
+    onSuccess: (food) => {
       queryClient.invalidateQueries({ queryKey: ['foods'] })
-      toast.success('Food saved')
-      navigate('/foods')
+      queryClient.invalidateQueries({ queryKey: ['meals'] })
+      toast.success(`${food.name} added to ${mealType}`)
+      navigate('/dashboard')
     },
     onError: (error) => {
       toast.error(error instanceof ApiError ? error.message : 'Could not save this food')
@@ -138,8 +172,25 @@ export function ScanLabelPage() {
     <div className="px-6 pt-8 pb-6">
       <h1 className="text-foreground mb-2 text-3xl font-bold tracking-tight">Check the numbers</h1>
       <p className="text-muted-foreground mb-6 text-sm">
-        Fix anything we misread, then save — it'll show up in food search afterwards.
+        Fix anything we misread, then save — it'll log this and save it for next time.
       </p>
+
+      <div className="mb-6 flex items-center gap-2">
+        <span className="text-muted-foreground text-sm">Logging to</span>
+        <Select value={mealType} onValueChange={(v) => setMealType(v as MealType)}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MEAL_TYPE_VALUES.map((type) => (
+              <SelectItem key={type} value={type}>
+                {MEAL_LABELS[type]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <form
         onSubmit={handleSubmit((data) => saveMutation.mutate(data))}
         className="space-y-4"
@@ -147,7 +198,7 @@ export function ScanLabelPage() {
       >
         <CustomFoodFormFields register={register} errors={errors} />
         <Button type="submit" className="w-full" disabled={saveMutation.isPending}>
-          {saveMutation.isPending ? 'Saving…' : 'Save food'}
+          {saveMutation.isPending ? 'Saving…' : `Add to ${mealType}`}
         </Button>
       </form>
     </div>

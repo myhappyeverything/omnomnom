@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDashboardData } from '@/hooks/useDashboardData'
 import { useAuth } from '@/context/AuthContext'
@@ -10,9 +10,7 @@ import { MacroProgressGrid } from '@/components/dashboard/MacroProgressGrid'
 import { WaterCard } from '@/components/dashboard/WaterCard'
 import { WeightCard } from '@/components/dashboard/WeightCard'
 import { MealRows } from '@/components/dashboard/MealRows'
-import { QuickAddSheet } from '@/components/dashboard/QuickAddSheet'
 import { Divider } from '@/components/ui/divider'
-import { FloatingActionButton } from '@/components/FloatingActionButton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function DashboardPage() {
@@ -28,7 +26,6 @@ export function DashboardPage() {
   } = useDashboardData()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [mascotTrigger, setMascotTrigger] = useState<'smile' | 'bounce' | null>(null)
 
   const previousMealCount = useRef<number | null>(null)
@@ -123,11 +120,6 @@ export function DashboardPage() {
       <Divider className="my-6" />
 
       <WeightCard currentWeightKg={currentWeightKg} trendKgPerWeek={weightTrendKgPerWeek} />
-
-      <FloatingActionButton aria-label="Quick add" onClick={() => setQuickAddOpen(true)}>
-        <Plus size={24} />
-      </FloatingActionButton>
-      <QuickAddSheet open={quickAddOpen} onOpenChange={setQuickAddOpen} />
     </div>
   )
 }

@@ -9,11 +9,19 @@ function cacheKey(query: string, limit: number): string {
   return `food-search:${query.trim().toLowerCase()}:${limit}`
 }
 
+function normalizedKey(result: ExternalFoodResult): string {
+  return `${result.name}|${result.brand ?? ''}`.toLowerCase().replace(/[^a-z0-9|]/g, '')
+}
+
 /**
- * Tries providers in priority order (OpenFoodFacts, then USDA) and stops at
- * the first one with results — this is the FoodProvider fan-out described in
- * the architecture doc. Results are cached in KV so a repeated search never
- * re-hits either external API.
+ * Queries both providers concurrently and interleaves their results — USDA's
+ * dataset is small and curated (one good entry per food), while OpenFoodFacts
+ * is crowdsourced and returns far more, noisier hits for the same query.
+ * Concatenating OFF-first would bury USDA's better matches under a wall of
+ * near-duplicate branded products, so results alternate rank-by-rank (USDA's
+ * pick at a given rank before OFF's), with exact name+brand duplicates across
+ * either provider dropped. The caller still trims to the requested limit.
+ * Cached in KV so a repeated search never re-hits either external API.
  */
 export async function searchExternalProviders(
   env: Env,
@@ -24,13 +32,25 @@ export async function searchExternalProviders(
   const cached = await env.CACHE.get(key, 'json')
   if (cached) return cached as ExternalFoodResult[]
 
-  let results = await searchOpenFoodFacts(query, limit).catch(() => [])
-  if (results.length === 0) {
-    results = await searchUsda(query, limit, env.USDA_FDC_API_KEY).catch(() => [])
+  const [offResults, usdaResults] = await Promise.all([
+    searchOpenFoodFacts(query, limit).catch(() => []),
+    searchUsda(query, limit, env.USDA_FDC_API_KEY).catch(() => []),
+  ])
+
+  const seen = new Set<string>()
+  const merged: ExternalFoodResult[] = []
+  for (let i = 0; i < Math.max(offResults.length, usdaResults.length); i++) {
+    for (const result of [usdaResults[i], offResults[i]]) {
+      if (!result) continue
+      const dedupeKey = normalizedKey(result)
+      if (seen.has(dedupeKey)) continue
+      seen.add(dedupeKey)
+      merged.push(result)
+    }
   }
 
-  await env.CACHE.put(key, JSON.stringify(results), { expirationTtl: CACHE_TTL_SECONDS })
-  return results
+  await env.CACHE.put(key, JSON.stringify(merged), { expirationTtl: CACHE_TTL_SECONDS })
+  return merged
 }
 
 export type { ExternalFoodResult }
