@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ReviewItemRow, type DraftItem } from '@/components/photo/ReviewItemRow'
+import { BitePhoto } from '@/components/photo/BitePhoto'
 import { compressImage } from '@/utils/imageCompression'
 import { inferMealTypeFromTime } from '@/utils/mealType'
 import { analyzePhoto } from '@/api/ai'
@@ -153,11 +154,7 @@ export function PhotoLogPage() {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 p-6">
         {previewUrl && (
-          <img
-            src={previewUrl}
-            alt="Selected meal"
-            className="rounded-card h-48 w-48 object-cover"
-          />
+          <BitePhoto src={previewUrl} alt="Selected meal" className="rounded-card h-48 w-48" />
         )}
         <div
           className="border-border border-t-primary size-8 animate-spin rounded-full border-2"
