@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// The center "+" button that nestles into the Liquid Glass tab bar, raised just
-/// slightly, and fans out quick-add actions one by one from the bar upward.
-struct QuickAddOverlay: View {
+/// The quick-add fan-out, triggered by the center "Add" tab. It shows a scrim
+/// and a column of actions that animate in from the tab bar upward. The trigger
+/// lives in the native tab bar (see RootTabView), so there is no floating button.
+struct QuickAddMenu: View {
+    @Binding var isPresented: Bool
     @Environment(AppState.self) private var appState
-    @State private var expanded = false
     @State private var activeSheet: Sheet?
 
     private enum Sheet: Identifiable {
@@ -21,10 +22,10 @@ struct QuickAddOverlay: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            if expanded {
+            if isPresented {
                 Color.black.opacity(0.22)
                     .ignoresSafeArea()
-                    .onTapGesture { collapse() }
+                    .onTapGesture { close() }
                     .transition(.opacity)
             }
 
@@ -32,10 +33,11 @@ struct QuickAddOverlay: View {
                 ForEach(Array(actions.enumerated()), id: \.element.id) { index, action in
                     actionRow(action, index: index)
                 }
-                plusButton
             }
-            .padding(.bottom, 6)
+            .padding(.bottom, 4)
+            .allowsHitTesting(isPresented)
         }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isPresented)
         .fullScreenCover(item: $activeSheet) { sheet in
             switch sheet {
             case .photo: PhotoLogView { _ in appState.dataChanged() }
@@ -48,13 +50,13 @@ struct QuickAddOverlay: View {
         [
             Action(title: "Search food", symbol: "magnifyingglass") {
                 appState.selectedTab = 1
-                collapse()
+                close()
             },
             Action(title: "Photo", symbol: "camera.fill") {
-                collapse(); activeSheet = .photo
+                close(); activeSheet = .photo
             },
             Action(title: "Scan label", symbol: "text.viewfinder") {
-                collapse(); activeSheet = .label
+                close(); activeSheet = .label
             },
             Action(title: "Water +250 ml", symbol: "drop.fill") {
                 Task {
@@ -63,12 +65,12 @@ struct QuickAddOverlay: View {
                     appState.dataChanged()
                     Haptics.success()
                 }
-                collapse()
+                close()
             },
         ]
     }
 
-    /// Bottom row (closest to the +) animates first.
+    /// Bottom row (closest to the tab bar) animates in first.
     private func actionRow(_ action: Action, index: Int) -> some View {
         let delay = Double(actions.count - 1 - index) * 0.05
         return Button {
@@ -85,35 +87,14 @@ struct QuickAddOverlay: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .glassEffect(.regular.interactive(), in: .capsule)
         }
-        .frame(width: 220)
-        .opacity(expanded ? 1 : 0)
-        .scaleEffect(expanded ? 1 : 0.9, anchor: .bottom)
-        .offset(y: expanded ? 0 : 16)
-        .animation(.spring(response: 0.32, dampingFraction: 0.72).delay(expanded ? delay : 0), value: expanded)
-        .allowsHitTesting(expanded)
+        .frame(width: 230)
+        .opacity(isPresented ? 1 : 0)
+        .scaleEffect(isPresented ? 1 : 0.9, anchor: .bottom)
+        .offset(y: isPresented ? 0 : 16)
+        .animation(.spring(response: 0.32, dampingFraction: 0.72).delay(isPresented ? delay : 0), value: isPresented)
     }
 
-    private var plusButton: some View {
-        Button {
-            Haptics.tap()
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { expanded.toggle() }
-        } label: {
-            Image(systemName: "plus")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 54, height: 54)
-                .background(
-                    LinearGradient(colors: [Theme.accent, Theme.accentDeep],
-                                   startPoint: .topLeading, endPoint: .bottomTrailing),
-                    in: .circle)
-                .overlay(Circle().strokeBorder(.white.opacity(0.6), lineWidth: 3))
-                .rotationEffect(.degrees(expanded ? 45 : 0))
-                .shadow(color: Theme.accentDeep.opacity(0.35), radius: 6, y: 2)
-        }
-        .accessibilityLabel(expanded ? "Close quick add" : "Quick add")
-    }
-
-    private func collapse() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { expanded = false }
+    private func close() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { isPresented = false }
     }
 }

@@ -1,10 +1,14 @@
 import SwiftUI
 
 /// The app's root. On iOS 26 this `TabView` automatically adopts the floating
-/// Liquid Glass tab bar; each tab owns its own `NavigationStack`. A raised
-/// quick-add button floats above the bar as a separate layer.
+/// Liquid Glass tab bar. The center "Add" tab is an action rather than a page:
+/// selecting it reverts to the previous tab and opens the quick-add menu.
 struct RootTabView: View {
     @Environment(AppState.self) private var appState
+    @State private var previousTab = 0
+    @State private var showQuickAdd = false
+
+    private let addTab = 2
 
     var body: some View {
         @Bindable var appState = appState
@@ -15,15 +19,29 @@ struct RootTabView: View {
             Tab("Foods", systemImage: "fork.knife", value: 1) {
                 FoodsView()
             }
-            Tab("Trends", systemImage: "chart.line.uptrend.xyaxis", value: 2) {
+            Tab("Add", systemImage: "plus.circle.fill", value: addTab) {
+                Color.clear
+            }
+            Tab("Trends", systemImage: "chart.line.uptrend.xyaxis", value: 3) {
                 TrendsView()
             }
-            Tab("Settings", systemImage: "gearshape.fill", value: 3) {
+            Tab("Settings", systemImage: "gearshape.fill", value: 4) {
                 SettingsView()
             }
         }
-        .overlay(alignment: .bottom) {
-            QuickAddOverlay()
+        .onChange(of: appState.selectedTab) { _, newValue in
+            // The center "Add" tab is an action: revert to the previous tab and
+            // toggle the quick-add menu instead of showing a page.
+            if newValue == addTab {
+                appState.selectedTab = previousTab
+                Haptics.tap()
+                showQuickAdd.toggle()
+            } else {
+                previousTab = newValue
+            }
+        }
+        .overlay {
+            QuickAddMenu(isPresented: $showQuickAdd)
         }
     }
 }

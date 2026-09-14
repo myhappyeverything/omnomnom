@@ -22,7 +22,7 @@ struct FoodsView: View {
                     .pickerStyle(.segmented)
                 }
                 .padding(.horizontal, Theme.Spacing.md)
-                .padding(.top, Theme.Spacing.xs)
+                .padding(.top, Theme.Spacing.md + Theme.Spacing.xs)
 
                 content
             }
