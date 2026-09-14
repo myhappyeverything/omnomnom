@@ -113,7 +113,22 @@ export async function logoutSession(env: Env, rawRefreshToken: string): Promise<
   }
 }
 
-/** Deletes the user row; every other table cascades on user_id/created_by_user_id. */
+/**
+ * Deletes the account and every row tied to it. Most tables cascade on
+ * user_id / created_by_user_id, but meal_items.food_id and recipe_items.food_id
+ * are ON DELETE RESTRICT, so a user's own custom foods can't be cascade-deleted
+ * while their line items still reference them. We clear those line items first,
+ * then delete the user so the remaining tables (including the user's custom
+ * foods) cascade cleanly.
+ *
+ * Meal photos live in a shared, content-addressed R2 cache (keyed by image
+ * hash, deliberately de-duplicated across users), so they are intentionally not
+ * deleted here — once the user's meals are gone there is no link back to them.
+ */
 export async function deleteAccount(env: Env, userId: string): Promise<void> {
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM meal_items WHERE meal_id IN (SELECT id FROM meals WHERE user_id = ?)').bind(userId),
+    env.DB.prepare('DELETE FROM recipe_items WHERE recipe_id IN (SELECT id FROM recipes WHERE user_id = ?)').bind(userId),
+  ])
   await deleteUser(env, userId)
 }

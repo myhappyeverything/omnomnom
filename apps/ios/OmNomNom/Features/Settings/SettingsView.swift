@@ -21,6 +21,12 @@ struct SettingsView: View {
         return !trimmed.isEmpty && trimmed != session.user?.name
     }
 
+    private var initials: String {
+        let parts = (session.user?.name ?? "").split(separator: " ").prefix(2)
+        let letters = parts.compactMap { $0.first }.map(String.init).joined().uppercased()
+        return letters.isEmpty ? "?" : letters
+    }
+
     private var dobLabel: String {
         guard let dob = session.user?.dateOfBirth, let date = ISO8601.date(from: dob) else { return "Not set" }
         return date.formatted(.dateTime.day().month(.abbreviated).year())
@@ -100,8 +106,14 @@ struct SettingsView: View {
     private var profileCard: some View {
         SettingsCard(title: "Profile") {
             HStack(spacing: Theme.Spacing.md) {
-                Image(systemName: "person.crop.circle.fill")
-                    .font(.system(size: 44)).foregroundStyle(.secondary)
+                Text(initials)
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 52, height: 52)
+                    .background(
+                        LinearGradient(colors: [Theme.accent, Theme.accentDeep],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing),
+                        in: .circle)
                 Text(session.user?.email ?? "")
                     .font(.subheadline).foregroundStyle(.secondary)
                 Spacer(minLength: 0)
