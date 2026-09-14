@@ -34,7 +34,7 @@ struct QuickAddMenu: View {
                     actionRow(action, index: index)
                 }
             }
-            .padding(.bottom, 4)
+            .padding(.bottom, 84) // sit clearly above the tab bar
             .allowsHitTesting(isPresented)
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isPresented)
@@ -70,9 +70,10 @@ struct QuickAddMenu: View {
         ]
     }
 
-    /// Bottom row (closest to the tab bar) animates in first.
+    /// Bottom row (closest to the tab bar) animates in first, then upward.
     private func actionRow(_ action: Action, index: Int) -> some View {
-        let delay = Double(actions.count - 1 - index) * 0.05
+        let stepsFromBottom = Double(actions.count - 1 - index)
+        let delay = isPresented ? stepsFromBottom * 0.09 : 0
         return Button {
             Haptics.tap()
             action.run()
@@ -89,9 +90,9 @@ struct QuickAddMenu: View {
         }
         .frame(width: 230)
         .opacity(isPresented ? 1 : 0)
-        .scaleEffect(isPresented ? 1 : 0.9, anchor: .bottom)
-        .offset(y: isPresented ? 0 : 16)
-        .animation(.spring(response: 0.32, dampingFraction: 0.72).delay(isPresented ? delay : 0), value: isPresented)
+        .scaleEffect(isPresented ? 1 : 0.8, anchor: .bottom)
+        .offset(y: isPresented ? 0 : 28)
+        .animation(.spring(response: 0.34, dampingFraction: 0.7).delay(delay), value: isPresented)
     }
 
     private func close() {
