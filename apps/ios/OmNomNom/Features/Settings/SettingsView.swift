@@ -21,6 +21,11 @@ struct SettingsView: View {
         return !trimmed.isEmpty && trimmed != session.user?.name
     }
 
+    private var dobLabel: String {
+        guard let dob = session.user?.dateOfBirth, let date = ISO8601.date(from: dob) else { return "Not set" }
+        return date.formatted(.dateTime.day().month(.abbreviated).year())
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -121,6 +126,8 @@ struct SettingsView: View {
             }
             Divider()
             tapRow("Height", value: session.user.map { Units.heightLabel($0.heightCm, unitSystem) }) { showBodyDetails = true }
+            Divider()
+            tapRow("Date of birth", value: dobLabel) { showBodyDetails = true }
             Divider()
             tapRow("Weight", value: latestWeight.map { Units.formattedWeight($0.weightKg, unitSystem) } ?? "Add") { showWeighIn = true }
         }
