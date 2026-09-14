@@ -76,18 +76,18 @@ struct BitesPhotoView: View {
     /// A jittered 3x4 grid of bites, each big enough to cover its cell (so the
     /// union leaves no gaps), ordered from the outer edges inward.
     private static func makeBites() -> [Bite] {
-        let cols = 3, rows = 4
+        let cols = 4, rows = 5
         var rng = SystemRandomNumberGenerator()
         var bites: [Bite] = []
         for r in 0..<rows {
             for c in 0..<cols {
                 let baseX = (Double(c) + 0.5) / Double(cols)
                 let baseY = (Double(r) + 0.5) / Double(rows)
-                let jitterX = Double.random(in: -0.05...0.05, using: &rng)
-                let jitterY = Double.random(in: -0.05...0.05, using: &rng)
+                let jitterX = Double.random(in: -0.03...0.03, using: &rng)
+                let jitterY = Double.random(in: -0.03...0.03, using: &rng)
                 bites.append(Bite(
                     center: CGPoint(x: baseX + jitterX, y: baseY + jitterY),
-                    radius: CGFloat.random(in: 0.28...0.36, using: &rng),
+                    radius: CGFloat.random(in: 0.20...0.25, using: &rng),
                     rotation: Double.random(in: 0..<(2 * .pi), using: &rng),
                     teeth: Int.random(in: 6...9, using: &rng)))
             }

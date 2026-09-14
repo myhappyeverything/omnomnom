@@ -7,6 +7,7 @@ struct WeighInSheet: View {
     var onSave: (Double) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var editing: Bool
     @State private var value: Double
 
     init(unitSystem: UnitSystem, current: Double?, onSave: @escaping (Double) -> Void) {
@@ -20,14 +21,24 @@ struct WeighInSheet: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: Theme.Spacing.lg) {
-                Text("\(value, specifier: "%.1f") \(Units.weightUnit(unitSystem))")
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Stepper(value: $value, in: 20...400, step: 0.1) {
-                    Text("Adjust weight")
+                // Tap the number to type it directly, or use the +/- buttons.
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    TextField("0", value: $value, format: .number.precision(.fractionLength(0...1)))
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .focused($editing)
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .fixedSize()
+                    Text(Units.weightUnit(unitSystem))
+                        .font(.title2.weight(.semibold)).foregroundStyle(.secondary)
                 }
-                .labelsHidden()
+
+                HStack(spacing: Theme.Spacing.lg) {
+                    stepButton("minus") { value = max(20, (value - 0.1) * 10 / 10).rounded(toPlaces: 1) }
+                    stepButton("plus") { value = min(400, value + 0.1).rounded(toPlaces: 1) }
+                }
+
                 Button {
                     onSave(value)
                     dismiss()
@@ -39,7 +50,23 @@ struct WeighInSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .keyboard) {
+                    Button("Done") { editing = false }.frame(maxWidth: .infinity, alignment: .trailing)
+                }
             }
         }
+    }
+
+    private func stepButton(_ symbol: String, action: @escaping () -> Void) -> some View {
+        Button {
+            editing = false
+            action()
+        } label: {
+            Image(systemName: symbol)
+                .font(.title2.weight(.semibold))
+                .frame(width: 56, height: 44)
+                .glassEffect(.regular.interactive(), in: .capsule)
+        }
+        .foregroundStyle(Theme.accent)
     }
 }

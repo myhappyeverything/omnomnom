@@ -41,6 +41,11 @@ final class Session {
         let user = try await api.register(account)
         self.user = user
         _ = try await api.createGoal(goal)
+        // Record the starting weight from onboarding as the first weigh-in so it
+        // shows on the dashboard, trends, and settings.
+        _ = try? await api.logWeight(CreateWeightLogInput(
+            weightKg: goal.startingWeightKg, loggedAt: ISO8601.string(from: .now),
+            notes: nil, clientId: UUID().uuidString))
         await loadProfile(existingUser: user)
     }
 

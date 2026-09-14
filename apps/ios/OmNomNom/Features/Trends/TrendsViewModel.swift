@@ -28,6 +28,7 @@ final class TrendsViewModel {
     var range: Range = .month { didSet { Task { await load() } } }
 
     var scores: [DailyScoreSummary] = []
+    var calendarScores: [DailyScoreSummary] = []   // a year, for the history calendar
     var weights: [WeightLogRecord] = []
     var waters: [WaterLogRecord] = []
     var isLoading = false
@@ -45,6 +46,8 @@ final class TrendsViewModel {
             switch section {
             case .nutrition:
                 scores = try await api.nutritionScoreRange(from: bounds.from, to: bounds.to)
+                let year = Date.range(daysBack: 365)
+                calendarScores = (try? await api.nutritionScoreRange(from: year.from, to: year.to)) ?? calendarScores
             case .weight:
                 weights = try await api.weight(from: Date.range(daysBack: max(range.days, 365)).from,
                                                to: bounds.to)

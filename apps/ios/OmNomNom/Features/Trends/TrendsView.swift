@@ -108,7 +108,7 @@ struct TrendsView: View {
             Card {
                 VStack(alignment: .leading, spacing: Theme.Spacing.md) {
                     Text("History").font(.headline)
-                    NutritionCalendar(scores: model.scores) { date in
+                    NutritionCalendar(scores: model.calendarScores) { date in
                         selectedDay = DaySelection(date: date)
                     }
                     Text("Tap a day to see what you logged.")
@@ -364,7 +364,8 @@ private struct NutritionCalendar: View {
                 .background(score.map { scoreBandColor($0).opacity(0.22) } ?? Color.gray.opacity(0.08),
                             in: .rect(cornerRadius: 8))
                 .overlay(alignment: .bottom) {
-                    if let score { Circle().fill(scoreBandColor(score)).frame(width: 5, height: 5).padding(.bottom, 4) }
+                    // A dot marks days with something logged.
+                    if let score { Circle().fill(scoreBandColor(score)).frame(width: 6, height: 6).padding(.bottom, 4) }
                 }
                 .foregroundStyle(isFuture ? Color.secondary.opacity(0.4) : .primary)
         }

@@ -3,16 +3,23 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(Session.self) private var session
 
+    @State private var name = ""
     @State private var theme: AppTheme = .system
     @State private var unitSystem: UnitSystem = .metric
     @State private var latestWeight: WeightLogRecord?
-    @State private var showEditProfile = false
+    @State private var showBodyDetails = false
     @State private var showEditGoal = false
+    @State private var showWeighIn = false
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
     @State private var exportURL: URL?
     @State private var showShare = false
     @State private var isExporting = false
+
+    private var nameChanged: Bool {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        return !trimmed.isEmpty && trimmed != session.user?.name
+    }
 
     var body: some View {
         NavigationStack {
@@ -23,20 +30,14 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, Theme.Spacing.xs)
 
-                    profileGroup
-                    goalGroup
-                    preferencesGroup
-
-                    SettingsGroup {
-                        NavigationLink { NotificationsView() } label: {
-                            SettingsRow(icon: "bell.badge.fill", tint: Theme.accent, title: "Notifications", showChevron: true)
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    dataGroup
-                    aboutGroup
-                    accountGroup
+                    profileCard
+                    goalCard
+                    preferencesCard
+                    notificationsCard
+                    dataCard
+                    aboutCard
+                    signOutButton
+                    deleteCard
                 }
                 .padding(Theme.Spacing.md)
             }
@@ -45,14 +46,13 @@ struct SettingsView: View {
             .toolbar(.hidden, for: .navigationBar)
             .tint(Theme.accent)
             .task {
+                name = session.user?.name ?? ""
                 theme = session.settings?.theme ?? .system
                 unitSystem = session.settings?.unitSystem ?? .metric
                 await loadLatestWeight()
             }
-            .sheet(isPresented: $showEditProfile, onDismiss: { Task { await loadLatestWeight() } }) {
-                if let user = session.user {
-                    EditProfileSheet(user: user, unitSystem: unitSystem, latestWeight: latestWeight)
-                }
+            .sheet(isPresented: $showBodyDetails) {
+                if let user = session.user { BodyDetailsSheet(user: user, unitSystem: unitSystem) }
             }
             .sheet(isPresented: $showEditGoal) {
                 if let goal = session.activeGoal, let user = session.user {
@@ -61,9 +61,18 @@ struct SettingsView: View {
                                   unitSystem: unitSystem)
                 }
             }
-            .sheet(isPresented: $showShare) {
-                if let exportURL { ShareSheet(items: [exportURL]) }
+            .sheet(isPresented: $showWeighIn) {
+                WeighInSheet(unitSystem: unitSystem, current: latestWeight?.weightKg) { value in
+                    Task {
+                        latestWeight = try? await APIClient.shared.logWeight(CreateWeightLogInput(
+                            weightKg: Units.kg(fromDisplay: value, unitSystem),
+                            loggedAt: ISO8601.string(from: .now), notes: nil, clientId: UUID().uuidString))
+                        Haptics.success()
+                    }
+                }
+                .presentationDetents([.height(300)])
             }
+            .sheet(isPresented: $showShare) { if let exportURL { ShareSheet(items: [exportURL]) } }
             .confirmationDialog("Delete your account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
                 Button("Delete everything", role: .destructive) {
                     Task { isDeleting = true; try? await session.deleteAccount(); isDeleting = false }
@@ -81,219 +90,216 @@ struct SettingsView: View {
             .max { $0.loggedAt < $1.loggedAt }
     }
 
-    // MARK: Groups
+    // MARK: Cards
 
-    private var profileGroup: some View {
-        SettingsGroup(title: "Profile") {
-            if let user = session.user {
-                SettingsRow(icon: "person.fill", tint: Theme.accent, title: "Name", value: user.name)
-                divider
-                SettingsRow(icon: "envelope.fill", tint: Theme.water, title: "Email", value: user.email)
-                divider
-                SettingsRow(icon: "ruler.fill", tint: Theme.fibre, title: "Height",
-                            value: Units.heightLabel(user.heightCm, unitSystem))
-                divider
-                SettingsRow(icon: "scalemass.fill", tint: Theme.fat, title: "Weight",
-                            value: latestWeight.map { Units.formattedWeight($0.weightKg, unitSystem) } ?? "Not set")
-                divider
-                Button { showEditProfile = true } label: {
-                    SettingsRow(icon: "pencil", tint: .gray, title: "Edit profile", titleColor: Theme.accentDeep, showChevron: true)
-                }
-                .buttonStyle(.plain)
+    private var profileCard: some View {
+        SettingsCard(title: "Profile") {
+            HStack(spacing: Theme.Spacing.md) {
+                Image(systemName: "person.crop.circle.fill")
+                    .font(.system(size: 44)).foregroundStyle(.secondary)
+                Text(session.user?.email ?? "")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                Spacer(minLength: 0)
             }
+            Divider()
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Display name").font(.caption).foregroundStyle(.secondary)
+                HStack(spacing: Theme.Spacing.sm) {
+                    TextField("Name", text: $name)
+                        .textContentType(.name)
+                        .padding(.horizontal, 12).padding(.vertical, 10)
+                        .background(Theme.background, in: .rect(cornerRadius: Theme.Radius.control))
+                    Button("Save") {
+                        Task { await session.updateProfile(name: name.trimmingCharacters(in: .whitespaces)); Haptics.success() }
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, Theme.Spacing.md).padding(.vertical, 10)
+                    .background(nameChanged ? Theme.accent : Color.gray.opacity(0.2), in: .rect(cornerRadius: Theme.Radius.control))
+                    .foregroundStyle(nameChanged ? .white : .secondary)
+                    .disabled(!nameChanged)
+                }
+            }
+            Divider()
+            tapRow("Height", value: session.user.map { Units.heightLabel($0.heightCm, unitSystem) }) { showBodyDetails = true }
+            Divider()
+            tapRow("Weight", value: latestWeight.map { Units.formattedWeight($0.weightKg, unitSystem) } ?? "Add") { showWeighIn = true }
         }
     }
 
-    private var goalGroup: some View {
-        SettingsGroup(title: "Goal & targets") {
+    private var goalCard: some View {
+        SettingsCard(title: "Goal & targets") {
             if let goal = session.activeGoal {
-                SettingsRow(icon: "target", tint: Theme.accent, title: "Goal", value: goal.goalType.label)
-                divider
-                SettingsRow(icon: "flame.fill", tint: Theme.accentDeep, title: "Calories", value: "\(Int(goal.calorieTarget)) kcal")
-                divider
-                SettingsRow(icon: "chart.bar.fill", tint: Theme.protein, title: "Protein / Carbs / Fat",
-                            value: "\(Int(goal.proteinTargetG)) / \(Int(goal.carbsTargetG)) / \(Int(goal.fatTargetG))")
-                divider
-                SettingsRow(icon: "drop.fill", tint: Theme.water, title: "Water", value: "\(Int(goal.waterTargetMl)) ml")
-                divider
-                Button { showEditGoal = true } label: {
-                    SettingsRow(icon: "slider.horizontal.3", tint: .gray, title: "Edit goal & targets",
-                                titleColor: Theme.accentDeep, showChevron: true)
-                }
-                .buttonStyle(.plain)
+                infoRow("Goal", goal.goalType.label)
+                Divider()
+                infoRow("Calories", "\(Int(goal.calorieTarget)) kcal")
+                Divider()
+                infoRow("Protein / Carbs / Fat", "\(Int(goal.proteinTargetG)) / \(Int(goal.carbsTargetG)) / \(Int(goal.fatTargetG)) g")
+                Divider()
+                infoRow("Water", "\(Int(goal.waterTargetMl)) ml")
+                Divider()
+                tapRow("Edit goal & targets", accent: true) { showEditGoal = true }
             } else {
-                SettingsRow(icon: "target", tint: .gray, title: "No active goal")
+                Text("No active goal").foregroundStyle(.secondary)
             }
         }
     }
 
-    private var preferencesGroup: some View {
-        SettingsGroup(title: "Preferences") {
-            Menu {
-                Picker("Units", selection: $unitSystem) {
-                    Text("Metric (kg, cm)").tag(UnitSystem.metric)
-                    Text("Imperial (lb, in)").tag(UnitSystem.imperial)
-                }
-            } label: {
-                SettingsRow(icon: "ruler", tint: Theme.fibre, title: "Units",
-                            value: unitSystem == .metric ? "Metric" : "Imperial", showMenuChevron: true)
+    private var preferencesCard: some View {
+        SettingsCard(title: "Appearance") {
+            Picker("Appearance", selection: $theme) {
+                Text("System").tag(AppTheme.system)
+                Text("Light").tag(AppTheme.light)
+                Text("Dark").tag(AppTheme.dark)
             }
-            .onChange(of: unitSystem) { _, value in Task { await session.updateSettings(unitSystem: value) } }
-            divider
-            Menu {
-                Picker("Appearance", selection: $theme) {
-                    Text("System").tag(AppTheme.system)
-                    Text("Light").tag(AppTheme.light)
-                    Text("Dark").tag(AppTheme.dark)
-                }
-            } label: {
-                SettingsRow(icon: "circle.lefthalf.filled", tint: .indigo, title: "Appearance",
-                            value: theme.rawValue.capitalized, showMenuChevron: true)
-            }
+            .pickerStyle(.segmented)
             .onChange(of: theme) { _, value in Task { await session.updateSettings(theme: value) } }
+
+            Text("Units").font(.subheadline.weight(.medium)).frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, Theme.Spacing.xs)
+            Picker("Units", selection: $unitSystem) {
+                Text("Metric").tag(UnitSystem.metric)
+                Text("Imperial").tag(UnitSystem.imperial)
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: unitSystem) { _, value in Task { await session.updateSettings(unitSystem: value) } }
         }
     }
 
-    private var dataGroup: some View {
+    private var notificationsCard: some View {
+        SettingsCard {
+            NavigationLink { NotificationsView() } label: {
+                rowLabel("Notifications", chevron: true)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var dataCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SettingsGroup {
+            SettingsCard {
                 Button {
                     Task {
                         isExporting = true
                         if let data = try? await APIClient.shared.exportData() {
                             let url = FileManager.default.temporaryDirectory.appendingPathComponent("omnomnom-export.json")
-                            try? data.write(to: url)
-                            exportURL = url
-                            showShare = true
+                            try? data.write(to: url); exportURL = url; showShare = true
                         }
                         isExporting = false
                     }
                 } label: {
-                    SettingsRow(icon: "square.and.arrow.up.fill", tint: Theme.mustard, title: "Export my data",
-                                titleColor: Theme.accentDeep, trailing: isExporting ? AnyView(ProgressView()) : nil)
+                    HStack {
+                        Text("Export my data").foregroundStyle(Theme.accentDeep)
+                        Spacer()
+                        if isExporting { ProgressView() }
+                    }
                 }
                 .buttonStyle(.plain)
             }
             Text("Your data syncs to your account automatically, so signing in on another device restores everything. Export is an extra personal backup.")
-                .font(.caption).foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
+                .font(.caption).foregroundStyle(.secondary).padding(.horizontal, 4)
         }
     }
 
-    private var aboutGroup: some View {
-        SettingsGroup(title: "About") {
-            NavigationLink { PrivacyView() } label: {
-                SettingsRow(icon: "hand.raised.fill", tint: Theme.fibre, title: "Privacy", showChevron: true)
-            }.buttonStyle(.plain)
-            divider
-            NavigationLink { TermsView() } label: {
-                SettingsRow(icon: "doc.text.fill", tint: Theme.water, title: "Terms of Use", showChevron: true)
-            }.buttonStyle(.plain)
-            divider
-            NavigationLink { AboutView() } label: {
-                SettingsRow(icon: "info.circle.fill", tint: .gray, title: "About OmNomNom", showChevron: true)
-            }.buttonStyle(.plain)
+    private var aboutCard: some View {
+        SettingsCard(title: "About") {
+            NavigationLink { PrivacyView() } label: { rowLabel("Privacy", chevron: true) }.buttonStyle(.plain)
+            Divider()
+            NavigationLink { TermsView() } label: { rowLabel("Terms of Use", chevron: true) }.buttonStyle(.plain)
+            Divider()
+            NavigationLink { AboutView() } label: { rowLabel("About OmNomNom", chevron: true) }.buttonStyle(.plain)
         }
     }
 
-    private var accountGroup: some View {
-        SettingsGroup {
-            Button { Task { await session.logout() } } label: {
-                SettingsRow(icon: "rectangle.portrait.and.arrow.right", tint: .red, title: "Log out", titleColor: .red)
-            }.buttonStyle(.plain)
-            divider
+    private var signOutButton: some View {
+        Button { Task { await session.logout() } } label: {
+            Text("Sign out")
+                .font(.headline)
+                .foregroundStyle(.red)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(Color.red.opacity(0.12), in: .rect(cornerRadius: Theme.Radius.card))
+        }
+    }
+
+    private var deleteCard: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            Text("Delete account").font(.title3.weight(.bold)).foregroundStyle(.red)
+            Text("Permanently deletes your account and all your meals, water, weight, goals and custom foods. This cannot be undone.")
+                .font(.subheadline).foregroundStyle(.secondary)
             Button { showDeleteConfirm = true } label: {
-                SettingsRow(icon: "trash.fill", tint: .red, title: "Delete account", titleColor: .red)
+                Text("Delete account")
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(.red)
+                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                    .background(Color.red.opacity(0.12), in: .rect(cornerRadius: Theme.Radius.control))
             }
-            .buttonStyle(.plain)
             .disabled(isDeleting)
         }
+        .padding(Theme.Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(.red.opacity(0.35), lineWidth: 1))
     }
 
-    private var divider: some View {
-        Divider().padding(.leading, 56)
+    // MARK: Row builders
+
+    private func infoRow(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text(value).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func rowLabel(_ title: String, value: String? = nil, chevron: Bool = false, accent: Bool = false) -> some View {
+        HStack {
+            Text(title).foregroundStyle(accent ? Theme.accentDeep : .primary)
+            Spacer()
+            if let value { Text(value).foregroundStyle(.secondary) }
+            if chevron { Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary) }
+        }
+        .padding(.vertical, 2)
+        .contentShape(.rect)
+    }
+
+    private func tapRow(_ title: String, value: String? = nil, accent: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) { rowLabel(title, value: value, chevron: true, accent: accent) }
+            .buttonStyle(.plain)
     }
 }
 
-// MARK: - Reusable settings components
+// MARK: - Reusable card
 
-private struct SettingsGroup<Content: View>: View {
+private struct SettingsCard<Content: View>: View {
     var title: String?
     @ViewBuilder var content: Content
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let title {
-                Text(title.uppercased())
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.leading, 4)
-            }
-            VStack(spacing: 0) { content }
-                .background(Theme.surface, in: .rect(cornerRadius: 18))
-                .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(.black.opacity(0.05), lineWidth: 0.5))
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            if let title { Text(title).font(.title3.weight(.bold)) }
+            content
         }
+        .padding(Theme.Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(.black.opacity(0.05), lineWidth: 0.5))
     }
 }
 
-private struct SettingsRow: View {
-    let icon: String
-    var tint: Color = .gray
-    let title: String
-    var value: String?
-    var titleColor: Color = .primary
-    var showChevron = false
-    var showMenuChevron = false
-    var trailing: AnyView?
+// MARK: - Edit body details (height + date of birth)
 
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 30, height: 30)
-                .background(tint, in: .rect(cornerRadius: 8))
-            Text(title).foregroundStyle(titleColor)
-            Spacer(minLength: 8)
-            if let value {
-                Text(value).foregroundStyle(.secondary).lineLimit(1).truncationMode(.tail)
-            }
-            if let trailing { trailing }
-            if showChevron {
-                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
-            }
-            if showMenuChevron {
-                Image(systemName: "chevron.up.chevron.down").font(.caption2).foregroundStyle(.tertiary)
-            }
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .contentShape(.rect)
-    }
-}
-
-// MARK: - Edit profile
-
-private struct EditProfileSheet: View {
+private struct BodyDetailsSheet: View {
     let user: PublicUser
     let unitSystem: UnitSystem
-    let latestWeight: WeightLogRecord?
 
     @Environment(Session.self) private var session
     @Environment(\.dismiss) private var dismiss
-    @State private var name: String
     @State private var dob: Date
     @State private var heightValue: Double
-    @State private var weightValue: Double
 
-    init(user: PublicUser, unitSystem: UnitSystem, latestWeight: WeightLogRecord?) {
+    init(user: PublicUser, unitSystem: UnitSystem) {
         self.user = user
         self.unitSystem = unitSystem
-        self.latestWeight = latestWeight
-        _name = State(initialValue: user.name)
         _dob = State(initialValue: ISO8601.date(from: user.dateOfBirth) ?? .now)
         _heightValue = State(initialValue: unitSystem == .imperial ? (user.heightCm / 2.54).rounded() : user.heightCm.rounded())
-        let startKg = latestWeight?.weightKg ?? 70
-        _weightValue = State(initialValue: (Units.displayWeight(startKg, unitSystem) * 10).rounded() / 10)
     }
 
     private var heightUnit: String { unitSystem == .imperial ? "in" : "cm" }
@@ -302,47 +308,28 @@ private struct EditProfileSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Name") { TextField("Name", text: $name).textContentType(.name) }
-                Section {
-                    DatePicker("Date of birth", selection: $dob, in: ...Date.now, displayedComponents: .date)
-                    Stepper(value: $heightValue, in: heightRange, step: 1) {
-                        HStack { Text("Height"); Spacer(); Text("\(Int(heightValue)) \(heightUnit)").foregroundStyle(.secondary) }
-                    }
-                    Stepper(value: $weightValue, in: 20...400, step: 0.1) {
-                        HStack {
-                            Text("Weight"); Spacer()
-                            Text("\(weightValue, specifier: "%.1f") \(Units.weightUnit(unitSystem))").foregroundStyle(.secondary)
-                        }
-                    }
-                } footer: {
-                    Text("Updating weight adds a new weigh-in.")
+                DatePicker("Date of birth", selection: $dob, in: ...Date.now, displayedComponents: .date)
+                Stepper(value: $heightValue, in: heightRange, step: 1) {
+                    HStack { Text("Height"); Spacer(); Text("\(Int(heightValue)) \(heightUnit)").foregroundStyle(.secondary) }
                 }
             }
-            .navigationTitle("Edit profile")
+            .navigationTitle("Body details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }.fontWeight(.semibold)
-                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    Button("Save") {
+                        let cm = unitSystem == .imperial ? heightValue * 2.54 : heightValue
+                        Task {
+                            await session.updateProfile(dateOfBirth: ISO8601.dateOnlyString(from: dob), heightCm: cm)
+                            Haptics.success()
+                        }
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
                 }
             }
         }
-    }
-
-    private func save() {
-        let cm = unitSystem == .imperial ? heightValue * 2.54 : heightValue
-        let trimmedName = name.trimmingCharacters(in: .whitespaces)
-        let newKg = Units.kg(fromDisplay: weightValue, unitSystem)
-        Task {
-            await session.updateProfile(name: trimmedName, dateOfBirth: ISO8601.dateOnlyString(from: dob), heightCm: cm)
-            if abs(newKg - (latestWeight?.weightKg ?? -1)) > 0.05 {
-                _ = try? await APIClient.shared.logWeight(CreateWeightLogInput(
-                    weightKg: newKg, loggedAt: ISO8601.string(from: .now), notes: nil, clientId: UUID().uuidString))
-            }
-            Haptics.success()
-        }
-        dismiss()
     }
 }
 
