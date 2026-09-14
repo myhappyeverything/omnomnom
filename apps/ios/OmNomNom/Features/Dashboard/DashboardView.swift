@@ -6,19 +6,17 @@ struct DashboardView: View {
     @State private var model = DashboardViewModel()
     @State private var bounceToken = 0
     @State private var showPhotoLog = false
+    @State private var showScore = false
 
     private var goal: GoalRecord? { session.activeGoal }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: Theme.Spacing.md) {
-                    greetingHeader
+                VStack(spacing: Theme.Spacing.lg) {
+                    header
                     calorieCard
-                    HStack(spacing: Theme.Spacing.md) {
-                        scoreCard
-                        weightCard
-                    }
+                    scoreCard
                     macrosCard
                     waterCard
                     mealsSection
@@ -31,10 +29,11 @@ struct DashboardView: View {
             .refreshable { await model.load() }
             .overlay { if model.isLoading && model.meals.isEmpty { ProgressView() } }
             .fullScreenCover(isPresented: $showPhotoLog) {
-                PhotoLogView { _ in
-                    bounceToken += 1
-                    Task { await model.load() }
-                }
+                PhotoLogView { _ in appState.didLog("Nice one") }
+            }
+            .sheet(isPresented: $showScore) {
+                ScoreBreakdownSheet(score: model.score)
+                    .presentationDetents([.medium, .large])
             }
         }
         .task { await model.load() }
@@ -44,118 +43,126 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: Greeting
+    // MARK: Header
 
-    private var greetingHeader: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(greetingPrefix)
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Text(firstName)
-                .font(.largeTitle.weight(.bold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+    private var header: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("OmNomNom").font(.largeTitle.weight(.bold))
+                Text(greeting).font(.subheadline).foregroundStyle(.secondary)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+            }
+            Spacer(minLength: Theme.Spacing.sm)
+            Button { appState.selectedTab = 1 } label: {
+                Image(systemName: "magnifyingglass")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                    .frame(width: 40, height: 40)
+                    .background(Theme.surface, in: .circle)
+                    .overlay(Circle().strokeBorder(.black.opacity(0.06), lineWidth: 0.5))
+            }
+            .accessibilityLabel("Search foods")
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, Theme.Spacing.xs)
     }
 
-    private var firstName: String {
-        session.user?.name.split(separator: " ").first.map(String.init) ?? "there"
-    }
-
-    private var greetingPrefix: String {
-        switch Calendar.current.component(.hour, from: .now) {
-        case ..<12: "Good morning,"
-        case ..<17: "Good afternoon,"
-        default: "Good evening,"
+    private var greeting: String {
+        let name = session.user?.name.split(separator: " ").first.map(String.init) ?? "there"
+        let part = switch Calendar.current.component(.hour, from: .now) {
+        case ..<12: "Good morning"
+        case ..<17: "Good afternoon"
+        default: "Good evening"
         }
+        return "\(part), \(name)"
     }
 
-    // MARK: Calorie card
+    // MARK: Calories
 
     private var calorieCard: some View {
-        Card {
-            HStack(spacing: Theme.Spacing.lg) {
-                let target = goal?.calorieTarget ?? 0
-                let remaining = max(0, target - model.consumedCalories)
-                RingProgress(
-                    progress: target > 0 ? model.consumedCalories / target : 0,
-                    lineWidth: 14,
-                    gradient: [Theme.accent, Theme.accentDeep, Theme.mustard]
-                ) {
-                    Mascot(size: 76, bounceToken: bounceToken)
-                }
-                .frame(width: 130, height: 130)
-
-                VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("\(Int(remaining))")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .foregroundStyle(Theme.accent)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-                        Text("kcal left").font(.caption).foregroundStyle(.secondary)
-                    }
-                    calorieStat("Eaten", model.consumedCalories, .primary)
-                    calorieStat("Target", goal?.calorieTarget ?? 0, .secondary)
+        let target = goal?.calorieTarget ?? 0
+        let remaining = max(0, target - model.consumedCalories)
+        return Card {
+            HStack(spacing: Theme.Spacing.md) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("CALORIES LEFT")
+                        .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                        .tracking(0.5)
+                    Text("\(Int(remaining))")
+                        .font(.system(size: 52, weight: .bold, design: .rounded))
+                        .foregroundStyle(.primary)
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                    Text("of \(Int(target)) kcal").font(.subheadline).foregroundStyle(.secondary)
+                    Text(motivational).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.accent)
+                        .padding(.top, 2)
                 }
                 Spacer(minLength: 0)
+                RingProgress(
+                    progress: target > 0 ? model.consumedCalories / target : 0,
+                    lineWidth: 12,
+                    gradient: [Theme.accent, Theme.accentDeep, Theme.mustard]
+                ) {
+                    Mascot(size: 66, bounceToken: bounceToken)
+                }
+                .frame(width: 118, height: 118)
             }
         }
     }
 
-    private func calorieStat(_ label: String, _ value: Double, _ color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(label).font(.caption).foregroundStyle(.secondary)
-            Text("\(Int(value))").font(.title3.weight(.bold)).foregroundStyle(color).monospacedDigit()
-        }
+    private var motivational: String {
+        let target = goal?.calorieTarget ?? 0
+        if target > 0 && model.consumedCalories > target { return "Tomorrow's a fresh start" }
+        return "You've got this"
     }
 
-    // MARK: Score
+    // MARK: Nutrition score (prominent, tappable)
 
     private var scoreCard: some View {
-        Card {
-            VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                Text("Today's score").font(.caption).foregroundStyle(.secondary)
-                if let score = model.score {
-                    Text("\(Int(score.score))")
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .foregroundStyle(Theme.accent)
-                        .contentTransition(.numericText())
-                    Text(score.label.rawValue).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-                } else {
-                    Text("-").font(.system(size: 34, weight: .bold, design: .rounded)).foregroundStyle(.secondary)
-                    Text("Log to see").font(.caption).foregroundStyle(.secondary)
+        let score = model.score?.score ?? 0
+        let label = model.score?.label ?? NutritionScoreLabel.from(score: 0)
+        return Button { showScore = true } label: {
+            Card {
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("TODAY'S NUTRITION SCORE")
+                            .font(.caption.weight(.semibold)).foregroundStyle(.secondary).tracking(0.5)
+                        Text(label.rawValue)
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(scoreColor(score))
+                    }
+                    Spacer(minLength: Theme.Spacing.sm)
+                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        Image(systemName: "questionmark.circle")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                            .padding(.trailing, 4)
+                        Text("\(Int(score))")
+                            .font(.system(size: 36, weight: .bold, design: .rounded)).monospacedDigit()
+                            .contentTransition(.numericText())
+                        Text("/100").font(.subheadline).foregroundStyle(.secondary)
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func scoreColor(_ score: Double) -> Color {
+        switch score {
+        case 85...: Theme.fibre
+        case 70..<85: Theme.accent
+        case 50..<70: Theme.carbs
+        default: Theme.protein
         }
     }
 
-    private var weightCard: some View {
-        Card {
-            VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                Text("Weight").font(.caption).foregroundStyle(.secondary)
-                if let weight = model.latestWeight {
-                    Text(String(format: "%.1f", weight.weightKg))
-                        .font(.system(size: 34, weight: .bold, design: .rounded)).monospacedDigit()
-                    Text("kg").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-                } else {
-                    Text("-").font(.system(size: 34, weight: .bold, design: .rounded)).foregroundStyle(.secondary)
-                    Text("Not logged").font(.caption).foregroundStyle(.secondary)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    // MARK: Macros
+    // MARK: Macros (2 columns, no header)
 
     private var macrosCard: some View {
-        Card {
-            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-                Text("Macros").font(.headline)
+        let columns = [GridItem(.flexible(), spacing: Theme.Spacing.lg),
+                       GridItem(.flexible(), spacing: Theme.Spacing.lg)]
+        return Card {
+            LazyVGrid(columns: columns, spacing: Theme.Spacing.md) {
                 MacroBar(label: "Protein", consumed: model.consumedProtein,
                          target: goal?.proteinTargetG ?? 0, unit: "g", color: Theme.protein)
                 MacroBar(label: "Carbs", consumed: model.consumedCarbs,
@@ -197,6 +204,7 @@ struct DashboardView: View {
                             Task {
                                 await model.addWater(ml: ml)
                                 bounceToken += 1
+                                appState.celebrate("Hydrate")
                             }
                         } label: {
                             Text("+\(ml)")

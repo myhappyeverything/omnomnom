@@ -43,5 +43,30 @@ struct RootTabView: View {
         .overlay {
             QuickAddMenu(isPresented: $showQuickAdd)
         }
+        .overlay(alignment: .top) {
+            if let toast = appState.toast {
+                ToastView(text: toast.text)
+                    .id(toast.id)
+                    .padding(.top, Theme.Spacing.sm)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .task(id: toast.id) {
+                        try? await Task.sleep(for: .seconds(1.8))
+                        withAnimation { appState.toast = nil }
+                    }
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: appState.toast)
+    }
+}
+
+private struct ToastView: View {
+    let text: String
+    var body: some View {
+        Label(text, systemImage: "checkmark.circle.fill")
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.vertical, 10)
+            .glassEffect(.regular.tint(Theme.accent.opacity(0.28)), in: .capsule)
     }
 }

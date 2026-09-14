@@ -43,9 +43,9 @@ struct QuickAddMenu: View {
         }
         .fullScreenCover(item: $activeSheet) { sheet in
             switch sheet {
-            case .photo: PhotoLogView { _ in appState.dataChanged() }
-            case .label: ScanLabelView { _ in appState.dataChanged() }
-            case .barcode: BarcodeLogView { _ in appState.dataChanged() }
+            case .photo: PhotoLogView { _ in appState.didLog(appState.mealCheer()) }
+            case .label: ScanLabelView { _ in appState.didLog(appState.mealCheer()) }
+            case .barcode: BarcodeLogView { _ in appState.didLog(appState.mealCheer()) }
             }
         }
     }
@@ -80,7 +80,7 @@ struct QuickAddMenu: View {
                 Task {
                     _ = try? await APIClient.shared.logWater(CreateWaterLogInput(
                         amountMl: 250, loggedAt: ISO8601.string(from: .now), clientId: UUID().uuidString))
-                    appState.dataChanged()
+                    appState.didLog("Hydrate")
                     Haptics.success()
                 }
                 close()
