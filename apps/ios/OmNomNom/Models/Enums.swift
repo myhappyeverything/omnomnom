@@ -1,6 +1,6 @@
 import Foundation
 
-// Ported from packages/shared/src/constants.ts — keep in sync with the API.
+// Ported from packages/shared/src/constants.ts - keep in sync with the API.
 
 enum Sex: String, Codable, CaseIterable, Sendable {
     case male, female
@@ -98,7 +98,7 @@ enum MealType: String, Codable, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// Mirrors apps/web/src/utils/mealType.ts — infer a meal type from the hour.
+    /// Mirrors apps/web/src/utils/mealType.ts - infer a meal type from the hour.
     static func inferred(from date: Date = .now, calendar: Calendar = .current) -> MealType {
         switch calendar.component(.hour, from: date) {
         case ..<11: .breakfast

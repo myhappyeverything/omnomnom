@@ -7,6 +7,7 @@ enum AppGroup {
     static let apiBase = "https://omnomnom-api.wasim-811.workers.dev"
 
     private static let tokenKey = "widgetToken"
+    private static let tokenIdKey = "widgetTokenId"
 
     static var defaults: UserDefaults? { UserDefaults(suiteName: id) }
 
@@ -15,6 +16,14 @@ enum AppGroup {
         set {
             if let newValue { defaults?.set(newValue, forKey: tokenKey) }
             else { defaults?.removeObject(forKey: tokenKey) }
+        }
+    }
+
+    static var widgetTokenId: String? {
+        get { defaults?.string(forKey: tokenIdKey) }
+        set {
+            if let newValue { defaults?.set(newValue, forKey: tokenIdKey) }
+            else { defaults?.removeObject(forKey: tokenIdKey) }
         }
     }
 }

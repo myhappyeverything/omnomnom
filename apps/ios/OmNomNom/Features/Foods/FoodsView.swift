@@ -4,7 +4,6 @@ struct FoodsView: View {
     @State private var model = FoodsViewModel()
     @State private var selectedFood: FoodRecord?
     @State private var toast: String?
-    @State private var showScanLabel = false
 
     var body: some View {
         NavigationStack {
@@ -20,20 +19,10 @@ struct FoodsView: View {
                 content
             }
             .background(Theme.background.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 52) }
             .navigationTitle("Foods")
             .searchable(text: $model.query, placement: .navigationBarDrawer(displayMode: .always),
                         prompt: "Search foods")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showScanLabel = true } label: {
-                        Image(systemName: "text.viewfinder")
-                    }
-                    .accessibilityLabel("Scan a nutrition label")
-                }
-            }
-            .fullScreenCover(isPresented: $showScanLabel) {
-                ScanLabelView { meal in toast = "Added to \(meal.mealType.label)" }
-            }
             .sheet(item: $selectedFood) { food in
                 LogFoodSheet(food: food) { meal in
                     toast = "Added to \(meal.mealType.label)"

@@ -3,11 +3,13 @@ import SwiftUI
 @main
 struct OmNomNomApp: App {
     @State private var session = Session()
+    @State private var appState = AppState()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(session)
+                .environment(appState)
                 .tint(Theme.accent)
                 .preferredColorScheme(colorScheme)
         }

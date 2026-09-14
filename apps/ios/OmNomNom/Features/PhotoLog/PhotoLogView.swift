@@ -208,7 +208,7 @@ private struct ReviewRow: View {
                             .padding(.top, 4)
                         }
                     } else {
-                        Text("No match found — skipped")
+                        Text("No match found - skipped")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }

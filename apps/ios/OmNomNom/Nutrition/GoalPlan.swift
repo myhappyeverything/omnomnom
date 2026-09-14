@@ -93,7 +93,7 @@ enum GoalPlan {
         return ((18.5 * m * m).rounded(toPlaces: 1), (24.9 * m * m).rounded(toPlaces: 1))
     }
 
-    /// Full plan — mirrors calculateGoalPlan().
+    /// Full plan - mirrors calculateGoalPlan().
     static func calculate(
         dateOfBirth: String,
         sex: Sex,

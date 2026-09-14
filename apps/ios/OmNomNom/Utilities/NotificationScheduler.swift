@@ -25,27 +25,27 @@ enum NotificationScheduler {
         var requests: [UNNotificationRequest] = []
 
         if let t = settings.breakfastReminderTime {
-            requests.append(daily(id: "meal.breakfast", title: "Breakfast time 🍳",
+            requests.append(daily(id: "meal.breakfast", title: "Breakfast time",
                                   body: "Log your breakfast to start the day right.", hhmm: t))
         }
         if let t = settings.lunchReminderTime {
-            requests.append(daily(id: "meal.lunch", title: "Lunch time 🥗",
+            requests.append(daily(id: "meal.lunch", title: "Lunch time",
                                   body: "Don't forget to log your lunch.", hhmm: t))
         }
         if let t = settings.dinnerReminderTime {
-            requests.append(daily(id: "meal.dinner", title: "Dinner time 🍽️",
+            requests.append(daily(id: "meal.dinner", title: "Dinner time",
                                   body: "Log your dinner before you wind down.", hhmm: t))
         }
         if let t = settings.weighInReminderTime {
             let days = settings.weighInReminderDays.isEmpty ? Array(1...7) : settings.weighInReminderDays
             for day in days {
-                requests.append(weekly(id: "weighin.\(day)", title: "Weigh-in reminder ⚖️",
+                requests.append(weekly(id: "weighin.\(day)", title: "Weigh-in reminder",
                                        body: "Time to log your weight.", hhmm: t, weekday: day))
             }
         }
         if settings.waterReminderEnabled, let interval = settings.waterReminderIntervalMinutes, interval >= 30 {
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Double(interval * 60), repeats: true)
-            requests.append(request(id: "water.interval", title: "Hydration 💧",
+            requests.append(request(id: "water.interval", title: "Hydration",
                                     body: "Time for some water.", trigger: trigger))
         }
         for reminder in reminders where reminder.enabled {

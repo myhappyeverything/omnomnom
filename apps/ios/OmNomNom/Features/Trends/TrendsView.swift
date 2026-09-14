@@ -5,6 +5,12 @@ struct TrendsView: View {
     @Environment(Session.self) private var session
     @State private var model = TrendsViewModel()
     @State private var showLogWeight = false
+    @State private var selectedDay: DaySelection?
+
+    struct DaySelection: Identifiable {
+        let date: Date
+        var id: TimeInterval { date.timeIntervalSince1970 }
+    }
 
     private var unitSystem: UnitSystem { session.settings?.unitSystem ?? .metric }
 
@@ -28,10 +34,11 @@ struct TrendsView: View {
                 .padding(Theme.Spacing.md)
             }
             .background(Theme.background.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 52) }
             .navigationTitle("Trends")
             .overlay { if model.isLoading { ProgressView() } }
             .sheet(isPresented: $showLogWeight) {
-                LogWeightSheet(unitSystem: unitSystem,
+                WeighInSheet(unitSystem: unitSystem,
                                current: model.latestWeight?.weightKg) { value in
                     Task {
                         await model.logWeight(displayValue: value, system: unitSystem)
@@ -39,6 +46,9 @@ struct TrendsView: View {
                     }
                 }
                 .presentationDetents([.height(280)])
+            }
+            .sheet(item: $selectedDay) { sel in
+                DayDetailSheet(date: sel.date, unitSystem: unitSystem)
             }
         }
         .task { await model.load() }
@@ -60,7 +70,7 @@ struct TrendsView: View {
                     HStack {
                         VStack(alignment: .leading) {
                             Text("Average score").font(.subheadline).foregroundStyle(.secondary)
-                            Text(model.averageScore.map { "\(Int($0))" } ?? "—")
+                            Text(model.averageScore.map { "\(Int($0))" } ?? "-")
                                 .font(.system(size: 34, weight: .bold, design: .rounded))
                                 .foregroundStyle(Theme.accent)
                         }
@@ -89,6 +99,17 @@ struct TrendsView: View {
                     }
                 }
             }
+
+            Card {
+                VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                    Text("History").font(.headline)
+                    NutritionCalendar(scores: model.scores) { date in
+                        selectedDay = DaySelection(date: date)
+                    }
+                    Text("Tap a day to see what you logged.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
         }
     }
 
@@ -109,7 +130,7 @@ struct TrendsView: View {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Current").font(.subheadline).foregroundStyle(.secondary)
-                        Text(model.latestWeight.map { Units.formattedWeight($0.weightKg, unitSystem) } ?? "—")
+                        Text(model.latestWeight.map { Units.formattedWeight($0.weightKg, unitSystem) } ?? "-")
                             .font(.system(size: 32, weight: .bold, design: .rounded)).monospacedDigit()
                     }
                     Spacer()
@@ -240,7 +261,7 @@ struct TrendsView: View {
     }
 
     private func changeText(_ kg: Double?) -> String {
-        guard let kg else { return "—" }
+        guard let kg else { return "-" }
         let display = Units.displayWeight(abs(kg), unitSystem)
         let sign = kg > 0 ? "+" : kg < 0 ? "−" : ""
         return String(format: "%@%.1f %@", sign, display, Units.weightUnit(unitSystem))
@@ -261,45 +282,141 @@ struct TrendsView: View {
     }
 }
 
-/// Sheet for logging a weigh-in in the user's unit.
-private struct LogWeightSheet: View {
-    let unitSystem: UnitSystem
-    let current: Double?
-    var onSave: (Double) -> Void
+/// Score band color shared by the chart and the calendar.
+func scoreBandColor(_ score: Double) -> Color {
+    switch score {
+    case 85...: Theme.fibre
+    case 70..<85: Theme.accent
+    case 50..<70: Theme.carbs
+    default: Theme.protein
+    }
+}
 
-    @Environment(\.dismiss) private var dismiss
-    @State private var value: Double
+/// A month grid where each day is tinted by its nutrition score; tapping a day
+/// opens that day's detail.
+private struct NutritionCalendar: View {
+    let scores: [DailyScoreSummary]
+    var onSelect: (Date) -> Void
 
-    init(unitSystem: UnitSystem, current: Double?, onSave: @escaping (Double) -> Void) {
-        self.unitSystem = unitSystem
-        self.current = current
-        self.onSave = onSave
-        let start = current.map { Units.displayWeight($0, unitSystem) } ?? (unitSystem == .imperial ? 154 : 70)
-        _value = State(initialValue: (start * 10).rounded() / 10)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
+    private let weekdays = ["S", "M", "T", "W", "T", "F", "S"]
+
+    private var scoreByKey: [String: Double] {
+        Dictionary(scores.map { ($0.dateKey, $0.score) }, uniquingKeysWith: { a, _ in a })
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: Theme.Spacing.lg) {
-                Text("\(value, specifier: "%.1f") \(Units.weightUnit(unitSystem))")
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Stepper(value: $value, in: 20...400, step: 0.1) {
-                    Text("Adjust weight")
+        VStack(spacing: 8) {
+            Text(monthTitle).font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, alignment: .leading)
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(0..<7, id: \.self) { i in
+                    Text(weekdays[i]).font(.caption2).foregroundStyle(.secondary)
                 }
-                .labelsHidden()
-                Button {
-                    onSave(value)
-                    dismiss()
-                } label: { Text("Save weigh-in") }
-                    .buttonStyle(.primary)
+                ForEach(Array(days.enumerated()), id: \.offset) { _, day in
+                    if let day { dayCell(day) } else { Color.clear.frame(height: 38) }
+                }
             }
-            .padding(Theme.Spacing.lg)
-            .navigationTitle("Log weight")
+        }
+    }
+
+    private func dayCell(_ date: Date) -> some View {
+        let key = Self.localKey(date)
+        let score = scoreByKey[key]
+        let isFuture = Calendar.current.startOfDay(for: date) > Calendar.current.startOfDay(for: .now)
+        let day = Calendar.current.component(.day, from: date)
+        return Button {
+            if !isFuture { onSelect(date) }
+        } label: {
+            Text("\(day)")
+                .font(.footnote.weight(.medium))
+                .frame(maxWidth: .infinity, minHeight: 38)
+                .background(score.map { scoreBandColor($0).opacity(0.22) } ?? Color.gray.opacity(0.08),
+                            in: .rect(cornerRadius: 8))
+                .overlay(alignment: .bottom) {
+                    if let score { Circle().fill(scoreBandColor(score)).frame(width: 5, height: 5).padding(.bottom, 4) }
+                }
+                .foregroundStyle(isFuture ? Color.secondary.opacity(0.4) : .primary)
+        }
+        .buttonStyle(.plain)
+        .disabled(isFuture)
+    }
+
+    private var monthTitle: String {
+        Date().formatted(.dateTime.month(.wide).year())
+    }
+
+    // Current month's days with leading blanks for weekday alignment.
+    private var days: [Date?] {
+        let cal = Calendar.current
+        let now = Date()
+        guard let monthStart = cal.date(from: cal.dateComponents([.year, .month], from: now)),
+              let range = cal.range(of: .day, in: .month, for: monthStart) else { return [] }
+        let leading = cal.component(.weekday, from: monthStart) - 1
+        var result: [Date?] = Array(repeating: nil, count: leading)
+        for d in range {
+            result.append(cal.date(byAdding: .day, value: d - 1, to: monthStart))
+        }
+        return result
+    }
+
+    static func localKey(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: date)
+    }
+}
+
+/// A sheet showing the meals logged on a given day.
+private struct DayDetailSheet: View {
+    let date: Date
+    let unitSystem: UnitSystem
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var meals: [MealRecord] = []
+    @State private var isLoading = true
+
+    private var totalCalories: Double { meals.reduce(0) { $0 + $1.totalCalories } }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if isLoading {
+                    ProgressView()
+                } else if meals.isEmpty {
+                    ContentUnavailableView("Nothing logged", systemImage: "fork.knife",
+                                           description: Text("No meals were logged on this day."))
+                } else {
+                    List {
+                        Section {
+                            LabeledContent("Total", value: "\(Int(totalCalories)) kcal")
+                        }
+                        ForEach(meals) { meal in
+                            Section(meal.mealType.label) {
+                                ForEach(meal.items) { item in
+                                    HStack {
+                                        Text(item.food?.name ?? "Item")
+                                        Spacer()
+                                        Text("\(Int(item.calories)) kcal").foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(date.formatted(.dateTime.weekday(.wide).month().day()))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+            }
+            .task {
+                let cal = Calendar.current
+                let start = cal.startOfDay(for: date)
+                let end = cal.date(byAdding: .day, value: 1, to: start) ?? date
+                meals = (try? await APIClient.shared.meals(from: ISO8601.string(from: start),
+                                                           to: ISO8601.string(from: end))) ?? []
+                isLoading = false
             }
         }
     }

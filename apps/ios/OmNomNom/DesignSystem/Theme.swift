@@ -5,13 +5,13 @@ import SwiftUI
 enum Theme {
     // MARK: Brand colors
 
-    /// Warm OmNomNom orange — the primary accent, carried over from the web app.
+    /// Warm OmNomNom orange - the primary accent, carried over from the web app.
     static let accent = Color(light: 0xF97316, dark: 0xFB923C)
     static let accentDeep = Color(light: 0xEA580C, dark: 0xF97316)
     /// Mustard highlight used for "saved"/favourite affordances.
     static let mustard = Color(light: 0xE0A400, dark: 0xF5C042)
 
-    /// App background — a soft off-white in light, near-black in dark.
+    /// App background - a soft off-white in light, near-black in dark.
     static let background = Color(light: 0xFBF7F2, dark: 0x0E0D0C)
     /// Surface behind glass cards on plain backgrounds.
     static let surface = Color(light: 0xFFFFFF, dark: 0x1A1817)

@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import WidgetKit
 
 /// App-wide auth + profile state. Drives whether the user sees onboarding/login
 /// or the main tab experience.
@@ -44,6 +45,7 @@ final class Session {
     }
 
     func logout() async {
+        await revokeWidgetToken()
         await api.logout()
         user = nil
         activeGoal = nil
@@ -61,14 +63,19 @@ final class Session {
             activeGoal = try? await api.activeGoal()
             settings = try? await api.settings()
             phase = .signedIn
+            await ensureWidgetToken()
         } catch {
-            // Couldn't load the profile even though refresh worked — treat as signed out.
+            // Couldn't load the profile even though refresh worked - treat as signed out.
             phase = .signedOut
         }
     }
 
     func refreshGoal() async {
         activeGoal = (try? await api.activeGoal()) ?? activeGoal
+    }
+
+    func updateGoal(_ overrides: UpdateGoalOverridesInput) async {
+        if let goal = try? await api.updateGoalOverrides(overrides) { activeGoal = goal }
     }
 
     func updateSettings(unitSystem: UnitSystem? = nil, theme: AppTheme? = nil) async {
@@ -86,9 +93,30 @@ final class Session {
     }
 
     func deleteAccount() async throws {
+        await revokeWidgetToken()
         try await api.deleteAccount()
         user = nil; activeGoal = nil; settings = nil
         api.clearSession()
         phase = .signedOut
+    }
+
+    // MARK: Widget token (provisioned silently for the home-screen widget)
+
+    private func ensureWidgetToken() async {
+        guard AppGroup.widgetToken == nil else { return }
+        if let issued = try? await api.issueWidgetToken(label: "iPhone") {
+            AppGroup.widgetToken = issued.token
+            AppGroup.widgetTokenId = issued.id
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+    }
+
+    private func revokeWidgetToken() async {
+        if let id = AppGroup.widgetTokenId {
+            try? await api.revokeWidgetToken(id: id)
+        }
+        AppGroup.widgetToken = nil
+        AppGroup.widgetTokenId = nil
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @Environment(Session.self) private var session
+    @Environment(AppState.self) private var appState
     @State private var model = DashboardViewModel()
     @State private var bounceToken = 0
     @State private var showPhotoLog = false
@@ -24,19 +25,10 @@ struct DashboardView: View {
                 .padding(Theme.Spacing.md)
             }
             .background(Theme.background.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 52) }
             .navigationTitle(greeting)
             .refreshable { await model.load() }
             .overlay { if model.isLoading && model.meals.isEmpty { ProgressView() } }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showPhotoLog = true
-                    } label: {
-                        Image(systemName: "camera.fill")
-                    }
-                    .accessibilityLabel("Log with a photo")
-                }
-            }
             .fullScreenCover(isPresented: $showPhotoLog) {
                 PhotoLogView { _ in
                     bounceToken += 1
@@ -45,6 +37,10 @@ struct DashboardView: View {
             }
         }
         .task { await model.load() }
+        .onChange(of: appState.dataVersion) {
+            bounceToken += 1
+            Task { await model.load() }
+        }
     }
 
     // MARK: Greeting
@@ -113,7 +109,7 @@ struct DashboardView: View {
                         .contentTransition(.numericText())
                     Text(score.label.rawValue).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 } else {
-                    Text("—").font(.system(size: 34, weight: .bold, design: .rounded)).foregroundStyle(.secondary)
+                    Text("-").font(.system(size: 34, weight: .bold, design: .rounded)).foregroundStyle(.secondary)
                     Text("Log to see").font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -130,7 +126,7 @@ struct DashboardView: View {
                         .font(.system(size: 34, weight: .bold, design: .rounded)).monospacedDigit()
                     Text("kg").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 } else {
-                    Text("—").font(.system(size: 34, weight: .bold, design: .rounded)).foregroundStyle(.secondary)
+                    Text("-").font(.system(size: 34, weight: .bold, design: .rounded)).foregroundStyle(.secondary)
                     Text("Not logged").font(.caption).foregroundStyle(.secondary)
                 }
             }

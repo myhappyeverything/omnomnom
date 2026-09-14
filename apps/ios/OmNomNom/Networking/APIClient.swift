@@ -170,7 +170,7 @@ final class APIClient {
                 _ = try await refreshAccessToken()
                 return true
             } catch let error as APIError {
-                // notAuthenticated means the refresh token is dead — stop retrying.
+                // notAuthenticated means the refresh token is dead - stop retrying.
                 switch error {
                 case .notAuthenticated: return false
                 default: if index == backoffs.count - 1 { return false }

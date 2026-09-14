@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The meal photo being "eaten" while the AI analyses it. A scalloped bite is
 /// chomped from an edge roughly once a second, marching across and accumulating
-/// (no loop) — a native port of the web analyzing animation. Respects Reduce
+/// (no loop) - a native port of the web analyzing animation. Respects Reduce
 /// Motion by showing the plain photo.
 struct BitesPhotoView: View {
     let image: UIImage

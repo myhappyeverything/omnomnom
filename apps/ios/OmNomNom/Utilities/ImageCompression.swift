@@ -1,7 +1,7 @@
 import UIKit
 
 /// Downscale + JPEG-compress before upload. Mirrors apps/web imageCompression.ts
-/// (max dimension 1024, JPEG quality 0.8) — the biggest lever on Vision cost.
+/// (max dimension 1024, JPEG quality 0.8) - the biggest lever on Vision cost.
 enum ImageCompression {
     static func encode(_ image: UIImage, maxDimension: CGFloat = 1024, quality: CGFloat = 0.8) -> AnalyzeImageInput? {
         let normalized = image.fixedOrientation()

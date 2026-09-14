@@ -165,7 +165,7 @@ struct OnboardingView: View {
     private var reviewStep: some View {
         let plan = draft.plan
         return VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            stepTitle("Your daily plan", "Calculated from your details — you can fine-tune later.")
+            stepTitle("Your daily plan", "Calculated from your details - you can fine-tune later.")
 
             Card {
                 VStack(spacing: Theme.Spacing.md) {
