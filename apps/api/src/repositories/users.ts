@@ -26,6 +26,18 @@ export async function deleteUser(env: Env, id: string): Promise<void> {
   await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run()
 }
 
+export async function updateUserPassword(
+  env: Env,
+  id: string,
+  password: { hash: string; salt: string; iterations: number },
+): Promise<void> {
+  await env.DB.prepare(
+    'UPDATE users SET password_hash = ?, password_salt = ?, password_iterations = ?, updated_at = ? WHERE id = ?',
+  )
+    .bind(password.hash, password.salt, password.iterations, nowIso(), id)
+    .run()
+}
+
 export interface UpdateUserInput {
   name?: string
   dateOfBirth?: string

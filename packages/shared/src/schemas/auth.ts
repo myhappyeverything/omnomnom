@@ -22,6 +22,18 @@ export const registerSchema = z.object({
 })
 export type RegisterInput = z.infer<typeof registerSchema>
 
+export const forgotPasswordSchema = z.object({
+  email: registerSchema.shape.email,
+})
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+
+export const resetPasswordSchema = z.object({
+  email: registerSchema.shape.email,
+  code: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code'),
+  password: passwordSchema,
+})
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+
 export const updateProfileSchema = z
   .object({
     name: registerSchema.shape.name,

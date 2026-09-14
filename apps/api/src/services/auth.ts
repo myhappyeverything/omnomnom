@@ -4,7 +4,8 @@ import type { UserRow } from '../types/models.js'
 import { hashPassword, verifyPassword, generateOpaqueToken, sha256Hex } from '../lib/crypto.js'
 import { createAccessToken, REFRESH_TOKEN_TTL_SECONDS } from '../lib/tokens.js'
 import { ConflictError, UnauthorizedError } from '../lib/errors.js'
-import { createUser, deleteUser, findUserByEmail } from '../repositories/users.js'
+import { createUser, deleteUser, findUserByEmail, updateUserPassword } from '../repositories/users.js'
+import { createResetCode, findValidResetCode, consumeResetCodes } from '../repositories/passwordResets.js'
 import {
   createRefreshToken,
   findActiveRefreshTokenByHash,
@@ -131,4 +132,46 @@ export async function deleteAccount(env: Env, userId: string): Promise<void> {
     env.DB.prepare('DELETE FROM recipe_items WHERE recipe_id IN (SELECT id FROM recipes WHERE user_id = ?)').bind(userId),
   ])
   await deleteUser(env, userId)
+}
+
+const RESET_CODE_TTL_SECONDS = 15 * 60
+
+function generateNumericCode(): string {
+  const bytes = new Uint32Array(1)
+  crypto.getRandomValues(bytes)
+  return String((bytes[0] ?? 0) % 1_000_000).padStart(6, '0')
+}
+
+/**
+ * Create a reset code for the email if an account exists. Returns the code and
+ * name so the route can deliver them via the webhook; returns null when there's
+ * no match (the route still responds 200 so it can't be used to probe emails).
+ */
+export async function requestPasswordReset(
+  env: Env,
+  email: string,
+): Promise<{ name: string; code: string } | null> {
+  const user = await findUserByEmail(env, email)
+  if (!user) return null
+  const code = generateNumericCode()
+  const codeHash = await sha256Hex(code)
+  const expiresAt = new Date(Date.now() + RESET_CODE_TTL_SECONDS * 1000).toISOString()
+  await createResetCode(env, user.id, codeHash, expiresAt)
+  return { name: user.name, code }
+}
+
+/** Verify a 6-digit reset code and set a new password. */
+export async function resetPassword(
+  env: Env,
+  email: string,
+  code: string,
+  password: string,
+): Promise<void> {
+  const user = await findUserByEmail(env, email)
+  if (!user) throw new UnauthorizedError('Invalid or expired code')
+  const match = await findValidResetCode(env, user.id, await sha256Hex(code))
+  if (!match) throw new UnauthorizedError('Invalid or expired code')
+  const { hash, salt, iterations } = await hashPassword(password)
+  await updateUserPassword(env, user.id, { hash, salt, iterations })
+  await consumeResetCodes(env, user.id)
 }

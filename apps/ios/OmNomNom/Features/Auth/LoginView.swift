@@ -6,6 +6,7 @@ struct LoginView: View {
     @State private var password = ""
     @State private var isSubmitting = false
     @State private var errorMessage: String?
+    @State private var showForgotPassword = false
     @FocusState private var focused: Field?
 
     private enum Field { case email, password }
@@ -45,6 +46,11 @@ struct LoginView: View {
                 }
                 .buttonStyle(.primary(loading: isSubmitting))
                 .disabled(isSubmitting || email.isEmpty || password.isEmpty)
+
+                Button("Forgot password?") { showForgotPassword = true }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.accent)
+                    .frame(maxWidth: .infinity)
             }
             .padding(Theme.Spacing.lg)
         }
@@ -52,6 +58,7 @@ struct LoginView: View {
         .navigationTitle("Sign in")
         .navigationBarTitleDisplayMode(.inline)
         .scrollDismissesKeyboard(.interactively)
+        .sheet(isPresented: $showForgotPassword) { ForgotPasswordView() }
     }
 
     private func submit() {

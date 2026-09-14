@@ -10,4 +10,8 @@ export interface Env {
   ENVIRONMENT: 'development' | 'production'
   /** Exact origin the Pages frontend is served from, e.g. https://omnomnom.pages.dev */
   ALLOWED_ORIGIN: string
+  /** Make.com webhook that sends the welcome email. Optional; no-op if unset. */
+  WELCOME_WEBHOOK_URL?: string
+  /** Make.com webhook that sends the password-reset code. Optional; no-op if unset. */
+  PASSWORD_RESET_WEBHOOK_URL?: string
 }

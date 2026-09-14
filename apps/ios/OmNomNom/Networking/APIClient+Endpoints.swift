@@ -8,6 +8,20 @@ extension APIClient {
     /// tzOffsetMinutes in the JS `Date.getTimezoneOffset()` convention the API expects.
     static var tzOffsetMinutes: Int { -TimeZone.current.secondsFromGMT() / 60 }
 
+    // MARK: Password reset
+
+    func forgotPassword(email: String) async throws {
+        _ = try await sendData(Endpoint(method: "POST", path: "/api/auth/forgot-password",
+                                        body: try encode(ForgotPasswordInput(email: email)),
+                                        authenticated: false))
+    }
+
+    func resetPassword(email: String, code: String, password: String) async throws {
+        _ = try await sendData(Endpoint(method: "POST", path: "/api/auth/reset-password",
+                                        body: try encode(ResetPasswordInput(email: email, code: code, password: password)),
+                                        authenticated: false))
+    }
+
     // MARK: Profile
 
     func me() async throws -> PublicUser {

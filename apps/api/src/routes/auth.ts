@@ -1,7 +1,13 @@
 import { Hono, type Context } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
-import { registerSchema, loginSchema, updateProfileSchema } from '@omnomnom/shared'
+import {
+  registerSchema,
+  loginSchema,
+  updateProfileSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from '@omnomnom/shared'
 import type { AppEnv } from '../types/hono.js'
 import type { AuthTokens } from '../services/auth.js'
 import {
@@ -10,9 +16,12 @@ import {
   logoutSession,
   refreshSession,
   registerUser,
+  requestPasswordReset,
+  resetPassword,
   toPublicUser,
 } from '../services/auth.js'
 import { UnauthorizedError } from '../lib/errors.js'
+import { fireWebhook } from '../lib/webhooks.js'
 import { requireAuth } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 import { findUserById, updateUser } from '../repositories/users.js'
@@ -55,6 +64,9 @@ authRoute.post(
   async (c) => {
     const { user, tokens } = await registerUser(c.env, c.req.valid('json'))
     setRefreshCookie(c, tokens.refreshToken)
+    c.executionCtx.waitUntil(
+      fireWebhook(c.env.WELCOME_WEBHOOK_URL, { email: user.email, name: user.name }),
+    )
     return c.json({ user: toPublicUser(user), ...tokensResponse(tokens) }, 201)
   },
 )
@@ -67,6 +79,38 @@ authRoute.post(
     const { user, tokens } = await loginUser(c.env, c.req.valid('json'))
     setRefreshCookie(c, tokens.refreshToken)
     return c.json({ user: toPublicUser(user), ...tokensResponse(tokens) })
+  },
+)
+
+authRoute.post(
+  '/forgot-password',
+  rateLimit({ keyPrefix: 'forgot-password', limit: 5, windowSeconds: 15 * 60 }),
+  zValidator('json', forgotPasswordSchema),
+  async (c) => {
+    const { email } = c.req.valid('json')
+    const result = await requestPasswordReset(c.env, email)
+    if (result) {
+      c.executionCtx.waitUntil(
+        fireWebhook(c.env.PASSWORD_RESET_WEBHOOK_URL, {
+          email,
+          name: result.name,
+          code: result.code,
+        }),
+      )
+    }
+    // Always 200 so the endpoint can't be used to check which emails are registered.
+    return c.json({ success: true })
+  },
+)
+
+authRoute.post(
+  '/reset-password',
+  rateLimit({ keyPrefix: 'reset-password', limit: 10, windowSeconds: 15 * 60 }),
+  zValidator('json', resetPasswordSchema),
+  async (c) => {
+    const { email, code, password } = c.req.valid('json')
+    await resetPassword(c.env, email, code, password)
+    return c.json({ success: true })
   },
 )
 

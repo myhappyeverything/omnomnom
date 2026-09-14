@@ -19,6 +19,16 @@ struct LoginInput: Encodable, Sendable {
     var password: String
 }
 
+struct ForgotPasswordInput: Encodable, Sendable {
+    var email: String
+}
+
+struct ResetPasswordInput: Encodable, Sendable {
+    var email: String
+    var code: String
+    var password: String
+}
+
 struct UpdateProfileInput: Encodable, Sendable {
     var name: String?
     var dateOfBirth: String?
