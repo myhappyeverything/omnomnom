@@ -1,8 +1,7 @@
 import SwiftUI
 
-/// The raised center "+" button that floats above the Liquid Glass tab bar and
-/// fans out quick-add actions. It's a separate floating layer, so it doesn't
-/// affect the system tab bar's glass.
+/// The center "+" button that nestles into the Liquid Glass tab bar, raised just
+/// slightly, and fans out quick-add actions one by one from the bar upward.
 struct QuickAddOverlay: View {
     @Environment(AppState.self) private var appState
     @State private var expanded = false
@@ -23,32 +22,24 @@ struct QuickAddOverlay: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             if expanded {
-                Color.black.opacity(0.25)
+                Color.black.opacity(0.22)
                     .ignoresSafeArea()
                     .onTapGesture { collapse() }
                     .transition(.opacity)
             }
 
-            VStack(spacing: Theme.Spacing.md) {
-                if expanded {
-                    VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
-                        ForEach(actions) { action in
-                            actionRow(action)
-                        }
-                    }
-                    .transition(.scale(scale: 0.85, anchor: .bottom).combined(with: .opacity))
+            VStack(spacing: Theme.Spacing.sm) {
+                ForEach(Array(actions.enumerated()), id: \.element.id) { index, action in
+                    actionRow(action, index: index)
                 }
-
                 plusButton
             }
-            .padding(.bottom, 34)
+            .padding(.bottom, 6)
         }
         .fullScreenCover(item: $activeSheet) { sheet in
             switch sheet {
-            case .photo:
-                PhotoLogView { _ in appState.dataChanged() }
-            case .label:
-                ScanLabelView { _ in appState.dataChanged() }
+            case .photo: PhotoLogView { _ in appState.dataChanged() }
+            case .label: ScanLabelView { _ in appState.dataChanged() }
             }
         }
     }
@@ -77,8 +68,10 @@ struct QuickAddOverlay: View {
         ]
     }
 
-    private func actionRow(_ action: Action) -> some View {
-        Button {
+    /// Bottom row (closest to the +) animates first.
+    private func actionRow(_ action: Action, index: Int) -> some View {
+        let delay = Double(actions.count - 1 - index) * 0.05
+        return Button {
             Haptics.tap()
             action.run()
         } label: {
@@ -93,23 +86,29 @@ struct QuickAddOverlay: View {
             .glassEffect(.regular.interactive(), in: .capsule)
         }
         .frame(width: 220)
+        .opacity(expanded ? 1 : 0)
+        .scaleEffect(expanded ? 1 : 0.9, anchor: .bottom)
+        .offset(y: expanded ? 0 : 16)
+        .animation(.spring(response: 0.32, dampingFraction: 0.72).delay(expanded ? delay : 0), value: expanded)
+        .allowsHitTesting(expanded)
     }
 
     private var plusButton: some View {
         Button {
             Haptics.tap()
-            withAnimation(.spring(response: 0.32, dampingFraction: 0.7)) { expanded.toggle() }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { expanded.toggle() }
         } label: {
             Image(systemName: "plus")
-                .font(.system(size: 26, weight: .bold))
+                .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
-                .frame(width: 62, height: 62)
+                .frame(width: 54, height: 54)
                 .background(
                     LinearGradient(colors: [Theme.accent, Theme.accentDeep],
                                    startPoint: .topLeading, endPoint: .bottomTrailing),
                     in: .circle)
+                .overlay(Circle().strokeBorder(.white.opacity(0.6), lineWidth: 3))
                 .rotationEffect(.degrees(expanded ? 45 : 0))
-                .shadow(color: Theme.accentDeep.opacity(0.4), radius: 10, y: 4)
+                .shadow(color: Theme.accentDeep.opacity(0.35), radius: 6, y: 2)
         }
         .accessibilityLabel(expanded ? "Close quick add" : "Quick add")
     }

@@ -24,6 +24,7 @@ export type RegisterInput = z.infer<typeof registerSchema>
 
 export const updateProfileSchema = z
   .object({
+    name: registerSchema.shape.name,
     dateOfBirth: registerSchema.shape.dateOfBirth,
     heightCm: registerSchema.shape.heightCm,
   })

@@ -18,6 +18,11 @@ struct TrendsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Theme.Spacing.md) {
+                    Text("Trends")
+                        .font(.largeTitle.weight(.bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, Theme.Spacing.xs)
+
                     Picker("Section", selection: $model.section) {
                         ForEach(TrendsViewModel.Section.allCases) { Text($0.rawValue).tag($0) }
                     }
@@ -35,7 +40,7 @@ struct TrendsView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 52) }
-            .navigationTitle("Trends")
+            .toolbar(.hidden, for: .navigationBar)
             .overlay { if model.isLoading { ProgressView() } }
             .sheet(isPresented: $showLogWeight) {
                 WeighInSheet(unitSystem: unitSystem,
@@ -298,6 +303,9 @@ private struct NutritionCalendar: View {
     let scores: [DailyScoreSummary]
     var onSelect: (Date) -> Void
 
+    @State private var month: Date = Calendar.current.date(
+        from: Calendar.current.dateComponents([.year, .month], from: .now)) ?? .now
+
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
     private let weekdays = ["S", "M", "T", "W", "T", "F", "S"]
 
@@ -305,9 +313,25 @@ private struct NutritionCalendar: View {
         Dictionary(scores.map { ($0.dateKey, $0.score) }, uniquingKeysWith: { a, _ in a })
     }
 
+    private var canGoForward: Bool {
+        let cal = Calendar.current
+        let thisMonth = cal.date(from: cal.dateComponents([.year, .month], from: .now)) ?? .now
+        return month < thisMonth
+    }
+
     var body: some View {
         VStack(spacing: 8) {
-            Text(monthTitle).font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left") }
+                    .buttonStyle(.plain).foregroundStyle(Theme.accent)
+                Spacer()
+                Text(monthTitle).font(.subheadline.weight(.semibold))
+                Spacer()
+                Button { shiftMonth(1) } label: { Image(systemName: "chevron.right") }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(canGoForward ? Theme.accent : .secondary.opacity(0.4))
+                    .disabled(!canGoForward)
+            }
             LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(0..<7, id: \.self) { i in
                     Text(weekdays[i]).font(.caption2).foregroundStyle(.secondary)
@@ -316,6 +340,13 @@ private struct NutritionCalendar: View {
                     if let day { dayCell(day) } else { Color.clear.frame(height: 38) }
                 }
             }
+        }
+    }
+
+    private func shiftMonth(_ delta: Int) {
+        if delta > 0 && !canGoForward { return }
+        if let next = Calendar.current.date(byAdding: .month, value: delta, to: month) {
+            withAnimation(.snappy) { month = next }
         }
     }
 
@@ -342,19 +373,17 @@ private struct NutritionCalendar: View {
     }
 
     private var monthTitle: String {
-        Date().formatted(.dateTime.month(.wide).year())
+        month.formatted(.dateTime.month(.wide).year())
     }
 
-    // Current month's days with leading blanks for weekday alignment.
+    // The selected month's days with leading blanks for weekday alignment.
     private var days: [Date?] {
         let cal = Calendar.current
-        let now = Date()
-        guard let monthStart = cal.date(from: cal.dateComponents([.year, .month], from: now)),
-              let range = cal.range(of: .day, in: .month, for: monthStart) else { return [] }
-        let leading = cal.component(.weekday, from: monthStart) - 1
+        guard let range = cal.range(of: .day, in: .month, for: month) else { return [] }
+        let leading = cal.component(.weekday, from: month) - 1
         var result: [Date?] = Array(repeating: nil, count: leading)
         for d in range {
-            result.append(cal.date(byAdding: .day, value: d - 1, to: monthStart))
+            result.append(cal.date(byAdding: .day, value: d - 1, to: month))
         }
         return result
     }

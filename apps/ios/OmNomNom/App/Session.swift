@@ -86,10 +86,15 @@ final class Session {
         }
     }
 
-    func updateProfile(dateOfBirth: String? = nil, heightCm: Double? = nil) async {
-        if let user = try? await api.updateProfile(UpdateProfileInput(dateOfBirth: dateOfBirth, heightCm: heightCm)) {
+    func updateProfile(name: String? = nil, dateOfBirth: String? = nil, heightCm: Double? = nil) async {
+        if let user = try? await api.updateProfile(UpdateProfileInput(name: name, dateOfBirth: dateOfBirth, heightCm: heightCm)) {
             self.user = user
         }
+    }
+
+    /// Create a fresh active goal (used when the user re-runs their goal setup).
+    func setGoal(_ input: CreateGoalInput) async {
+        if let goal = try? await api.createGoal(input) { activeGoal = goal }
     }
 
     func deleteAccount() async throws {

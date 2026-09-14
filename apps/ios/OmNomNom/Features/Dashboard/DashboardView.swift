@@ -13,6 +13,7 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Theme.Spacing.md) {
+                    greetingHeader
                     calorieCard
                     HStack(spacing: Theme.Spacing.md) {
                         scoreCard
@@ -26,7 +27,7 @@ struct DashboardView: View {
             }
             .background(Theme.background.ignoresSafeArea())
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 52) }
-            .navigationTitle(greeting)
+            .toolbar(.hidden, for: .navigationBar)
             .refreshable { await model.load() }
             .overlay { if model.isLoading && model.meals.isEmpty { ProgressView() } }
             .fullScreenCover(isPresented: $showPhotoLog) {
@@ -45,15 +46,30 @@ struct DashboardView: View {
 
     // MARK: Greeting
 
-    private var greeting: String {
-        let name = session.user?.name.split(separator: " ").first.map(String.init) ?? "there"
-        let hour = Calendar.current.component(.hour, from: .now)
-        let part = switch hour {
-        case ..<12: "Good morning"
-        case ..<17: "Good afternoon"
-        default: "Good evening"
+    private var greetingHeader: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(greetingPrefix)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(firstName)
+                .font(.largeTitle.weight(.bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
-        return "\(part), \(name)"
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, Theme.Spacing.xs)
+    }
+
+    private var firstName: String {
+        session.user?.name.split(separator: " ").first.map(String.init) ?? "there"
+    }
+
+    private var greetingPrefix: String {
+        switch Calendar.current.component(.hour, from: .now) {
+        case ..<12: "Good morning,"
+        case ..<17: "Good afternoon,"
+        default: "Good evening,"
+        }
     }
 
     // MARK: Calorie card

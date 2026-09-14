@@ -27,6 +27,7 @@ export async function deleteUser(env: Env, id: string): Promise<void> {
 }
 
 export interface UpdateUserInput {
+  name?: string
   dateOfBirth?: string
   heightCm?: number
 }
@@ -34,6 +35,10 @@ export interface UpdateUserInput {
 export async function updateUser(env: Env, id: string, input: UpdateUserInput): Promise<UserRow> {
   const fields: string[] = []
   const values: unknown[] = []
+  if (input.name !== undefined) {
+    fields.push('name = ?')
+    values.push(input.name)
+  }
   if (input.dateOfBirth !== undefined) {
     fields.push('date_of_birth = ?')
     values.push(input.dateOfBirth)

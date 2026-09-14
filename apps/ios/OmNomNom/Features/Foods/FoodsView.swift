@@ -4,25 +4,31 @@ struct FoodsView: View {
     @State private var model = FoodsViewModel()
     @State private var selectedFood: FoodRecord?
     @State private var toast: String?
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
         NavigationStack {
             VStack(spacing: Theme.Spacing.md) {
-                Picker("View", selection: $model.tab) {
-                    ForEach(FoodsViewModel.Tab.allCases) { tab in
-                        Text(tab.rawValue).tag(tab)
+                VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                    Text("Foods")
+                        .font(.largeTitle.weight(.bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    searchField
+                    Picker("View", selection: $model.tab) {
+                        ForEach(FoodsViewModel.Tab.allCases) { tab in
+                            Text(tab.rawValue).tag(tab)
+                        }
                     }
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
                 .padding(.horizontal, Theme.Spacing.md)
+                .padding(.top, Theme.Spacing.xs)
 
                 content
             }
             .background(Theme.background.ignoresSafeArea())
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 52) }
-            .navigationTitle("Foods")
-            .searchable(text: $model.query, placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: "Search foods")
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(item: $selectedFood) { food in
                 LogFoodSheet(food: food) { meal in
                     toast = "Added to \(meal.mealType.label)"
@@ -46,6 +52,31 @@ struct FoodsView: View {
             .animation(.snappy, value: toast)
         }
         .task { if model.tab != .search { await model.loadTab() } }
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+            TextField("Search foods", text: $model.query)
+                .focused($searchFocused)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+            if !model.query.isEmpty {
+                Button {
+                    model.query = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(Theme.surface, in: .capsule)
+        .overlay(Capsule().strokeBorder(.black.opacity(0.06), lineWidth: 0.5))
+        .onChange(of: model.tab) { _, tab in
+            if tab == .search { searchFocused = true }
+        }
     }
 
     @ViewBuilder

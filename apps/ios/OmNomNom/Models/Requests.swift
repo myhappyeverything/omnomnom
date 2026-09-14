@@ -20,6 +20,7 @@ struct LoginInput: Encodable, Sendable {
 }
 
 struct UpdateProfileInput: Encodable, Sendable {
+    var name: String?
     var dateOfBirth: String?
     var heightCm: Double?
 }
