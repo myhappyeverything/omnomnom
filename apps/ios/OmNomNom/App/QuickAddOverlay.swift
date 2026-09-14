@@ -22,12 +22,11 @@ struct QuickAddMenu: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            if isPresented {
-                Color.black.opacity(0.22)
-                    .ignoresSafeArea()
-                    .onTapGesture { close() }
-                    .transition(.opacity)
-            }
+            Color.black.opacity(isPresented ? 0.22 : 0)
+                .ignoresSafeArea()
+                .allowsHitTesting(isPresented)
+                .onTapGesture { close() }
+                .animation(.easeInOut(duration: 0.2), value: isPresented)
 
             VStack(spacing: Theme.Spacing.sm) {
                 ForEach(Array(actions.enumerated()), id: \.element.id) { index, action in
@@ -37,7 +36,6 @@ struct QuickAddMenu: View {
             .padding(.bottom, 84) // sit clearly above the tab bar
             .allowsHitTesting(isPresented)
         }
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isPresented)
         .fullScreenCover(item: $activeSheet) { sheet in
             switch sheet {
             case .photo: PhotoLogView { _ in appState.dataChanged() }
@@ -73,7 +71,7 @@ struct QuickAddMenu: View {
     /// Bottom row (closest to the tab bar) animates in first, then upward.
     private func actionRow(_ action: Action, index: Int) -> some View {
         let stepsFromBottom = Double(actions.count - 1 - index)
-        let delay = isPresented ? stepsFromBottom * 0.09 : 0
+        let delay = isPresented ? stepsFromBottom * 0.11 : 0
         return Button {
             Haptics.tap()
             action.run()
