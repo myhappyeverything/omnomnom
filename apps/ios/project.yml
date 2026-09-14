@@ -1,0 +1,64 @@
+name: OmNomNom
+options:
+  bundleIdPrefix: com.pocketlibraries
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    GENERATE_INFOPLIST_FILE: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_STRICT_CONCURRENCY: complete
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  OmNomNom:
+    type: application
+    platform: iOS
+    sources:
+      - path: OmNomNom
+    dependencies:
+      - target: OmNomNomWidgets
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pocketlibraries.omnomnom
+        PRODUCT_NAME: OmNomNom
+        CODE_SIGN_ENTITLEMENTS: OmNomNom/OmNomNom.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSCameraUsageDescription: "OmNomNom uses the camera to identify the food on your plate and read nutrition labels."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "OmNomNom lets you pick a meal photo from your library to log what you ate."
+
+  OmNomNomWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: OmNomNomWidgets
+      # Shared source reused by the extension (kept compiling in both targets).
+      - path: OmNomNom/Models/Enums.swift
+      - path: OmNomNom/Models/Domain.swift
+      - path: OmNomNom/DesignSystem/Theme.swift
+      - path: OmNomNom/Utilities/AppGroup.swift
+      - path: OmNomNom/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pocketlibraries.omnomnom.widgets
+        PRODUCT_NAME: OmNomNomWidgets
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: OmNomNomWidgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: OmNomNomWidgets/OmNomNomWidgets.entitlements
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # WidgetKit's completion-based TimelineProvider trips Swift 6's `sending`
+        # checks; build the extension in Swift 5 language mode (app stays Swift 6).
+        SWIFT_VERSION: "5.0"
+        SWIFT_STRICT_CONCURRENCY: minimal
