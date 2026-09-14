@@ -8,6 +8,14 @@ import type { FoodRow } from '../types/models.js'
 import { NotFoundError } from '../lib/errors.js'
 import * as foodsRepo from '../repositories/foods.js'
 import { searchExternalProviders, type ExternalFoodResult } from '../lib/foodProviders/index.js'
+import { lookupOpenFoodFactsBarcode } from '../lib/foodProviders/openFoodFacts.js'
+
+/// Look up a product by barcode (OpenFoodFacts). Returns an unsaved FoodRecord
+/// (isLocal false); logging it materializes a real row like any provider hit.
+export async function lookupBarcode(_env: Env, barcode: string): Promise<FoodRecord | null> {
+  const result = await lookupOpenFoodFactsBarcode(barcode)
+  return result ? toUnsavedFoodRecord(result) : null
+}
 
 export function toFoodRecord(row: FoodRow, isFavourite?: boolean): FoodRecord {
   return {

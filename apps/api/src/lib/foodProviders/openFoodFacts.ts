@@ -12,6 +12,48 @@ interface OpenFoodFactsSearchResponse {
   hits?: OpenFoodFactsHit[]
 }
 
+interface OpenFoodFactsProductResponse {
+  status?: number
+  product?: {
+    code?: string
+    product_name?: string
+    brands?: string
+    nutriments?: Record<string, number>
+  }
+}
+
+/** Look up a single product by its barcode via the OFF product API. */
+export async function lookupOpenFoodFactsBarcode(barcode: string): Promise<ExternalFoodResult | null> {
+  const url = new URL(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json`)
+  url.searchParams.set('fields', 'code,product_name,brands,nutriments')
+
+  const response = await fetch(url, {
+    headers: { 'User-Agent': 'OmNomNom - Personal Nutrition Tracker - Version 1.0' },
+    signal: AbortSignal.timeout(4000),
+  })
+  if (!response.ok) return null
+
+  const data = await response.json<OpenFoodFactsProductResponse>()
+  const product = data.product
+  if (data.status !== 1 || !product?.product_name || product.nutriments?.['energy-kcal_100g'] == null) {
+    return null
+  }
+  return {
+    source: 'openfoodfacts',
+    sourceId: product.code ?? barcode,
+    name: product.product_name,
+    brand: product.brands?.split(',')[0]?.trim() || null,
+    barcode: product.code || barcode,
+    servingSize: 100,
+    servingUnit: 'g',
+    calories: round2(product.nutriments['energy-kcal_100g']),
+    proteinG: round2(product.nutriments['proteins_100g'] ?? 0),
+    carbsG: round2(product.nutriments['carbohydrates_100g'] ?? 0),
+    fatG: round2(product.nutriments['fat_100g'] ?? 0),
+    fibreG: round2(product.nutriments['fiber_100g'] ?? 0),
+  }
+}
+
 /**
  * OpenFoodFacts reports nutrition per 100g/100ml for virtually every product
  * (unlike per-serving values, which are inconsistently populated), so that's

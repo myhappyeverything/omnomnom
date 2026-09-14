@@ -53,6 +53,16 @@ extension APIClient {
         ]), as: Wrapped<[FoodRecord]>.self).value
     }
 
+    /// Look up a product by barcode. Returns nil on a 404 (no match).
+    func lookupBarcode(_ code: String) async throws -> FoodRecord? {
+        do {
+            return try await send(Endpoint(path: "/api/foods/barcode/\(code)"), as: Wrapped<FoodRecord>.self).value
+        } catch let error as APIError {
+            if case let .server(status, _) = error, status == 404 { return nil }
+            throw error
+        }
+    }
+
     func recentFoods() async throws -> [FoodRecord] {
         try await send(Endpoint(path: "/api/foods/recent"), as: Wrapped<[FoodRecord]>.self).value
     }

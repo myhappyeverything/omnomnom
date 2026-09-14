@@ -22,6 +22,12 @@ foodsRoute.get('/', zValidator('query', searchFoodsQuerySchema), async (c) => {
   return c.json({ foods })
 })
 
+foodsRoute.get('/barcode/:code', async (c) => {
+  const food = await foodsService.lookupBarcode(c.env, c.req.param('code'))
+  if (!food) return c.json({ error: 'No product found for that barcode' }, 404)
+  return c.json({ food })
+})
+
 foodsRoute.get('/recent', async (c) => {
   const foods = await foodsService.listRecentFoods(c.env, c.get('userId'))
   return c.json({ foods })

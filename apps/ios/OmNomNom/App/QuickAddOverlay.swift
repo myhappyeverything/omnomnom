@@ -10,7 +10,7 @@ struct QuickAddMenu: View {
     @State private var activeSheet: Sheet?
 
     private enum Sheet: Identifiable {
-        case photo, label
+        case photo, label, barcode
         var id: Int { hashValue }
     }
 
@@ -45,6 +45,7 @@ struct QuickAddMenu: View {
             switch sheet {
             case .photo: PhotoLogView { _ in appState.dataChanged() }
             case .label: ScanLabelView { _ in appState.dataChanged() }
+            case .barcode: BarcodeLogView { _ in appState.dataChanged() }
             }
         }
     }
@@ -71,6 +72,9 @@ struct QuickAddMenu: View {
             },
             Action(title: "Scan label", symbol: "text.viewfinder") {
                 close(); activeSheet = .label
+            },
+            Action(title: "Barcode", symbol: "barcode.viewfinder") {
+                close(); activeSheet = .barcode
             },
             Action(title: "Water +250 ml", symbol: "drop.fill") {
                 Task {
